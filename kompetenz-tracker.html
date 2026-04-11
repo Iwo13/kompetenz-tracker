@@ -340,6 +340,33 @@
   }
 
   .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
+
+  /* ── GITHUB OPTION ── */
+  .gh-card {
+    border: 2px solid #d1fae5; border-radius: 12px;
+    padding: 20px 22px; margin-bottom: 4px; cursor: pointer; transition: all .2s;
+    background: #f0fdf4;
+  }
+  .gh-card:hover { border-color: #34d399; background: #ecfdf5; }
+  .gh-card-header { display: flex; align-items: center; gap: 12px; }
+  .gh-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .gh-card-title { font-weight: 700; font-size: 0.95rem; color: #065f46; }
+  .gh-card-desc { font-size: 0.8rem; color: #047857; margin-top: 2px; }
+  .gh-chevron { margin-left: auto; color: #34d399; transition: transform .25s; font-size: 0.85rem; }
+  .gh-form { display: none; margin-top: 18px; border-top: 1px solid #d1fae5; padding-top: 16px; }
+  .gh-form.open { display: block; }
+  .gh-form .form-group { margin-bottom: 14px; }
+  .gh-form .form-group:last-of-type { margin-bottom: 0; }
+  .gh-form label { color: #065f46 !important; }
+  .gh-form input { border-color: #a7f3d0 !important; background: #fff !important; }
+  .gh-form input:focus { border-color: #34d399 !important; box-shadow: 0 0 0 3px rgba(52,211,153,0.2) !important; }
+  .btn-gh { width: 100%; padding: 11px; border: none; border-radius: 8px; background: #059669; color: #fff; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 14px; }
+  .btn-gh:hover { background: #047857; }
+  .btn-gh:disabled { background: #a7f3d0; color: #fff; cursor: not-allowed; }
+  .gh-token-hint { font-size: 0.75rem; color: #047857; margin-top: 5px; line-height: 1.4; }
+  .gh-saved-banner { display: none; align-items: center; gap: 8px; background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 10px 14px; font-size: 0.83rem; color: #065f46; margin-top: 10px; cursor: pointer; }
+  .gh-saved-banner.show { display: flex; }
+  .gh-saved-banner strong { font-weight: 700; }
 </style>
 </head>
 <body>
@@ -371,6 +398,56 @@
       <div class="file-picker-title">Neue Datei erstellen</div>
       <div class="file-picker-desc">Erstelle eine neue leere JSON-Datei und beginne mit der ersten Person.</div>
       <button class="file-picker-btn new" onclick="createNewFile(); event.stopPropagation()">Neue Datei …</button>
+    </div>
+
+    <div class="divider"><span>oder</span></div>
+
+    <!-- GITHUB OPTION -->
+    <div class="gh-card" onclick="toggleGhForm()">
+      <div class="gh-card-header">
+        <span class="gh-icon">🐙</span>
+        <div>
+          <div class="gh-card-title">GitHub Repository</div>
+          <div class="gh-card-desc">Daten direkt aus einem GitHub-Repo laden und speichern</div>
+        </div>
+        <span class="gh-chevron" id="ghChevron">▼</span>
+      </div>
+
+      <div class="gh-form" id="ghForm" onclick="event.stopPropagation()">
+        <div id="ghSavedBanner" class="gh-saved-banner" onclick="loadSavedGhConfig()">
+          <span>🔗</span>
+          <span>Gespeicherte Verbindung: <strong id="ghSavedLabel"></strong></span>
+          <span style="margin-left:auto; font-weight:600">Wiederverwenden →</span>
+        </div>
+
+        <div class="form-group">
+          <label>GitHub Benutzername / Organisation</label>
+          <input type="text" id="ghOwner" placeholder="z.B. muster-schule" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Repository Name</label>
+          <input type="text" id="ghRepo" placeholder="z.B. kompetenz-tracker" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Dateiname (im Repo)</label>
+          <input type="text" id="ghPath" placeholder="kompetenzen.json" value="kompetenzen.json" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Branch</label>
+          <input type="text" id="ghBranch" placeholder="main" value="main" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Personal Access Token (PAT)</label>
+          <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <div class="gh-token-hint">
+            GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens<br>
+            Berechtigung: <strong>Contents: Read and write</strong> für das gewählte Repository
+          </div>
+        </div>
+        <button class="btn-gh" id="btnGhConnect" onclick="connectToGitHub()" disabled>
+          Mit GitHub verbinden
+        </button>
+      </div>
     </div>
 
     <div id="fileError" class="alert alert-error hidden" style="margin-top:12px"></div>
@@ -693,14 +770,19 @@ const AREAS = [
 ];
 
 // ═══════════════════════════════════════════
-// STORAGE LAYER (File System Access API + localStorage fallback)
+// STORAGE LAYER
 // ═══════════════════════════════════════════
-const LS_KEY = 'kompetenz_tracker_v2';
-let fileHandle = null;
-let hasFSA = ('showOpenFilePicker' in window);
-let db = { version: 2, users: [] };   // in-memory working copy
+const LS_KEY     = 'kompetenz_tracker_v2';
+const LS_GH_KEY  = 'kompetenz_tracker_gh_config';
+let fileHandle   = null;
+let hasFSA       = ('showOpenFilePicker' in window);
+let db           = { version: 2, users: [] };
 let currentUserId = null;
-let saveTimer = null;
+let saveTimer    = null;
+
+// GitHub state
+let ghConfig     = null;   // { owner, repo, path, branch, token }
+let ghFileSha    = null;   // SHA of current file version on GitHub (needed for updates)
 
 function setFileStatus(state, text, filename) {
   const dot = document.getElementById('fileStatusDot');
@@ -713,7 +795,12 @@ function setFileStatus(state, text, filename) {
 
 async function persistDB() {
   const json = JSON.stringify(db, null, 2);
-  if (fileHandle) {
+
+  if (ghConfig) {
+    // ── GitHub API save ──
+    await githubWriteFile(json);
+  } else if (fileHandle) {
+    // ── Local File System ──
     try {
       setFileStatus('saving', 'Speichert …');
       const writable = await fileHandle.createWritable();
@@ -725,7 +812,7 @@ async function persistDB() {
       setFileStatus('error', 'Fehler beim Speichern!');
     }
   } else {
-    // localStorage fallback
+    // ── localStorage fallback ──
     localStorage.setItem(LS_KEY, json);
     setFileStatus('saved', 'Im Browser gespeichert (localStorage)');
   }
@@ -733,7 +820,154 @@ async function persistDB() {
 
 function scheduleSave() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(persistDB, 500);
+  saveTimer = setTimeout(persistDB, 800);
+}
+
+// ═══════════════════════════════════════════
+// GITHUB API
+// ═══════════════════════════════════════════
+function ghApiUrl() {
+  return `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
+}
+
+function ghHeaders() {
+  return {
+    'Authorization': `Bearer ${ghConfig.token}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'Content-Type': 'application/json',
+  };
+}
+
+async function githubReadFile() {
+  const url = ghApiUrl() + `?ref=${encodeURIComponent(ghConfig.branch)}&t=${Date.now()}`;
+  const res = await fetch(url, { headers: ghHeaders() });
+  if (res.status === 404) return null;             // file doesn't exist yet
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || `GitHub API ${res.status}`);
+  }
+  const data = await res.json();
+  ghFileSha = data.sha;
+  // GitHub returns base64 with line breaks
+  const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+  return JSON.parse(content);
+}
+
+async function githubWriteFile(jsonString) {
+  setFileStatus('saving', 'Speichert auf GitHub …');
+  try {
+    // Re-fetch SHA before writing to avoid conflicts
+    const checkUrl = ghApiUrl() + `?ref=${encodeURIComponent(ghConfig.branch)}&t=${Date.now()}`;
+    const checkRes = await fetch(checkUrl, { headers: ghHeaders() });
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      ghFileSha = checkData.sha;
+    }
+
+    const body = {
+      message: `Update Kompetenzen [${new Date().toLocaleString('de-CH')}]`,
+      content: btoa(unescape(encodeURIComponent(jsonString))),
+      branch: ghConfig.branch,
+    };
+    if (ghFileSha) body.sha = ghFileSha;
+
+    const res = await fetch(ghApiUrl(), {
+      method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub API ${res.status}`);
+    }
+    const data = await res.json();
+    ghFileSha = data.content.sha;
+    setFileStatus('saved', 'Auf GitHub gespeichert',
+      `${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`);
+  } catch(e) {
+    console.error('GitHub write error', e);
+    setFileStatus('error', 'GitHub Fehler: ' + e.message);
+  }
+}
+
+// ── GitHub Form UI ──
+function toggleGhForm() {
+  const form = document.getElementById('ghForm');
+  const chevron = document.getElementById('ghChevron');
+  form.classList.toggle('open');
+  chevron.style.transform = form.classList.contains('open') ? 'rotate(180deg)' : '';
+  if (form.classList.contains('open')) checkSavedGhConfig();
+}
+
+function checkSavedGhConfig() {
+  const saved = localStorage.getItem(LS_GH_KEY);
+  if (!saved) return;
+  try {
+    const cfg = JSON.parse(saved);
+    const banner = document.getElementById('ghSavedBanner');
+    document.getElementById('ghSavedLabel').textContent =
+      `${cfg.owner}/${cfg.repo}/${cfg.path}`;
+    banner.classList.add('show');
+  } catch(e) {}
+}
+
+function loadSavedGhConfig() {
+  const saved = localStorage.getItem(LS_GH_KEY);
+  if (!saved) return;
+  try {
+    const cfg = JSON.parse(saved);
+    document.getElementById('ghOwner').value  = cfg.owner  || '';
+    document.getElementById('ghRepo').value   = cfg.repo   || '';
+    document.getElementById('ghPath').value   = cfg.path   || 'kompetenzen.json';
+    document.getElementById('ghBranch').value = cfg.branch || 'main';
+    document.getElementById('ghToken').value  = cfg.token  || '';
+    validateGhForm();
+  } catch(e) {}
+}
+
+function validateGhForm() {
+  const ok = ['ghOwner','ghRepo','ghPath','ghBranch','ghToken']
+    .every(id => document.getElementById(id).value.trim() !== '');
+  document.getElementById('btnGhConnect').disabled = !ok;
+}
+
+['ghOwner','ghRepo','ghPath','ghBranch','ghToken'].forEach(id => {
+  document.getElementById(id).addEventListener('input', validateGhForm);
+});
+
+async function connectToGitHub() {
+  hideFileError();
+  const btn = document.getElementById('btnGhConnect');
+  btn.disabled = true;
+  btn.textContent = 'Verbinde …';
+
+  ghConfig = {
+    owner:  document.getElementById('ghOwner').value.trim(),
+    repo:   document.getElementById('ghRepo').value.trim(),
+    path:   document.getElementById('ghPath').value.trim() || 'kompetenzen.json',
+    branch: document.getElementById('ghBranch').value.trim() || 'main',
+    token:  document.getElementById('ghToken').value.trim(),
+  };
+
+  try {
+    const data = await githubReadFile();
+    if (data === null) {
+      // File doesn't exist yet – create empty
+      db = { version: 2, users: [] };
+      await githubWriteFile(JSON.stringify(db, null, 2));
+    } else {
+      db = data;
+      if (!db.users) db.users = [];
+    }
+    // Save config (including token) to localStorage for reuse
+    localStorage.setItem(LS_GH_KEY, JSON.stringify(ghConfig));
+    afterFileLoaded();
+  } catch(e) {
+    ghConfig = null;
+    showFileError('GitHub-Verbindung fehlgeschlagen: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Mit GitHub verbinden';
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -858,9 +1092,11 @@ function hideFileError() {
 // ═══════════════════════════════════════════
 function showUserSelectScreen() {
   hide('screenRegister');
-  const fname = fileHandle ? fileHandle.name : 'localStorage';
+  const fname = ghConfig
+    ? `GitHub: ${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`
+    : fileHandle ? fileHandle.name : 'localStorage';
   document.getElementById('userSelectSubtitle').textContent =
-    `Datei: ${fname} · ${db.users.length} Person${db.users.length !== 1 ? 'en' : ''}`;
+    `${fname} · ${db.users.length} Person${db.users.length !== 1 ? 'en' : ''}`;
 
   const list = document.getElementById('userList');
   list.innerHTML = '';
@@ -975,7 +1211,9 @@ function saveUser() {
 // APP ENTRY
 // ═══════════════════════════════════════════
 function enterApp() {
-  const fname = fileHandle ? fileHandle.name : 'localStorage';
+  const fname = ghConfig
+    ? `${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`
+    : fileHandle ? fileHandle.name : 'localStorage';
   setFileStatus('saved', 'Bereit', fname);
   document.getElementById('app').classList.add('visible');
   renderHeader();
