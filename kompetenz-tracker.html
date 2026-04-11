@@ -6,10 +6,17 @@
 <title>Handlungskompetenz-Tracker – Informatik EFZ</title>
 <style>
   :root {
-    --primary: #1a3a5c; --primary-light: #2d5a8e; --primary-dark: #0f2236;
-    --accent: #e63946; --bg: #f0f4f8; --surface: #ffffff;
-    --border: #d1dbe6; --text: #1e293b; --text-muted: #64748b;
+    --primary: #1a3a5c;
+    --primary-light: #2d5a8e;
+    --primary-dark: #0f2236;
+    --accent: #e63946;
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --border: #d1dbe6;
+    --text: #1e293b;
+    --text-muted: #64748b;
     --sidebar-w: 260px;
+
     --k0-bg: #94a3b8; --k0-text: #fff;
     --k1-bg: #60a5fa; --k1-text: #fff;
     --k2-bg: #34d399; --k2-text: #fff;
@@ -18,95 +25,214 @@
     --k5-bg: #f97316; --k5-text: #fff;
     --k6-bg: #a855f7; --k6-text: #fff;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(15,34,54,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+
+  /* ── MODAL BASE ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,34,54,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; backdrop-filter: blur(4px);
+  }
   .modal-overlay.hidden { display: none; }
-  .modal { background: var(--surface); border-radius: 16px; padding: 40px; width: min(540px, 95vw); box-shadow: 0 24px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+
+  .modal {
+    background: var(--surface); border-radius: 16px; padding: 40px;
+    width: min(540px, 95vw); box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
+  }
   .modal h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
   .modal .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .modal h2 { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
 
   .form-group { margin-bottom: 20px; }
-  .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 7px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; color: var(--text); background: var(--surface); transition: border-color .2s; }
-  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(45,90,142,0.15); }
+  .form-group label {
+    display: block; font-size: 0.82rem; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: .06em; margin-bottom: 7px;
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.95rem; color: var(--text); background: var(--surface);
+    transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none; border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(45,90,142,0.15);
+  }
 
-  .btn-primary { width: 100%; padding: 12px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 8px; }
+  .btn-primary {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    background: var(--primary); color: #fff;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: background .2s; margin-top: 8px;
+  }
   .btn-primary:hover { background: var(--primary-light); }
   .btn-primary:disabled { background: var(--border); color: #94a3b8; cursor: not-allowed; }
-  .btn-secondary { width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all .2s; margin-top: 8px; }
+
+  .btn-secondary {
+    width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text);
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all .2s; margin-top: 8px;
+  }
   .btn-secondary:hover { border-color: var(--primary-light); background: #f0f6ff; }
-  .btn-ghost { padding: 8px 14px; border: none; border-radius: 8px; background: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer; transition: all .2s; }
+
+  .btn-danger {
+    padding: 8px 14px; border: 1.5px solid #fca5a5; border-radius: 8px;
+    background: #fff1f2; color: #dc2626;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-danger:hover { background: #fee2e2; border-color: #f87171; }
+
+  .btn-ghost {
+    padding: 8px 14px; border: none; border-radius: 8px;
+    background: none; color: var(--text-muted);
+    font-size: 0.85rem; cursor: pointer; transition: all .2s;
+  }
   .btn-ghost:hover { background: #f1f5f9; color: var(--text); }
 
-  .file-picker-card { border: 2px dashed var(--border); border-radius: 12px; padding: 28px 24px; text-align: center; margin-bottom: 16px; cursor: pointer; transition: all .2s; }
+  /* ── SCREEN 1: FILE PICKER ── */
+  .file-picker-card {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 32px 24px; text-align: center; margin-bottom: 16px;
+    transition: all .2s;
+  }
   .file-picker-card:hover { border-color: var(--primary-light); background: #f8faff; }
-  .file-picker-icon { font-size: 2.2rem; margin-bottom: 10px; }
-  .file-picker-title { font-weight: 700; font-size: 1rem; margin-bottom: 5px; color: var(--primary); }
+  .file-picker-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .file-picker-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; color: var(--primary); }
   .file-picker-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-  .file-picker-btn { margin-top: 12px; padding: 9px 22px; border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .file-picker-btn {
+    margin-top: 14px; padding: 10px 24px; border: none; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
   .file-picker-btn.open { background: var(--primary); color: #fff; }
   .file-picker-btn.open:hover { background: var(--primary-light); }
-  .file-picker-btn.new-file { background: #e8f0fb; color: var(--primary); border: 1.5px solid var(--primary-light); }
-  .file-picker-btn.new-file:hover { background: #d0e4f7; }
-  .divider { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+  .file-picker-btn.new { background: #e8f0fb; color: var(--primary); border: 1.5px solid var(--primary-light); }
+  .file-picker-btn.new:hover { background: #d0e4f7; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
   .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   .divider span { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
-  .alert { padding: 10px 14px; border-radius: 8px; font-size: 0.84rem; margin-bottom: 16px; line-height: 1.5; }
-  .alert-error { background: #fff1f2; border: 1px solid #fca5a5; color: #dc2626; }
-  .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
 
+  .alert {
+    padding: 10px 14px; border-radius: 8px; font-size: 0.84rem;
+    margin-bottom: 16px; line-height: 1.5;
+  }
+  .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+  .alert-warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+  .alert-error { background: #fff1f2; border: 1px solid #fca5a5; color: #dc2626; }
+
+  /* ── SCREEN 2: USER SELECT ── */
   .user-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .user-card { display: flex; align-items: center; gap: 14px; border: 1.5px solid var(--border); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all .2s; background: var(--surface); }
+  .user-card {
+    display: flex; align-items: center; gap: 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: all .2s;
+    background: var(--surface);
+  }
   .user-card:hover { border-color: var(--primary-light); background: #f0f6ff; }
-  .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+  .user-card.selected { border-color: var(--primary); background: #e8f0fb; }
+  .user-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+  }
   .user-card-info { flex: 1; min-width: 0; }
   .user-card-name { font-weight: 700; font-size: 0.95rem; }
   .user-card-meta { font-size: 0.77rem; color: var(--text-muted); margin-top: 2px; }
   .user-card-progress { font-size: 0.75rem; font-weight: 600; color: var(--primary); }
 
+  /* ── SCREEN 3: REGISTRATION ── */
   .specialty-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .specialty-card { border: 2px solid var(--border); border-radius: 10px; padding: 16px 14px; cursor: pointer; transition: all .2s; user-select: none; }
+  .specialty-card {
+    border: 2px solid var(--border); border-radius: 10px;
+    padding: 16px 14px; cursor: pointer; transition: all .2s; user-select: none;
+  }
   .specialty-card:hover { border-color: var(--primary-light); background: #f0f6ff; }
   .specialty-card.selected { border-color: var(--primary); background: #e8f0fb; }
   .specialty-card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
   .specialty-card .card-title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
   .specialty-card .card-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
 
+  /* ── LAYOUT ── */
   .app { display: none; height: 100vh; overflow: hidden; }
   .app.visible { display: flex; }
 
-  .header { position: fixed; top: 0; left: 0; right: 0; height: 58px; background: var(--primary-dark); display: flex; align-items: center; padding: 0 20px; gap: 16px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  /* ── HEADER ── */
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; height: 58px;
+    background: var(--primary-dark);
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 16px; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
   .header-title { font-size: 1rem; font-weight: 700; color: #fff; white-space: nowrap; flex-shrink: 0; }
   .header-user { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+  }
   .user-info { min-width: 0; }
   .user-name { font-size: 0.88rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .user-detail { font-size: 0.72rem; color: #93c5fd; }
   .header-progress { display: flex; align-items: center; gap: 10px; margin-left: auto; }
   .progress-ring-wrap { position: relative; width: 36px; height: 36px; }
   .progress-ring-wrap svg { transform: rotate(-90deg); }
-  .progress-ring-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; color: #fff; }
-  .lehrjahr-badge { background: var(--primary-light); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
-  .header-btn { background: none; border: none; color: #93c5fd; cursor: pointer; padding: 6px 8px; border-radius: 6px; transition: background .2s; font-size: 0.8rem; }
+  .progress-ring-value {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700; color: #fff;
+  }
+  .lehrjahr-badge {
+    background: var(--primary-light); color: #fff;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  }
+  .header-btn {
+    background: none; border: none; color: #93c5fd;
+    cursor: pointer; font-size: 1.1rem; padding: 6px 8px;
+    border-radius: 6px; transition: background .2s; white-space: nowrap; font-size: 0.8rem;
+  }
   .header-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-  .sidebar { position: fixed; left: 0; top: 58px; bottom: 0; width: var(--sidebar-w); background: var(--primary); overflow-y: auto; z-index: 90; border-right: 1px solid var(--primary-light); }
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; left: 0; top: 58px; bottom: 0; width: var(--sidebar-w);
+    background: var(--primary); overflow-y: auto; z-index: 90;
+    border-right: 1px solid var(--primary-light);
+  }
   .sidebar::-webkit-scrollbar { width: 4px; }
   .sidebar::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 2px; }
   .sidebar-section { padding: 14px 14px 6px; }
   .sidebar-section-title { font-size: 0.68rem; font-weight: 700; color: #93c5fd; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
-  .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; color: #cbd5e1; font-size: 0.85rem; transition: all .15s; margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer;
+    color: #cbd5e1; font-size: 0.85rem; transition: all .15s;
+    margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left;
+  }
   .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
   .sidebar-item.active { background: rgba(255,255,255,0.15); color: #fff; }
   .sidebar-item .item-badge { margin-left: auto; font-size: 0.72rem; font-weight: 700; background: rgba(255,255,255,0.15); padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
   .sidebar-item .item-id { font-weight: 800; font-size: 0.82rem; width: 20px; flex-shrink: 0; text-align: center; }
   .sidebar-item .item-name { flex: 1; font-size: 0.8rem; line-height: 1.3; }
 
-  .main { margin-left: var(--sidebar-w); margin-top: 58px; flex: 1; overflow-y: auto; padding: 24px; padding-bottom: 40px; }
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); margin-top: 58px; flex: 1; overflow-y: auto; padding: 24px; }
 
-  .area-header { background: var(--surface); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 5px solid var(--primary); }
+  .area-header {
+    background: var(--surface); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 5px solid var(--primary);
+  }
   .area-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
   .area-header .area-id { display: inline-block; background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-bottom: 8px; }
   .area-header .area-meta { font-size: 0.82rem; color: var(--text-muted); }
@@ -115,6 +241,7 @@
   .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 4px; transition: width .4s ease; }
 
+  /* ── SUB-COMPETENCY ── */
   .sub-comp { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border: 1.5px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .sub-comp-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; background: none; border: none; width: 100%; text-align: left; transition: background .15s; color: var(--text); }
   .sub-comp-header:hover { background: #f8fafc; }
@@ -127,6 +254,7 @@
   .sub-comp-body { display: none; border-top: 1.5px solid var(--border); }
   .sub-comp.open .sub-comp-body { display: block; }
 
+  /* ── GOAL ROW ── */
   .goal-row { display: grid; grid-template-columns: 80px 1fr; gap: 0; border-bottom: 1px solid #f1f5f9; padding: 14px 18px; align-items: start; }
   .goal-row:last-child { border-bottom: none; }
   .goal-id { font-size: 0.78rem; font-weight: 700; color: var(--primary); padding-top: 4px; }
@@ -134,7 +262,7 @@
   .goal-text { font-size: 0.87rem; line-height: 1.5; margin-bottom: 10px; }
   .goal-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
   .k-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
-  .k-btn { width: 36px; height: 28px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 0.73rem; font-weight: 700; transition: all .15s; }
+  .k-btn { width: 36px; height: 28px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 0.73rem; font-weight: 700; transition: all .15s; line-height: 1; }
   .k-btn[data-level="0"] { background: var(--k0-bg); color: var(--k0-text); }
   .k-btn[data-level="1"] { background: var(--k1-bg); color: var(--k1-text); }
   .k-btn[data-level="2"] { background: var(--k2-bg); color: var(--k2-text); }
@@ -145,12 +273,13 @@
   .k-btn.selected { border-color: #1e293b; box-shadow: 0 0 0 2px rgba(30,41,59,0.3); transform: scale(1.1); }
   .k-btn:hover:not(.selected):not(:disabled) { opacity: 0.85; transform: scale(1.05); }
   .k-btn.over-max { opacity: 0.3; cursor: not-allowed; }
-  .goal-max-badge { font-size: 0.7rem; color: var(--text-muted); background: #f1f5f9; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+  .goal-max-badge { font-size: 0.7rem; color: var(--text-muted); background: #f1f5f9; padding: 3px 8px; border-radius: 20px; white-space: nowrap; align-self: center; }
   .goal-date { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
   .goal-comment { width: 100%; resize: vertical; min-height: 52px; border: 1.5px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 0.83rem; font-family: inherit; color: var(--text); transition: border-color .2s; }
   .goal-comment:focus { outline: none; border-color: var(--primary-light); }
   .goal-comment.saving { border-color: #fbbf24; }
 
+  /* ── OVERVIEW ── */
   .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .overview-card { background: var(--surface); border-radius: 12px; padding: 16px; border: 1.5px solid var(--border); cursor: pointer; transition: all .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .overview-card:hover { border-color: var(--primary-light); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
@@ -160,9 +289,10 @@
   .ov-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 3px; }
   .ov-pct { font-size: 0.75rem; color: var(--text-muted); }
 
+  /* ── LEHRJAHR ── */
   .lehrjahr-section { background: var(--surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
   .lehrjahr-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
-  .lehrjahr-bars { display: flex; gap: 10px; }
+  .lehrjahr-bars { display: flex; gap: 10px; align-items: center; }
   .lj-bar-wrap { flex: 1; }
   .lj-label { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-align: center; }
   .lj-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
@@ -174,126 +304,172 @@
   .bloom-legend { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 18px; background: #f8fafc; border-top: 1px solid var(--border); }
   .bloom-item { display: flex; align-items: center; gap: 5px; font-size: 0.73rem; color: var(--text-muted); }
   .bloom-dot { width: 12px; height: 12px; border-radius: 3px; }
+
   .tag-specialty { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
   .tag-both { background: #dbeafe; color: #1d4ed8; }
   .tag-platform { background: #dcfce7; color: #166534; }
   .tag-app { background: #fae8ff; color: #86198f; }
 
-  .file-status-bar { position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; background: #f8fafc; border-top: 1px solid var(--border); padding: 5px 16px; display: flex; align-items: center; gap: 10px; font-size: 0.76rem; color: var(--text-muted); z-index: 80; }
+  /* ── FILE STATUS BAR ── */
+  .file-status-bar {
+    position: fixed; bottom: 0; left: var(--sidebar-w); right: 0;
+    background: #f8fafc; border-top: 1px solid var(--border);
+    padding: 5px 16px; display: flex; align-items: center; gap: 10px;
+    font-size: 0.76rem; color: var(--text-muted); z-index: 80;
+  }
   .file-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
   .file-status-dot.saved { background: #34d399; }
   .file-status-dot.saving { background: #fbbf24; animation: pulse 1s infinite; }
   .file-status-dot.error { background: #ef4444; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── USER SWITCHER MODAL ── */
+  .modal-sm { width: min(440px, 95vw); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions .btn-primary { flex: 1; margin-top: 0; }
+  .modal-actions .btn-secondary { flex: 1; margin-top: 0; }
+
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; }
+    .sidebar { transform: translateX(-260px); width: 260px; transition: transform .3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .goal-row { grid-template-columns: 60px 1fr; }
+    .specialty-cards { grid-template-columns: 1fr; }
+    .file-status-bar { left: 0; }
+  }
+
+  .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
 </style>
 </head>
 <body>
 
-<!-- SCREEN 1: FILE PICKER -->
+<!-- ══════════════════════════════════════
+     SCREEN 1: FILE PICKER
+══════════════════════════════════════ -->
 <div class="modal-overlay" id="screenFile">
   <div class="modal">
     <h1>Handlungskompetenz-Tracker</h1>
     <p class="subtitle">Informatiker/in EFZ – Bildungsplan 88611</p>
+
     <div id="fsaNotice" class="no-fsa-notice hidden">
-      &#9888; Dein Browser unterstuetzt die File System Access API nicht (empfohlen: Chrome oder Edge).
-      Die Daten werden im Browser-Speicher (localStorage) gespeichert.
+      ⚠ Dein Browser unterstützt die File System Access API nicht (empfohlen: Chrome oder Edge).
+      Die Daten werden stattdessen im Browser-Speicher (localStorage) gespeichert – sie bleiben nur auf diesem Gerät und in diesem Browser erhalten.
     </div>
-    <div class="file-picker-card" onclick="openExistingFile()">
-      <div class="file-picker-icon">&#128194;</div>
-      <div class="file-picker-title">Bestehende Datei oeffnen</div>
-      <div class="file-picker-desc">Oeffne eine vorhandene .json-Datei mit bereits erfassten Lernenden.</div>
-      <button class="file-picker-btn open" onclick="openExistingFile(); event.stopPropagation()">Datei oeffnen &#8230;</button>
+
+    <div class="file-picker-card" onclick="openExistingFile()" style="cursor:pointer">
+      <div class="file-picker-icon">📂</div>
+      <div class="file-picker-title">Bestehende Datei öffnen</div>
+      <div class="file-picker-desc">Öffne eine vorhandene <code>.json</code>-Datei mit bereits erfassten Lernenden und Kompetenzen.</div>
+      <button class="file-picker-btn open" onclick="openExistingFile(); event.stopPropagation()">Datei öffnen …</button>
     </div>
+
     <div class="divider"><span>oder</span></div>
-    <div class="file-picker-card" onclick="createNewFile()">
-      <div class="file-picker-icon">&#10024;</div>
+
+    <div class="file-picker-card" onclick="createNewFile()" style="cursor:pointer">
+      <div class="file-picker-icon">✨</div>
       <div class="file-picker-title">Neue Datei erstellen</div>
       <div class="file-picker-desc">Erstelle eine neue leere JSON-Datei und beginne mit der ersten Person.</div>
-      <button class="file-picker-btn new-file" onclick="createNewFile(); event.stopPropagation()">Neue Datei &#8230;</button>
+      <button class="file-picker-btn new" onclick="createNewFile(); event.stopPropagation()">Neue Datei …</button>
     </div>
+
     <div id="fileError" class="alert alert-error hidden" style="margin-top:12px"></div>
   </div>
 </div>
 
-<!-- SCREEN 2: USER SELECT -->
+<!-- ══════════════════════════════════════
+     SCREEN 2: USER SELECT
+══════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="screenUserSelect">
   <div class="modal">
-    <h1>Person auswaehlen</h1>
-    <p class="subtitle" id="userSelectSubtitle">Waehle dein Profil oder erfasse eine neue Person.</p>
+    <h1>Person auswählen</h1>
+    <p class="subtitle" id="userSelectSubtitle">Wähle dein Profil oder erfasse eine neue Person.</p>
+
     <div id="userList" class="user-list"></div>
+
     <button class="btn-secondary" onclick="showRegistration(null)">+ Neue Person erfassen</button>
-    <div style="margin-top:8px">
-      <button class="btn-ghost" onclick="goBackToFile()">&#8592; Andere Datei</button>
+    <div style="margin-top:8px; display:flex; gap:8px;">
+      <button class="btn-ghost" style="flex:1" onclick="goBackToFile()">← Andere Datei</button>
     </div>
   </div>
 </div>
 
-<!-- SCREEN 3: REGISTRATION -->
+<!-- ══════════════════════════════════════
+     SCREEN 3: REGISTRATION / EDIT
+══════════════════════════════════════ -->
 <div class="modal-overlay hidden" id="screenRegister">
   <div class="modal">
     <h1 id="registerTitle">Neue Person</h1>
     <p class="subtitle">Grunddaten erfassen</p>
+
     <div class="form-group">
       <label>Name</label>
       <input type="text" id="inputName" placeholder="Vorname Nachname" autocomplete="off">
     </div>
+
     <div class="form-group">
       <label>Fachrichtung</label>
       <div class="specialty-cards">
         <div class="specialty-card" data-value="platform" onclick="selectSpecialty(this)">
-          <div class="card-icon">&#128187;</div>
+          <div class="card-icon">🖥️</div>
           <div class="card-title">Plattformentwicklung</div>
-          <div class="card-desc">Bereiche a&#8211;f</div>
+          <div class="card-desc">Bereiche a–f</div>
         </div>
         <div class="specialty-card" data-value="app" onclick="selectSpecialty(this)">
-          <div class="card-icon">&#128187;</div>
+          <div class="card-icon">💻</div>
           <div class="card-title">Applikationsentwicklung</div>
-          <div class="card-desc">Bereiche a&#8211;c, g&#8211;h</div>
+          <div class="card-desc">Bereiche a–c, g–h</div>
         </div>
       </div>
     </div>
+
     <div class="form-group">
       <label>Lehrstart</label>
       <input type="date" id="inputStartDate">
     </div>
+
     <div style="display:flex; gap:8px; margin-top:8px;">
-      <button class="btn-ghost" onclick="cancelRegistration()">Abbrechen</button>
+      <button class="btn-ghost" style="flex:0 0 auto" onclick="cancelRegistration()">Abbrechen</button>
       <button class="btn-primary" id="btnSaveUser" onclick="saveUser()" disabled style="flex:1; margin-top:0">Speichern</button>
     </div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
 <div class="app" id="app">
   <header class="header">
     <div class="header-title">HK-Tracker</div>
     <div class="header-user">
       <div class="avatar" id="headerAvatar">?</div>
       <div class="user-info">
-        <div class="user-name" id="headerName">&#8211;</div>
-        <div class="user-detail" id="headerDetail">&#8211;</div>
+        <div class="user-name" id="headerName">–</div>
+        <div class="user-detail" id="headerDetail">–</div>
       </div>
     </div>
     <div class="header-progress">
       <div class="lehrjahr-badge" id="lehrjahrBadge">LJ 1</div>
-      <div class="progress-ring-wrap">
+      <div class="progress-ring-wrap" title="Gesamtfortschritt">
         <svg width="36" height="36">
           <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
           <circle cx="18" cy="18" r="14" fill="none" stroke="#60a5fa" stroke-width="3"
-            stroke-dasharray="87.96" stroke-dashoffset="87.96" id="progressCircle" stroke-linecap="round"/>
+            stroke-dasharray="87.96" stroke-dashoffset="87.96"
+            id="progressCircle" stroke-linecap="round"/>
         </svg>
         <div class="progress-ring-value" id="progressPct">0%</div>
       </div>
-      <button class="header-btn" onclick="showUserSwitcher()">&#128100; Wechseln</button>
-      <button class="header-btn" onclick="showEditCurrentUser()">&#9881;</button>
+      <button class="header-btn" onclick="showUserSwitcher()" title="Person wechseln">👤 Wechseln</button>
+      <button class="header-btn" onclick="showEditCurrentUser()" title="Profil bearbeiten">⚙</button>
     </div>
   </header>
+
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-section">
       <div class="sidebar-section-title">Navigation</div>
       <button class="sidebar-item active" onclick="showOverview(this)">
-        <span class="item-id">&#127968;</span>
-        <span class="item-name">Uebersicht</span>
+        <span class="item-id">🏠</span>
+        <span class="item-name">Übersicht</span>
       </button>
     </div>
     <div class="sidebar-section">
@@ -301,115 +477,120 @@
       <div id="sidebarItems"></div>
     </div>
   </nav>
-  <main class="main" id="mainContent"></main>
+
+  <main class="main" id="mainContent" style="padding-bottom:36px"></main>
+
   <div class="file-status-bar" id="fileStatusBar">
     <div class="file-status-dot saved" id="fileStatusDot"></div>
-    <span id="fileStatusText">Bereit</span>
-    <span style="margin-left:auto;opacity:0.6" id="fileStatusName"></span>
+    <span id="fileStatusText">Gespeichert</span>
+    <span style="margin-left:auto; opacity:0.6" id="fileStatusName"></span>
   </div>
 </div>
 
 <script>
-const BLOOM_SHORT = ['-','Wissen','Verstehen','Anwenden','Analysieren','Synthese','Beurteilen'];
-const BLOOM_FULL  = ['K0 - Nicht bewertet','K1 - Wissen','K2 - Verstehen','K3 - Anwenden','K4 - Analysieren','K5 - Synthese','K6 - Beurteilen'];
+// ═══════════════════════════════════════════
+// COMPETENCY DATA
+// ═══════════════════════════════════════════
+const BLOOM_SHORT = ['–','Wissen','Verstehen','Anwenden','Analysieren','Synthese','Beurteilen'];
+const BLOOM_FULL  = ['K0 – Nicht bewertet','K1 – Wissen','K2 – Verstehen','K3 – Anwenden','K4 – Analysieren','K5 – Synthese','K6 – Beurteilen'];
 
 const AREAS = [
   { id:'a', name:'Begleiten von ICT-Projekten', specialty:'both', subComps:[
-    { id:'a1', name:'Beduerfnisse von Stakeholdern abklaeren und dokumentieren', goals:[
-      {id:'a1.1',text:'Projektziele und uebergeordnete Parameter (Kosten, Zeit, Qualitaet, Ressourcen) abklaeren',max:3},
+    { id:'a1', name:'Bedürfnisse von Stakeholdern abklären und dokumentieren', goals:[
+      {id:'a1.1',text:'Projektziele und übergeordnete Parameter (Kosten, Zeit, Qualität, Ressourcen) abklären',max:3},
       {id:'a1.2',text:'Verschiedene Befragungs- und Beobachtungstechniken beschreiben und anwenden',max:5},
       {id:'a1.3',text:'Ergebnisse aus Befragungen und Beobachtungen strukturiert dokumentieren',max:5},
       {id:'a1.4',text:'Anforderungen in geeigneter Form (z.B. Use Cases, User Stories) aufnehmen und dokumentieren',max:5},
-      {id:'a1.5',text:'Anforderungen priorisieren und auf Vollstaendigkeit und Widerspruchsfreiheit pruefen',max:5},
-      {id:'a1.6',text:'Aufwand fuer einfache ICT-Vorhaben schaetzen',max:3},
+      {id:'a1.5',text:'Anforderungen priorisieren und auf Vollständigkeit und Widerspruchsfreiheit prüfen',max:5},
+      {id:'a1.6',text:'Aufwand für einfache ICT-Vorhaben schätzen',max:3},
       {id:'a1.7',text:'Anforderungen in einem Lasten- oder Pflichtenheft dokumentieren',max:5},
     ]},
-    { id:'a2', name:'Loesungen evaluieren und vorschlagen', goals:[
-      {id:'a2.1',text:'Verschiedene Loesungsvarianten erarbeiten und gegenueberstellen',max:5},
-      {id:'a2.2',text:'Loesungsvarianten nach festgelegten Kriterien bewerten (z.B. Nutzwertanalyse)',max:5},
-      {id:'a2.3',text:'Eine begruendete Loesungsempfehlung erarbeiten und praesentieren',max:5},
+    { id:'a2', name:'Lösungen evaluieren und vorschlagen', goals:[
+      {id:'a2.1',text:'Verschiedene Lösungsvarianten erarbeiten und gegenüberstellen',max:5},
+      {id:'a2.2',text:'Lösungsvarianten nach festgelegten Kriterien bewerten (z.B. Nutzwertanalyse)',max:5},
+      {id:'a2.3',text:'Eine begründete Lösungsempfehlung erarbeiten und präsentieren',max:5},
     ]},
-    { id:'a3', name:'Vorhaben strukturiert durchfuehren', goals:[
+    { id:'a3', name:'Vorhaben strukturiert durchführen', goals:[
       {id:'a3.1',text:'Klassische und agile Projektmanagementmethoden unterscheiden und einordnen',max:4},
       {id:'a3.2',text:'Ein einfaches Vorhaben nach einer vorgegebenen Projektmanagementmethode planen',max:5},
       {id:'a3.3',text:'Rollen und Verantwortlichkeiten im Projektteam beschreiben',max:2},
-      {id:'a3.4',text:'Projektfortschritt anhand von Meilensteinen ueberwachen und dokumentieren',max:5},
-      {id:'a3.5',text:'In einem Projektteam mitwirken und die eigenen Aufgaben eigenverantwortlich erfuellen',max:3},
+      {id:'a3.4',text:'Projektfortschritt anhand von Meilensteinen überwachen und dokumentieren',max:5},
+      {id:'a3.5',text:'In einem Projektteam mitwirken und die eigenen Aufgaben eigenverantwortlich erfüllen',max:3},
     ]},
-    { id:'a4', name:'Qualitaetssichernde Massnahmen anwenden', goals:[
-      {id:'a4.1',text:'Qualitaetsbegriff fuer ICT-Loesungen definieren und erlaeutern',max:2},
-      {id:'a4.2',text:'Einfache Testfaelle ableiten und dokumentieren',max:5},
-      {id:'a4.3',text:'Tests durchfuehren, Ergebnisse protokollieren und auswerten',max:5},
+    { id:'a4', name:'Qualitätssichernde Massnahmen anwenden', goals:[
+      {id:'a4.1',text:'Qualitätsbegriff für ICT-Lösungen definieren und erläutern',max:2},
+      {id:'a4.2',text:'Einfache Testfälle ableiten und dokumentieren',max:5},
+      {id:'a4.3',text:'Tests durchführen, Ergebnisse protokollieren und auswerten',max:5},
       {id:'a4.4',text:'Fehler systematisch suchen, eingrenzen und beheben',max:5},
-      {id:'a4.5',text:'Uebergabeprotokolle und Abnahmepruefungen erstellen und durchfuehren',max:5},
+      {id:'a4.5',text:'Übergabeprotokolle und Abnahmeprüfungen erstellen und durchführen',max:5},
     ]},
     { id:'a5', name:'Beschaffungsvorhaben abwickeln', goals:[
       {id:'a5.1',text:'Beschaffungsanforderungen erfassen und ein Pflichtenheft erstellen',max:5},
       {id:'a5.2',text:'Offerten einholen, vergleichen und bewerten',max:5},
-      {id:'a5.3',text:'Eine Bestellung abwickeln und die Lieferung pruefen',max:3},
+      {id:'a5.3',text:'Eine Bestellung abwickeln und die Lieferung prüfen',max:3},
       {id:'a5.4',text:'Gesetzliche Vorschriften und Unternehmensrichtlinien bei der Beschaffung beachten',max:3},
     ]},
     { id:'a6', name:'Prozesse und Daten analysieren und optimieren', goals:[
-      {id:'a6.1',text:'Geschaeftsprozesse beschreiben und mit geeigneten Mitteln darstellen',max:5},
-      {id:'a6.2',text:'Schwachstellen in bestehenden Prozessen erkennen und Optimierungsvorschlaege erarbeiten',max:5},
-      {id:'a6.3',text:'Prozessoptimierungen umsetzen und deren Wirkung ueberpruefen',max:5},
-      {id:'a6.4',text:'Datenstrukturen analysieren und Optimierungsmoeglichkeiten aufzeigen',max:4},
-      {id:'a6.5',text:'Migration von Daten planen und durchfuehren',max:5},
+      {id:'a6.1',text:'Geschäftsprozesse beschreiben und mit geeigneten Mitteln darstellen',max:5},
+      {id:'a6.2',text:'Schwachstellen in bestehenden Prozessen erkennen und Optimierungsvorschläge erarbeiten',max:5},
+      {id:'a6.3',text:'Prozessoptimierungen umsetzen und deren Wirkung überprüfen',max:5},
+      {id:'a6.4',text:'Datenstrukturen analysieren und Optimierungsmöglichkeiten aufzeigen',max:4},
+      {id:'a6.5',text:'Migration von Daten planen und durchführen',max:5},
     ]},
     { id:'a7', name:'Informationen und Daten sicher handhaben', goals:[
-      {id:'a7.1',text:'Rechtliche Grundlagen des Datenschutzes (DSG, DSGVO) erklaeren',max:2},
+      {id:'a7.1',text:'Rechtliche Grundlagen des Datenschutzes (DSG, DSGVO) erklären',max:2},
       {id:'a7.2',text:'Massnahmen zum Schutz von Personendaten in ICT-Systemen umsetzen',max:3},
       {id:'a7.3',text:'Datensicherungskonzepte erstellen und Wiederherstellung testen',max:5},
-      {id:'a7.4',text:'Daten verschluesseln und sicher uebermitteln',max:3},
+      {id:'a7.4',text:'Daten verschlüsseln und sicher übermitteln',max:3},
       {id:'a7.5',text:'Informationssicherheitsrisiken erkennen und geeignete Massnahmen ergreifen',max:4},
       {id:'a7.6',text:'Richtlinien zur Informationssicherheit in einfachen Situationen anwenden',max:3},
       {id:'a7.7',text:'Vorgaben zum Umgang mit vertraulichen Informationen einhalten',max:3},
     ]},
   ]},
-  { id:'b', name:'Unterstuetzen und Beraten im ICT-Umfeld', specialty:'both', subComps:[
+  { id:'b', name:'Unterstützen und Beraten im ICT-Umfeld', specialty:'both', subComps:[
     { id:'b1', name:'Anwender und Anwenderinnen beraten und schulen', goals:[
       {id:'b1.1',text:'Den Bedarf von Anwender/innen ermitteln, aufnehmen und dokumentieren',max:5},
-      {id:'b1.2',text:'Stoerungen und Anfragen im ICT-Umfeld aufnehmen, priorisieren und bearbeiten',max:5},
+      {id:'b1.2',text:'Störungen und Anfragen im ICT-Umfeld aufnehmen, priorisieren und bearbeiten',max:5},
       {id:'b1.3',text:'Anwender/innen zu ICT-Themen und -Produkten beraten',max:5},
-      {id:'b1.4',text:'Schulungsunterlagen erstellen und einfache Schulungen durchfuehren',max:5},
+      {id:'b1.4',text:'Schulungsunterlagen erstellen und einfache Schulungen durchführen',max:5},
       {id:'b1.5',text:'Die eigene Kommunikation situationsgerecht auf die Anwender/innen abstimmen',max:3},
     ]},
-    { id:'b2', name:'ICT-Systeme und Loesungen dokumentieren', goals:[
+    { id:'b2', name:'ICT-Systeme und Lösungen dokumentieren', goals:[
       {id:'b2.1',text:'Technische Dokumentationen lesen, verstehen und anwenden',max:3},
-      {id:'b2.2',text:'ICT-Systeme und -Loesungen technisch dokumentieren',max:5},
-      {id:'b2.3',text:'Benutzeranleitung und Hilfedokumentation fuer ICT-Loesungen erstellen',max:5},
+      {id:'b2.2',text:'ICT-Systeme und -Lösungen technisch dokumentieren',max:5},
+      {id:'b2.3',text:'Benutzeranleitung und Hilfedokumentation für ICT-Lösungen erstellen',max:5},
       {id:'b2.4',text:'Bestehende Dokumentationen pflegen und aktuell halten',max:3},
     ]},
     { id:'b3', name:'Sich in der Branche orientieren und weiterbilden', goals:[
-      {id:'b3.1',text:'Aktuelle ICT-Trends beschreiben und deren Auswirkungen einschaetzen',max:2},
-      {id:'b3.2',text:'Berufs- und Weiterbildungsmoeglichkeiten in der ICT-Branche beschreiben',max:2},
-      {id:'b3.3',text:'Geeignete Quellen fuer technische Information nutzen und kritisch bewerten',max:3},
+      {id:'b3.1',text:'Aktuelle ICT-Trends beschreiben und deren Auswirkungen einschätzen',max:2},
+      {id:'b3.2',text:'Berufs- und Weiterbildungsmöglichkeiten in der ICT-Branche beschreiben',max:2},
+      {id:'b3.3',text:'Geeignete Quellen für technische Information nutzen und kritisch bewerten',max:3},
     ]},
   ]},
   { id:'c', name:'Aufbauen und Pflegen von digitalen Daten', specialty:'both', subComps:[
     { id:'c1', name:'Daten modellieren und implementieren', goals:[
       {id:'c1.1',text:'Datenbankmodelle (ER-Modell, relationales Modell) beschreiben und erstellen',max:5},
       {id:'c1.2',text:'Eine Datenbank anhand eines Datenbankmodells implementieren',max:5},
-      {id:'c1.3',text:'Daten mit SQL abfragen, einfuegen, aendern und loeschen (DML)',max:5},
+      {id:'c1.3',text:'Daten mit SQL abfragen, einfügen, ändern und löschen (DML)',max:5},
       {id:'c1.4',text:'Datenbankzugriffe aus Applikationen implementieren',max:5},
     ]},
     { id:'c2', name:'Daten beschaffen, integrieren und bereinigen', goals:[
       {id:'c2.1',text:'Datenquellen beschreiben und deren Eignung bewerten',max:4},
       {id:'c2.2',text:'Daten aus verschiedenen Quellen importieren und integrieren',max:5},
-      {id:'c2.3',text:'Datenqualitaet pruefen und Daten systematisch bereinigen',max:5},
+      {id:'c2.3',text:'Datenqualität prüfen und Daten systematisch bereinigen',max:5},
     ]},
     { id:'c3', name:'Daten auswerten', goals:[
-      {id:'c3.1',text:'Einfache Datenauswertungen und statistische Analysen durchfuehren',max:5},
+      {id:'c3.1',text:'Einfache Datenauswertungen und statistische Analysen durchführen',max:5},
       {id:'c3.2',text:'Ergebnisse von Datenauswertungen geeignet visualisieren',max:5},
       {id:'c3.3',text:'Resultate von Datenauswertungen interpretieren und kommentieren',max:4},
     ]},
   ]},
-  { id:'d', name:'Ausliefern und Betreiben von ICT-Loesungen', specialty:'platform', subComps:[
+  { id:'d', name:'Ausliefern und Betreiben von ICT-Lösungen', specialty:'platform', subComps:[
     { id:'d1', name:'Systeme aufbauen, konfigurieren und dokumentieren', goals:[
       {id:'d1.1',text:'Hardwarekomponenten und deren Zusammenspiel beschreiben',max:2},
       {id:'d1.2',text:'Betriebssysteme installieren und konfigurieren',max:5},
       {id:'d1.3',text:'ICT-Arbeitsplatzsysteme installieren und in Betrieb nehmen',max:5},
-      {id:'d1.4',text:'Peripheriegeraete installieren und konfigurieren',max:3},
+      {id:'d1.4',text:'Peripheriegeräte installieren und konfigurieren',max:3},
       {id:'d1.5',text:'Systeme und Konfigurationen nachvollziehbar dokumentieren',max:5},
     ]},
     { id:'d2', name:'ICT-Systeme virtualisieren und automatisieren', goals:[
@@ -418,10 +599,10 @@ const AREAS = [
       {id:'d2.3',text:'Container-Technologien (z.B. Docker) einsetzen',max:5},
       {id:'d2.4',text:'Automatisierungsskripte erstellen und einsetzen',max:5},
     ]},
-    { id:'d3', name:'ICT-Loesungen in Betrieb nehmen', goals:[
-      {id:'d3.1',text:'Inbetriebnahme von ICT-Loesungen planen und durchfuehren',max:5},
+    { id:'d3', name:'ICT-Lösungen in Betrieb nehmen', goals:[
+      {id:'d3.1',text:'Inbetriebnahme von ICT-Lösungen planen und durchführen',max:5},
       {id:'d3.2',text:'Deployment-Prozesse beschreiben und umsetzen',max:5},
-      {id:'d3.3',text:'Uebergabe und Abnahme von ICT-Loesungen durchfuehren',max:3},
+      {id:'d3.3',text:'Übergabe und Abnahme von ICT-Lösungen durchführen',max:3},
     ]},
   ]},
   { id:'e', name:'Betreiben von Netzen', specialty:'platform', subComps:[
@@ -431,16 +612,16 @@ const AREAS = [
       {id:'e1.3',text:'Netzwerkverbindungen einrichten und testen',max:5},
       {id:'e1.4',text:'WLAN-Infrastruktur aufbauen und konfigurieren',max:5},
     ]},
-    { id:'e2', name:'Netzwerke ueberwachen und optimieren', goals:[
-      {id:'e2.1',text:'Netzwerke mit geeigneten Tools ueberwachen und Monitoring einsetzen',max:5},
+    { id:'e2', name:'Netzwerke überwachen und optimieren', goals:[
+      {id:'e2.1',text:'Netzwerke mit geeigneten Tools überwachen und Monitoring einsetzen',max:5},
       {id:'e2.2',text:'Netzwerkprobleme diagnostizieren und beheben',max:5},
       {id:'e2.3',text:'Netzwerkperformance messen und Optimierungsmassnahmen ableiten',max:4},
     ]},
-    { id:'e3', name:'Netzwerke schuetzen', goals:[
-      {id:'e3.1',text:'Bedrohungen und Angriffsvektoren fuer Netzwerke beschreiben',max:2},
+    { id:'e3', name:'Netzwerke schützen', goals:[
+      {id:'e3.1',text:'Bedrohungen und Angriffsvektoren für Netzwerke beschreiben',max:2},
       {id:'e3.2',text:'Firewall-Regeln und weitere Schutzmassnahmen konfigurieren',max:5},
       {id:'e3.3',text:'VPN-Verbindungen einrichten und konfigurieren',max:5},
-      {id:'e3.4',text:'Sicherheitsaudits fuer Netzwerke planen und durchfuehren',max:4},
+      {id:'e3.4',text:'Sicherheitsaudits für Netzwerke planen und durchführen',max:4},
     ]},
   ]},
   { id:'f', name:'Betreiben von Serversystemen und Serverdiensten', specialty:'platform', subComps:[
@@ -455,15 +636,15 @@ const AREAS = [
       {id:'f2.3',text:'E-Mail-Dienste einrichten und konfigurieren',max:5},
       {id:'f2.4',text:'Datei- und Druckdienste einrichten und konfigurieren',max:5},
     ]},
-    { id:'f3', name:'Serversysteme ueberwachen und optimieren', goals:[
-      {id:'f3.1',text:'Monitoring-Systeme fuer Server einrichten und einsetzen',max:5},
+    { id:'f3', name:'Serversysteme überwachen und optimieren', goals:[
+      {id:'f3.1',text:'Monitoring-Systeme für Server einrichten und einsetzen',max:5},
       {id:'f3.2',text:'Serverperformance analysieren und Optimierungsmassnahmen umsetzen',max:5},
       {id:'f3.3',text:'Protokolldateien (Logs) auswerten und Massnahmen ableiten',max:4},
     ]},
-    { id:'f4', name:'Serversysteme schuetzen', goals:[
-      {id:'f4.1',text:'Sicherheitskonzepte fuer Serversysteme erarbeiten',max:5},
+    { id:'f4', name:'Serversysteme schützen', goals:[
+      {id:'f4.1',text:'Sicherheitskonzepte für Serversysteme erarbeiten',max:5},
       {id:'f4.2',text:'Zugriffsrechte und Berechtigungen nach Least-Privilege-Prinzip verwalten',max:5},
-      {id:'f4.3',text:'Backup-Strategien umsetzen und Wiederherstellungen regelmaessig testen',max:5},
+      {id:'f4.3',text:'Backup-Strategien umsetzen und Wiederherstellungen regelmässig testen',max:5},
       {id:'f4.4',text:'Sicherheitsupdates und Patches systematisch einspielen',max:3},
     ]},
   ]},
@@ -471,28 +652,28 @@ const AREAS = [
     { id:'g1', name:'Applikationen konzipieren', goals:[
       {id:'g1.1',text:'Software-Architekturen und -muster beschreiben und zielgerichtet einsetzen',max:5},
       {id:'g1.2',text:'Applikationen mit geeigneten Methoden konzipieren (z.B. UML)',max:5},
-      {id:'g1.3',text:'Benutzeroberflaechen konzipieren und prototypisch umsetzen (UI/UX)',max:5},
-      {id:'g1.4',text:'Datenbankdesign fuer Applikationen entwerfen',max:5},
+      {id:'g1.3',text:'Benutzeroberflächen konzipieren und prototypisch umsetzen (UI/UX)',max:5},
+      {id:'g1.4',text:'Datenbankdesign für Applikationen entwerfen',max:5},
     ]},
     { id:'g2', name:'Applikationen realisieren', goals:[
-      {id:'g2.1',text:'Code in einer objektorientierten Programmiersprache sauber und verstaendlich schreiben',max:5},
+      {id:'g2.1',text:'Code in einer objektorientierten Programmiersprache sauber und verständlich schreiben',max:5},
       {id:'g2.2',text:'Programmierprinzipien (z.B. DRY, KISS, SOLID) anwenden',max:3},
       {id:'g2.3',text:'Bestehende Bibliotheken und Frameworks zielgerichtet einsetzen',max:5},
       {id:'g2.4',text:'Datenbankzugriffe in Applikationen implementieren',max:5},
       {id:'g2.5',text:'Schnittstellen (APIs) implementieren und konsumieren',max:5},
-      {id:'g2.6',text:'Sicherheitsaspekte (z.B. Input-Validierung, Authentifizierung) beruecksichtigen',max:5},
+      {id:'g2.6',text:'Sicherheitsaspekte (z.B. Input-Validierung, Authentifizierung) berücksichtigen',max:5},
     ]},
-    { id:'g3', name:'Applikationen pruefen und dokumentieren', goals:[
+    { id:'g3', name:'Applikationen prüfen und dokumentieren', goals:[
       {id:'g3.1',text:'Teststufen und -methoden (Unit, Integration, System) beschreiben und anwenden',max:5},
-      {id:'g3.2',text:'Testfaelle und Testplaene erstellen',max:5},
+      {id:'g3.2',text:'Testfälle und Testpläne erstellen',max:5},
       {id:'g3.3',text:'Automatisierte Tests implementieren und in den Entwicklungsprozess integrieren',max:5},
-      {id:'g3.4',text:'Technische Dokumentation fuer Applikationen verstaendlich erstellen',max:5},
+      {id:'g3.4',text:'Technische Dokumentation für Applikationen verständlich erstellen',max:5},
     ]},
     { id:'g4', name:'Bestehende Applikationen warten und weiterentwickeln', goals:[
       {id:'g4.1',text:'Bestehenden Code analysieren, verstehen und Verbesserungspotenzial identifizieren',max:4},
-      {id:'g4.2',text:'Refactoring-Techniken anwenden um Code-Qualitaet zu verbessern',max:5},
+      {id:'g4.2',text:'Refactoring-Techniken anwenden um Code-Qualität zu verbessern',max:5},
       {id:'g4.3',text:'Versionskontrollsysteme (z.B. Git) im Entwicklungsprozess einsetzen',max:5},
-      {id:'g4.4',text:'Code-Reviews durchfuehren und konstruktives Feedback geben und empfangen',max:5},
+      {id:'g4.4',text:'Code-Reviews durchführen und konstruktives Feedback geben und empfangen',max:5},
     ]},
   ]},
   { id:'h', name:'Ausliefern und Betreiben von Applikationen', specialty:'app', subComps:[
@@ -500,10 +681,10 @@ const AREAS = [
       {id:'h1.1',text:'Build- und Deployment-Prozesse beschreiben und umsetzen',max:5},
       {id:'h1.2',text:'CI/CD-Pipelines einrichten und im Entwicklungsprozess nutzen',max:5},
       {id:'h1.3',text:'Applikationen in verschiedene Umgebungen (Dev, Test, Prod) ausliefern',max:5},
-      {id:'h1.4',text:'Releases planen, vorbereiten und durchfuehren',max:5},
+      {id:'h1.4',text:'Releases planen, vorbereiten und durchführen',max:5},
     ]},
     { id:'h2', name:'Applikationen betreiben', goals:[
-      {id:'h2.1',text:'Applikationen ueberwachen und Logdaten systematisch auswerten',max:5},
+      {id:'h2.1',text:'Applikationen überwachen und Logdaten systematisch auswerten',max:5},
       {id:'h2.2',text:'Performance-Probleme erkennen, analysieren und beheben',max:4},
       {id:'h2.3',text:'Applikationen skalieren (horizontal/vertikal)',max:4},
       {id:'h2.4',text:'Incidents bearbeiten, dokumentieren und nachhaltige Massnahmen ableiten',max:5},
@@ -511,10 +692,13 @@ const AREAS = [
   ]},
 ];
 
+// ═══════════════════════════════════════════
+// STORAGE LAYER (File System Access API + localStorage fallback)
+// ═══════════════════════════════════════════
 const LS_KEY = 'kompetenz_tracker_v2';
 let fileHandle = null;
 let hasFSA = ('showOpenFilePicker' in window);
-let db = { version: 2, users: [] };
+let db = { version: 2, users: [] };   // in-memory working copy
 let currentUserId = null;
 let saveTimer = null;
 
@@ -522,282 +706,556 @@ function setFileStatus(state, text, filename) {
   const dot = document.getElementById('fileStatusDot');
   const txt = document.getElementById('fileStatusText');
   const name = document.getElementById('fileStatusName');
-  dot.className = 'file-status-dot ' + (state||'');
-  if (txt) txt.textContent = text||'';
-  if (name && filename!==undefined) name.textContent = filename||'';
+  dot.className = 'file-status-dot ' + (state || '');
+  if (txt) txt.textContent = text || '';
+  if (name && filename !== undefined) name.textContent = filename || '';
 }
 
 async function persistDB() {
   const json = JSON.stringify(db, null, 2);
   if (fileHandle) {
     try {
-      setFileStatus('saving','Speichert ...');
+      setFileStatus('saving', 'Speichert …');
       const writable = await fileHandle.createWritable();
       await writable.write(json);
       await writable.close();
-      setFileStatus('saved','Gespeichert', fileHandle.name);
+      setFileStatus('saved', 'Gespeichert', fileHandle.name);
     } catch(e) {
-      console.error('Write error',e);
-      setFileStatus('error','Fehler beim Speichern!');
+      console.error('Write error', e);
+      setFileStatus('error', 'Fehler beim Speichern!');
     }
   } else {
+    // localStorage fallback
     localStorage.setItem(LS_KEY, json);
-    setFileStatus('saved','Im Browser gespeichert (localStorage)');
+    setFileStatus('saved', 'Im Browser gespeichert (localStorage)');
   }
 }
 
-function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(persistDB, 500); }
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistDB, 500);
+}
 
-function generateId() { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function getUser(id) { return db.users.find(u=>u.id===id); }
-function currentUser() { return getUser(currentUserId); }
-function getGoalState(goalId) { const u=currentUser(); return (u&&u.goals&&u.goals[goalId])||{level:0,date:null,comment:''}; }
+// ═══════════════════════════════════════════
+// USER HELPERS
+// ═══════════════════════════════════════════
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function getUser(id) {
+  return db.users.find(u => u.id === id);
+}
+
+function currentUser() {
+  return getUser(currentUserId);
+}
+
+function getGoalState(goalId) {
+  const u = currentUser();
+  return (u && u.goals && u.goals[goalId]) || { level: 0, date: null, comment: '' };
+}
 
 function setGoalLevel(goalId, level) {
-  const u=currentUser(); if (!u) return;
-  if (!u.goals) u.goals={};
-  if (!u.goals[goalId]) u.goals[goalId]={level:0,date:null,comment:''};
-  u.goals[goalId].level=level; u.goals[goalId].date=new Date().toISOString();
+  const u = currentUser();
+  if (!u) return;
+  if (!u.goals) u.goals = {};
+  if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
+  u.goals[goalId].level = level;
+  u.goals[goalId].date = new Date().toISOString();
   scheduleSave();
 }
 
 function setGoalComment(goalId, comment) {
-  const u=currentUser(); if (!u) return;
-  if (!u.goals) u.goals={};
-  if (!u.goals[goalId]) u.goals[goalId]={level:0,date:null,comment:''};
-  u.goals[goalId].comment=comment; u.goals[goalId].date=new Date().toISOString();
+  const u = currentUser();
+  if (!u) return;
+  if (!u.goals) u.goals = {};
+  if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
+  u.goals[goalId].comment = comment;
+  u.goals[goalId].date = new Date().toISOString();
   scheduleSave();
 }
 
+// ═══════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════
 async function openExistingFile() {
   hideFileError();
   if (!hasFSA) {
-    const raw=localStorage.getItem(LS_KEY);
-    try { db=JSON.parse(raw); if(!db.users) db.users=[]; } catch(e) { db={version:2,users:[]}; }
-    afterFileLoaded(); return;
+    // localStorage fallback: load from LS
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      try {
+        db = JSON.parse(raw);
+        if (!db.users) db.users = [];
+      } catch(e) { db = { version:2, users:[] }; }
+    } else {
+      db = { version:2, users:[] };
+    }
+    afterFileLoaded();
+    return;
   }
   try {
-    const [handle] = await window.showOpenFilePicker({types:[{description:'JSON-Datei',accept:{'application/json':['.json']}}],multiple:false});
-    fileHandle=handle;
-    const file=await handle.getFile(); const text=await file.text();
-    db=JSON.parse(text); if(!db.users) db.users=[];
+    const [handle] = await window.showOpenFilePicker({
+      types: [{ description:'JSON-Datei', accept:{'application/json':['.json']} }],
+      multiple: false,
+    });
+    fileHandle = handle;
+    const file = await handle.getFile();
+    const text = await file.text();
+    db = JSON.parse(text);
+    if (!db.users) db.users = [];
     afterFileLoaded();
-  } catch(e) { if(e.name!=='AbortError') showFileError('Datei konnte nicht geoeffnet werden: '+e.message); }
+  } catch(e) {
+    if (e.name !== 'AbortError') showFileError('Datei konnte nicht geöffnet werden: ' + e.message);
+  }
 }
 
 async function createNewFile() {
-  hideFileError(); db={version:2,users:[]};
-  if (!hasFSA) { localStorage.setItem(LS_KEY,JSON.stringify(db,null,2)); afterFileLoaded(); return; }
+  hideFileError();
+  db = { version: 2, users: [] };
+  if (!hasFSA) {
+    localStorage.setItem(LS_KEY, JSON.stringify(db, null, 2));
+    afterFileLoaded();
+    return;
+  }
   try {
-    fileHandle=await window.showSaveFilePicker({suggestedName:'kompetenzen.json',types:[{description:'JSON-Datei',accept:{'application/json':['.json']}}]});
-    await persistDB(); afterFileLoaded();
-  } catch(e) { if(e.name!=='AbortError') showFileError('Datei konnte nicht erstellt werden: '+e.message); }
+    fileHandle = await window.showSaveFilePicker({
+      suggestedName: 'kompetenzen.json',
+      types: [{ description:'JSON-Datei', accept:{'application/json':['.json']} }],
+    });
+    await persistDB();
+    afterFileLoaded();
+  } catch(e) {
+    if (e.name !== 'AbortError') showFileError('Datei konnte nicht erstellt werden: ' + e.message);
+  }
 }
 
 function afterFileLoaded() {
   hide('screenFile');
-  if (db.users.length===0) showRegistration(null); else showUserSelectScreen();
+  if (db.users.length === 0) {
+    showRegistration(null);
+  } else {
+    showUserSelectScreen();
+  }
 }
 
-function goBackToFile() { hide('screenUserSelect'); show('screenFile'); }
-function showFileError(msg) { const el=document.getElementById('fileError'); el.textContent=msg; el.classList.remove('hidden'); }
-function hideFileError() { document.getElementById('fileError').classList.add('hidden'); }
+function goBackToFile() {
+  hide('screenUserSelect');
+  show('screenFile');
+}
 
+function showFileError(msg) {
+  const el = document.getElementById('fileError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function hideFileError() {
+  document.getElementById('fileError').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════
+// USER SELECT SCREEN
+// ═══════════════════════════════════════════
 function showUserSelectScreen() {
   hide('screenRegister');
-  const fname=fileHandle?fileHandle.name:'localStorage';
-  document.getElementById('userSelectSubtitle').textContent=`Datei: ${fname} - ${db.users.length} Person${db.users.length!==1?'en':''}`;
-  const list=document.getElementById('userList'); list.innerHTML='';
-  db.users.forEach(user=>{
-    const prog=getUserProgress(user);
-    const initials=user.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
-    const specialtyLabel=user.specialty==='platform'?'Plattformentwicklung':'Applikationsentwicklung';
-    const startStr=user.startDate?new Date(user.startDate).toLocaleDateString('de-CH'):'-';
-    const card=document.createElement('div'); card.className='user-card';
-    card.innerHTML=`<div class="user-avatar">${initials}</div><div class="user-card-info"><div class="user-card-name">${escHtml(user.name)}</div><div class="user-card-meta">${specialtyLabel} - Lehrstart: ${startStr}</div><div class="user-card-progress">${prog.achieved}/${prog.total} Leistungsziele bewertet (${prog.pct}%)</div></div>`;
-    card.onclick=()=>selectAndEnterApp(user.id); list.appendChild(card);
+  const fname = fileHandle ? fileHandle.name : 'localStorage';
+  document.getElementById('userSelectSubtitle').textContent =
+    `Datei: ${fname} · ${db.users.length} Person${db.users.length !== 1 ? 'en' : ''}`;
+
+  const list = document.getElementById('userList');
+  list.innerHTML = '';
+  db.users.forEach(user => {
+    const prog = getUserProgress(user);
+    const initials = user.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
+    const specialtyLabel = user.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
+    const startStr = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
+    const card = document.createElement('div');
+    card.className = 'user-card';
+    card.innerHTML = `
+      <div class="user-avatar">${initials}</div>
+      <div class="user-card-info">
+        <div class="user-card-name">${escHtml(user.name)}</div>
+        <div class="user-card-meta">${specialtyLabel} · Lehrstart: ${startStr}</div>
+        <div class="user-card-progress">${prog.achieved}/${prog.total} Leistungsziele bewertet (${prog.pct}%)</div>
+      </div>
+    `;
+    card.onclick = () => selectAndEnterApp(user.id);
+    list.appendChild(card);
   });
   show('screenUserSelect');
 }
 
-function selectAndEnterApp(userId) { currentUserId=userId; hide('screenUserSelect'); enterApp(); }
-function showUserSwitcher() { showUserSelectScreen(); document.getElementById('app').classList.remove('visible'); }
-
-let editingUserId=null, selectedSpecialty='';
-
-function showRegistration(userId) {
-  editingUserId=userId; const user=userId?getUser(userId):null;
-  document.getElementById('registerTitle').textContent=user?'Profil bearbeiten':'Neue Person';
-  document.getElementById('inputName').value=user?user.name:'';
-  document.getElementById('inputStartDate').value=user?(user.startDate||''):'';
-  selectedSpecialty=user?user.specialty:'';
-  document.querySelectorAll('.specialty-card').forEach(c=>c.classList.toggle('selected',c.dataset.value===selectedSpecialty));
-  hide('screenUserSelect'); validateRegForm(); show('screenRegister');
+function selectAndEnterApp(userId) {
+  currentUserId = userId;
+  hide('screenUserSelect');
+  enterApp();
 }
 
-function showEditCurrentUser() { showRegistration(currentUserId); }
+function showUserSwitcher() {
+  showUserSelectScreen();
+  hide('app');
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════
+// REGISTRATION / EDIT
+// ═══════════════════════════════════════════
+let editingUserId = null;
+let selectedSpecialty = '';
+
+function showRegistration(userId) {
+  editingUserId = userId;
+  const user = userId ? getUser(userId) : null;
+  document.getElementById('registerTitle').textContent = user ? 'Profil bearbeiten' : 'Neue Person';
+  document.getElementById('inputName').value = user ? user.name : '';
+  document.getElementById('inputStartDate').value = user ? (user.startDate || '') : '';
+  selectedSpecialty = user ? user.specialty : '';
+  document.querySelectorAll('.specialty-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.value === selectedSpecialty);
+  });
+  hide('screenUserSelect');
+  validateRegForm();
+  show('screenRegister');
+}
+
+function showEditCurrentUser() {
+  showRegistration(currentUserId);
+}
 
 function cancelRegistration() {
   hide('screenRegister');
-  if (db.users.length>0) showUserSelectScreen(); else show('screenFile');
+  if (db.users.length > 0) {
+    showUserSelectScreen();
+  } else {
+    show('screenFile');
+  }
 }
 
 function selectSpecialty(card) {
-  document.querySelectorAll('.specialty-card').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected'); selectedSpecialty=card.dataset.value; validateRegForm();
+  document.querySelectorAll('.specialty-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedSpecialty = card.dataset.value;
+  validateRegForm();
 }
 
 function validateRegForm() {
-  const name=document.getElementById('inputName').value.trim();
-  const date=document.getElementById('inputStartDate').value;
-  document.getElementById('btnSaveUser').disabled=!(name&&selectedSpecialty&&date);
+  const name = document.getElementById('inputName').value.trim();
+  const date = document.getElementById('inputStartDate').value;
+  document.getElementById('btnSaveUser').disabled = !(name && selectedSpecialty && date);
 }
 
-document.getElementById('inputName').addEventListener('input',validateRegForm);
-document.getElementById('inputStartDate').addEventListener('input',validateRegForm);
+document.getElementById('inputName').addEventListener('input', validateRegForm);
+document.getElementById('inputStartDate').addEventListener('input', validateRegForm);
 
 function saveUser() {
-  const name=document.getElementById('inputName').value.trim();
-  const startDate=document.getElementById('inputStartDate').value;
-  if (editingUserId) { const u=getUser(editingUserId); u.name=name; u.specialty=selectedSpecialty; u.startDate=startDate; }
-  else { const newUser={id:generateId(),name,specialty:selectedSpecialty,startDate,goals:{}}; db.users.push(newUser); editingUserId=newUser.id; }
-  scheduleSave(); hide('screenRegister'); currentUserId=editingUserId; enterApp();
+  const name = document.getElementById('inputName').value.trim();
+  const startDate = document.getElementById('inputStartDate').value;
+  if (editingUserId) {
+    const u = getUser(editingUserId);
+    u.name = name;
+    u.specialty = selectedSpecialty;
+    u.startDate = startDate;
+  } else {
+    const newUser = { id: generateId(), name, specialty: selectedSpecialty, startDate, goals: {} };
+    db.users.push(newUser);
+    editingUserId = newUser.id;
+  }
+  scheduleSave();
+  hide('screenRegister');
+  if (editingUserId === currentUserId) {
+    // re-entered app after edit
+    enterApp();
+  } else {
+    currentUserId = editingUserId;
+    enterApp();
+  }
 }
 
+// ═══════════════════════════════════════════
+// APP ENTRY
+// ═══════════════════════════════════════════
 function enterApp() {
-  const fname=fileHandle?fileHandle.name:'localStorage';
-  setFileStatus('saved','Bereit',fname);
+  const fname = fileHandle ? fileHandle.name : 'localStorage';
+  setFileStatus('saved', 'Bereit', fname);
   document.getElementById('app').classList.add('visible');
-  renderHeader(); renderSidebar(); showOverview(document.querySelector('#sidebar .sidebar-item'));
+  renderHeader();
+  renderSidebar();
+  showOverview(document.querySelector('#sidebar .sidebar-item'));
 }
 
+// ═══════════════════════════════════════════
+// PROGRESS HELPERS
+// ═══════════════════════════════════════════
 function getVisibleAreas(user) {
-  const sp=user?user.specialty:(currentUser()?currentUser().specialty:'both');
-  return AREAS.filter(a=>a.specialty==='both'||a.specialty===sp);
+  const sp = user ? user.specialty : (currentUser() ? currentUser().specialty : 'both');
+  return AREAS.filter(a => a.specialty === 'both' || a.specialty === sp);
 }
-function getAllGoalsForArea(area) { return area.subComps.flatMap(sc=>sc.goals); }
+
+function getAllGoalsForArea(area) {
+  return area.subComps.flatMap(sc => sc.goals);
+}
+
 function getAreaProgress(area) {
-  const goals=getAllGoalsForArea(area);
-  const achieved=goals.filter(g=>getGoalState(g.id).level>0).length;
-  return {achieved,total:goals.length,pct:goals.length?Math.round(achieved/goals.length*100):0};
+  const goals = getAllGoalsForArea(area);
+  const achieved = goals.filter(g => getGoalState(g.id).level > 0).length;
+  return { achieved, total: goals.length, pct: goals.length ? Math.round(achieved/goals.length*100) : 0 };
 }
+
 function getUserProgress(user) {
-  const areas=getVisibleAreas(user); const allGoals=areas.flatMap(a=>getAllGoalsForArea(a));
-  const achieved=allGoals.filter(g=>{const gs=(user.goals&&user.goals[g.id])||{};return (gs.level||0)>0;}).length;
-  return {achieved,total:allGoals.length,pct:allGoals.length?Math.round(achieved/allGoals.length*100):0};
+  const areas = getVisibleAreas(user);
+  const allGoals = areas.flatMap(a => getAllGoalsForArea(a));
+  const achieved = allGoals.filter(g => {
+    const gs = (user.goals && user.goals[g.id]) || {};
+    return (gs.level || 0) > 0;
+  }).length;
+  return { achieved, total: allGoals.length, pct: allGoals.length ? Math.round(achieved/allGoals.length*100) : 0 };
 }
-function getOverallProgress() { return getUserProgress(currentUser()); }
+
+function getOverallProgress() {
+  return getUserProgress(currentUser());
+}
 
 function getLehrjahrInfo() {
-  const u=currentUser(); if(!u||!u.startDate) return {current:1,pct:0,yearPcts:[0,0,0,0]};
-  const start=new Date(u.startDate), now=new Date(), totalDays=4*365.25;
-  const elapsed=Math.max(0,Math.min((now-start)/86400000,totalDays));
-  const current=Math.min(4,Math.floor(elapsed/365.25)+1);
-  const yearPcts=[0,1,2,3].map(i=>{const ys=i*365.25,ye=(i+1)*365.25;if(elapsed<=ys)return 0;if(elapsed>=ye)return 100;return Math.round((elapsed-ys)/365.25*100);});
-  return {current,pct:Math.round(elapsed/totalDays*100),yearPcts};
+  const u = currentUser();
+  if (!u || !u.startDate) return { current:1, pct:0, yearPcts:[0,0,0,0] };
+  const start = new Date(u.startDate);
+  const now = new Date();
+  const totalDays = 4*365.25;
+  const elapsed = Math.max(0, Math.min((now-start)/86400000, totalDays));
+  const current = Math.min(4, Math.floor(elapsed/365.25)+1);
+  const yearPcts = [0,1,2,3].map(i => {
+    const ys=i*365.25, ye=(i+1)*365.25;
+    if (elapsed<=ys) return 0;
+    if (elapsed>=ye) return 100;
+    return Math.round((elapsed-ys)/365.25*100);
+  });
+  return { current, pct:Math.round(elapsed/totalDays*100), yearPcts };
 }
 
+// ═══════════════════════════════════════════
+// RENDER: HEADER
+// ═══════════════════════════════════════════
 function renderHeader() {
-  const u=currentUser(); if(!u) return;
-  const initials=u.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
-  document.getElementById('headerAvatar').textContent=initials||'?';
-  document.getElementById('headerName').textContent=u.name;
-  document.getElementById('headerDetail').textContent=u.specialty==='platform'?'Plattformentwicklung':'Applikationsentwicklung';
-  const lj=getLehrjahrInfo(); document.getElementById('lehrjahrBadge').textContent=`${lj.current}. Lehrjahr`;
-  const overall=getOverallProgress(), c=2*Math.PI*14;
-  document.getElementById('progressCircle').style.strokeDashoffset=c*(1-overall.pct/100);
-  document.getElementById('progressPct').textContent=overall.pct+'%';
+  const u = currentUser();
+  if (!u) return;
+  const initials = u.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
+  document.getElementById('headerAvatar').textContent = initials || '?';
+  document.getElementById('headerName').textContent = u.name;
+  const specialtyLabel = u.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
+  document.getElementById('headerDetail').textContent = specialtyLabel;
+  const lj = getLehrjahrInfo();
+  document.getElementById('lehrjahrBadge').textContent = `${lj.current}. Lehrjahr`;
+  const overall = getOverallProgress();
+  const circumference = 2*Math.PI*14;
+  document.getElementById('progressCircle').style.strokeDashoffset = circumference*(1-overall.pct/100);
+  document.getElementById('progressPct').textContent = overall.pct + '%';
 }
 
+// ═══════════════════════════════════════════
+// RENDER: SIDEBAR
+// ═══════════════════════════════════════════
 function renderSidebar() {
-  const container=document.getElementById('sidebarItems'); container.innerHTML='';
-  getVisibleAreas().forEach(area=>{
-    const prog=getAreaProgress(area); const btn=document.createElement('button');
-    btn.className='sidebar-item'; btn.dataset.areaId=area.id;
-    btn.onclick=function(){showArea(area.id,this);};
-    btn.innerHTML=`<span class="item-id">${area.id.toUpperCase()}</span><span class="item-name">${area.name}</span><span class="item-badge">${prog.pct}%</span>`;
+  const container = document.getElementById('sidebarItems');
+  container.innerHTML = '';
+  getVisibleAreas().forEach(area => {
+    const prog = getAreaProgress(area);
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    btn.dataset.areaId = area.id;
+    btn.onclick = function() { showArea(area.id, this); };
+    btn.innerHTML = `
+      <span class="item-id">${area.id.toUpperCase()}</span>
+      <span class="item-name">${area.name}</span>
+      <span class="item-badge">${prog.pct}%</span>
+    `;
     container.appendChild(btn);
   });
 }
 
+// ═══════════════════════════════════════════
+// RENDER: OVERVIEW
+// ═══════════════════════════════════════════
 function showOverview(btn) {
-  document.querySelectorAll('.sidebar-item').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  const lj=getLehrjahrInfo();
-  let html=`<div class="lehrjahr-section"><h3>Lehrzeit-Fortschritt (${lj.pct}% absolviert)</h3><div class="lehrjahr-bars">`;
-  lj.yearPcts.forEach((pct,i)=>{
-    const cls=pct>=100?'lj-done':(i===lj.current-1?'lj-current':'lj-future');
-    html+=`<div class="lj-bar-wrap"><div class="lj-label">${i+1}. LJ</div><div class="lj-bar"><div class="lj-fill ${cls}" style="width:${pct}%"></div></div><div class="lj-pct">${pct}%</div></div>`;
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const lj = getLehrjahrInfo();
+  let html = `
+    <div class="lehrjahr-section">
+      <h3>Lehrzeit-Fortschritt (${lj.pct}% absolviert)</h3>
+      <div class="lehrjahr-bars">
+  `;
+  lj.yearPcts.forEach((pct,i) => {
+    const cls = pct>=100 ? 'lj-done' : (i===lj.current-1 ? 'lj-current' : 'lj-future');
+    html += `
+      <div class="lj-bar-wrap">
+        <div class="lj-label">${i+1}. LJ</div>
+        <div class="lj-bar"><div class="lj-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="lj-pct">${pct}%</div>
+      </div>`;
   });
-  html+=`</div></div><div class="overview-grid">`;
-  getVisibleAreas().forEach(area=>{
-    const prog=getAreaProgress(area);
-    html+=`<div class="overview-card" onclick="showArea('${area.id}')"><div class="ov-id">Bereich ${area.id.toUpperCase()}</div><div class="ov-name">${area.name}</div><div class="ov-progress-bar"><div class="ov-progress-fill" style="width:${prog.pct}%"></div></div><div class="ov-pct">${prog.achieved}/${prog.total} (${prog.pct}%)</div></div>`;
+  html += `</div></div><div class="overview-grid">`;
+  getVisibleAreas().forEach(area => {
+    const prog = getAreaProgress(area);
+    html += `
+      <div class="overview-card" onclick="showArea('${area.id}')">
+        <div class="ov-id">Bereich ${area.id.toUpperCase()}</div>
+        <div class="ov-name">${area.name}</div>
+        <div class="ov-progress-bar"><div class="ov-progress-fill" style="width:${prog.pct}%"></div></div>
+        <div class="ov-pct">${prog.achieved}/${prog.total} Leistungsziele (${prog.pct}%)</div>
+      </div>`;
   });
-  html+=`</div>`;
-  document.getElementById('mainContent').innerHTML=html;
+  html += `</div>`;
+  document.getElementById('mainContent').innerHTML = html;
 }
 
+// ═══════════════════════════════════════════
+// RENDER: AREA
+// ═══════════════════════════════════════════
 function showArea(areaId, sidebarBtn) {
-  const area=AREAS.find(a=>a.id===areaId); if(!area) return;
-  document.querySelectorAll('.sidebar-item').forEach(b=>b.classList.remove('active'));
-  if(sidebarBtn) sidebarBtn.classList.add('active');
-  else document.querySelectorAll(`.sidebar-item[data-area-id="${areaId}"]`).forEach(b=>b.classList.add('active'));
-  const prog=getAreaProgress(area);
-  const specialtyTag={both:'<span class="tag-specialty tag-both">Beide Fachrichtungen</span>',platform:'<span class="tag-specialty tag-platform">Plattformentwicklung</span>',app:'<span class="tag-specialty tag-app">Applikationsentwicklung</span>'}[area.specialty];
-  let html=`<div class="area-header"><div class="area-id">Bereich ${area.id.toUpperCase()}</div>${specialtyTag}<h2>${area.name}</h2><div class="area-meta">${prog.achieved} von ${prog.total} Leistungszielen bewertet</div><div class="area-progress-bar-wrap"><div class="area-progress-label"><span>Fortschritt</span><span>${prog.pct}%</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div></div></div>`;
-  html+=`<div class="bloom-legend">${[0,1,2,3,4,5,6].map(k=>`<div class="bloom-item"><div class="bloom-dot" style="background:var(--k${k}-bg)"></div><span>K${k}: ${BLOOM_SHORT[k]}</span></div>`).join('')}</div><br>`;
-  area.subComps.forEach((sc,i)=>{
-    const scAchieved=sc.goals.filter(g=>getGoalState(g.id).level>0).length;
-    html+=`<div class="sub-comp${i===0?' open':''}" id="sc-${sc.id}"><button class="sub-comp-header" onclick="toggleSubComp('sc-${sc.id}')"><span class="sub-comp-id">${sc.id}</span><span class="sub-comp-name">${sc.name}</span><span class="sub-comp-stats">${scAchieved}/${sc.goals.length}</span><span class="chevron">&#9660;</span></button><div class="sub-comp-body">${sc.goals.map(g=>renderGoalRow(g)).join('')}</div></div>`;
+  const area = AREAS.find(a => a.id === areaId);
+  if (!area) return;
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  if (sidebarBtn) sidebarBtn.classList.add('active');
+  else document.querySelectorAll(`.sidebar-item[data-area-id="${areaId}"]`).forEach(b => b.classList.add('active'));
+
+  const prog = getAreaProgress(area);
+  const specialtyTag = {
+    both:     '<span class="tag-specialty tag-both">Beide Fachrichtungen</span>',
+    platform: '<span class="tag-specialty tag-platform">Plattformentwicklung</span>',
+    app:      '<span class="tag-specialty tag-app">Applikationsentwicklung</span>',
+  }[area.specialty];
+
+  let html = `
+    <div class="area-header">
+      <div class="area-id">Bereich ${area.id.toUpperCase()}</div>${specialtyTag}
+      <h2>${area.name}</h2>
+      <div class="area-meta">${prog.achieved} von ${prog.total} Leistungszielen bewertet</div>
+      <div class="area-progress-bar-wrap">
+        <div class="area-progress-label"><span>Fortschritt</span><span>${prog.pct}%</span></div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+      </div>
+    </div>
+    <div class="bloom-legend">
+      ${[0,1,2,3,4,5,6].map(k=>`
+        <div class="bloom-item">
+          <div class="bloom-dot" style="background:var(--k${k}-bg)"></div>
+          <span>K${k}: ${BLOOM_SHORT[k]}</span>
+        </div>`).join('')}
+    </div><br>
+  `;
+
+  area.subComps.forEach((sc, i) => {
+    const scAchieved = sc.goals.filter(g => getGoalState(g.id).level > 0).length;
+    html += `
+      <div class="sub-comp${i===0?' open':''}" id="sc-${sc.id}">
+        <button class="sub-comp-header" onclick="toggleSubComp('sc-${sc.id}')">
+          <span class="sub-comp-id">${sc.id}</span>
+          <span class="sub-comp-name">${sc.name}</span>
+          <span class="sub-comp-stats">${scAchieved}/${sc.goals.length}</span>
+          <span class="chevron">▼</span>
+        </button>
+        <div class="sub-comp-body">
+          ${sc.goals.map(g => renderGoalRow(g)).join('')}
+        </div>
+      </div>`;
   });
-  document.getElementById('mainContent').innerHTML=html;
+
+  document.getElementById('mainContent').innerHTML = html;
   attachGoalListeners();
 }
 
 function renderGoalRow(goal) {
-  const gs=getGoalState(goal.id);
-  const dateStr=gs.date?new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
-  let kBtns='';
-  for(let k=0;k<=6;k++){const isOver=k>0&&k>goal.max;kBtns+=`<button class="k-btn${gs.level===k?' selected':''}${isOver?' over-max':''}" data-goal="${goal.id}" data-level="${k}" title="${BLOOM_FULL[k]}" ${isOver?'disabled':''}>${k===0?'-':'K'+k}</button>`;}
-  return `<div class="goal-row" id="row-${goal.id}"><div class="goal-id">${goal.id}</div><div class="goal-content"><div class="goal-text">${goal.text}</div><div class="goal-controls"><div class="k-buttons">${kBtns}</div><span class="goal-max-badge">max: K${goal.max}</span></div><div class="goal-date" id="date-${goal.id}">Letzte Aenderung: ${dateStr}</div><textarea class="goal-comment" data-goal="${goal.id}" placeholder="Kommentar, Erfahrungen, Belege ..." rows="2">${escHtml(gs.comment)}</textarea></div></div>`;
+  const gs = getGoalState(goal.id);
+  const dateStr = gs.date
+    ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '–';
+  let kBtns = '';
+  for (let k=0; k<=6; k++) {
+    const isOver = k>0 && k>goal.max;
+    kBtns += `<button class="k-btn${gs.level===k?' selected':''}${isOver?' over-max':''}"
+      data-goal="${goal.id}" data-level="${k}"
+      title="${BLOOM_FULL[k]}${isOver?' (über Max-Level)':''}"
+      ${isOver?'disabled':''}>${k===0?'–':'K'+k}</button>`;
+  }
+  return `
+    <div class="goal-row" id="row-${goal.id}">
+      <div class="goal-id">${goal.id}</div>
+      <div class="goal-content">
+        <div class="goal-text">${goal.text}</div>
+        <div class="goal-controls">
+          <div class="k-buttons">${kBtns}</div>
+          <span class="goal-max-badge">max: K${goal.max}</span>
+        </div>
+        <div class="goal-date" id="date-${goal.id}">Letzte Änderung: ${dateStr}</div>
+        <textarea class="goal-comment" data-goal="${goal.id}"
+          placeholder="Kommentar, Erfahrungen, Belege …"
+          rows="2">${escHtml(gs.comment)}</textarea>
+      </div>
+    </div>`;
 }
 
-function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-const debounceTimers={};
+// ═══════════════════════════════════════════
+// GOAL INTERACTIONS
+// ═══════════════════════════════════════════
+const debounceTimers = {};
+
 function attachGoalListeners() {
-  document.querySelectorAll('.k-btn').forEach(btn=>{
-    btn.addEventListener('click',function(){
-      if(this.disabled) return;
-      const goalId=this.dataset.goal,level=parseInt(this.dataset.level);
-      setGoalLevel(goalId,level);
-      document.querySelectorAll(`.k-btn[data-goal="${goalId}"]`).forEach(b=>b.classList.toggle('selected',parseInt(b.dataset.level)===level));
-      const gs=getGoalState(goalId);
-      const dateStr=gs.date?new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
-      const dateEl=document.getElementById(`date-${goalId}`); if(dateEl) dateEl.textContent=`Letzte Aenderung: ${dateStr}`;
-      renderHeader(); renderSidebar();
+  document.querySelectorAll('.k-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (this.disabled) return;
+      const goalId = this.dataset.goal;
+      const level = parseInt(this.dataset.level);
+      setGoalLevel(goalId, level);
+      document.querySelectorAll(`.k-btn[data-goal="${goalId}"]`).forEach(b => {
+        b.classList.toggle('selected', parseInt(b.dataset.level) === level);
+      });
+      const gs = getGoalState(goalId);
+      const dateStr = gs.date ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+      const dateEl = document.getElementById(`date-${goalId}`);
+      if (dateEl) dateEl.textContent = `Letzte Änderung: ${dateStr}`;
+      renderHeader();
+      renderSidebar();
     });
   });
-  document.querySelectorAll('.goal-comment').forEach(ta=>{
-    ta.addEventListener('input',function(){
-      const goalId=this.dataset.goal; this.classList.add('saving');
+
+  document.querySelectorAll('.goal-comment').forEach(ta => {
+    ta.addEventListener('input', function() {
+      const goalId = this.dataset.goal;
+      this.classList.add('saving');
       clearTimeout(debounceTimers[goalId]);
-      debounceTimers[goalId]=setTimeout(()=>{
-        setGoalComment(goalId,this.value); this.classList.remove('saving');
-        const gs=getGoalState(goalId);
-        const dateStr=gs.date?new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
-        const dateEl=document.getElementById(`date-${goalId}`); if(dateEl) dateEl.textContent=`Letzte Aenderung: ${dateStr}`;
-      },600);
+      debounceTimers[goalId] = setTimeout(() => {
+        setGoalComment(goalId, this.value);
+        this.classList.remove('saving');
+        const gs = getGoalState(goalId);
+        const dateStr = gs.date ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+        const dateEl = document.getElementById(`date-${goalId}`);
+        if (dateEl) dateEl.textContent = `Letzte Änderung: ${dateStr}`;
+      }, 600);
     });
   });
 }
 
-function toggleSubComp(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
-function show(id){document.getElementById(id).classList.remove('hidden');}
-function hide(id){document.getElementById(id).classList.add('hidden');}
+function toggleSubComp(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
 
-if(!hasFSA) document.getElementById('fsaNotice').classList.remove('hidden');
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+if (!hasFSA) {
+  document.getElementById('fsaNotice').classList.remove('hidden');
+}
 </script>
 </body>
 </html>
