@@ -1,0 +1,561 @@
+{
+  "lehrberuf": "Informatiker/in EFZ",
+  "berufsnummer": "88611",
+  "version": "Bildungsplan SBFI vom 19. November 2020",
+  "areas": [
+    {
+      "id": "a",
+      "name": "Begleiten von ICT-Projekten",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "a1",
+          "name": "Bedürfnisse von Stakeholdern im Rahmen eines ICT-Projekts abklären und dokumentieren",
+          "goals": [
+            { "id": "a1.1", "text": "Sie klären Projektziele und übergeordnete Parameter wie Kosten, Zeit, Qualität, Umfang, Verantwortlichkeiten und Methodik eines ICT-Projektes ab.", "max": 3 },
+            { "id": "a1.2", "text": "Sie wenden verschiedene Befragungstechniken und Beobachtungstechniken an (z.B. offene, geschlossene Fragen, Meeting, Workshop, Shadowing, Simulation der anzustrebenden Lösung in Form eines Zeitsprungs).", "max": 5 },
+            { "id": "a1.3", "text": "Sie analysieren den Systemkontext, nehmen eine System- und Kontextabgrenzung vor und identifizieren Schnittstellen.", "max": 4 },
+            { "id": "a1.4", "text": "Sie erarbeiten Lösungen zur Beseitigung möglicher Zielkonflikte.", "max": 5 },
+            { "id": "a1.5", "text": "Sie überführen die natürlichsprachige Definition (der Stakeholder) in eine modellbasierte Dokumentation mit eindeutigen, referenzierbaren Projektziele und -anforderungen.", "max": 5 },
+            { "id": "a1.6", "text": "Sie überprüfen die Projektziele und -anforderungen bezüglich Messbarkeit, Konsistenz, Vollständigkeit, Notwendigkeit, Korrektheit und Referenzierbarkeit.", "max": 4 },
+            { "id": "a1.7", "text": "Sie definieren die Eigenschaften für die Verwaltung der einzelnen Projektziele und -anforderungen (z.B. Versionierung, Identifikator zur Referenzierbarkeit, Beschreibung, Autor, Quelle, Kritikalität, Priorität).", "max": 3 }
+          ]
+        },
+        {
+          "id": "a2",
+          "name": "Vorgehensmodell für ein ICT-Projekt bestimmen",
+          "goals": [
+            { "id": "a2.1", "text": "Sie analysieren die vom Auftraggeber gegebenen Konditionen und Parameter.", "max": 4 },
+            { "id": "a2.2", "text": "Sie wägen die Vor- und Nachteile von verschiedenen plangetriebenen resp. agilen (iterativen, inkrementellen) Vorgehensmodellen in Bezug auf ein ICT-Projekt ab und wählen ein passendes Modell.", "max": 4 },
+            { "id": "a2.3", "text": "Sie passen ein Vorgehensmodell projektspezifisch an (Process-Tailoring).", "max": 5 }
+          ]
+        },
+        {
+          "id": "a3",
+          "name": "Informationen zu ICT-Lösungen und zu Innovationen recherchieren",
+          "goals": [
+            { "id": "a3.1", "text": "Sie suchen gezielt und systematisch nach Informationen aus digitalen und analogen Quellen.", "max": 4 },
+            { "id": "a3.2", "text": "Sie identifizieren verlässliche Quellen.", "max": 4 },
+            { "id": "a3.3", "text": "Sie vergleichen mehrere Varianten aus den Ergebnissen und bewerten sie.", "max": 4 },
+            { "id": "a3.4", "text": "Sie zeigen technische Potenziale und Risiken von Varianten auf.", "max": 4 },
+            { "id": "a3.5", "text": "Sie erstellen ein technisches Proof of Concept (PoC).", "max": 5 }
+          ]
+        },
+        {
+          "id": "a4",
+          "name": "ICT-Projekte und daraus entstehende Aufgaben gemäss Vorgehensmodell planen",
+          "goals": [
+            { "id": "a4.1", "text": "Sie teilen eine Gesamtaufgabe in kleinere, besser einschätzbare und einer Ressource zuteilbare Aktivitäten auf.", "max": 3 },
+            { "id": "a4.2", "text": "Sie identifizieren Aktivitäten nach Typ Aufwand oder Dauer.", "max": 4 },
+            { "id": "a4.3", "text": "Sie schätzen Aufwand, Dauer und Komplexitätsgrad von Aktivitäten ab.", "max": 4 },
+            { "id": "a4.4", "text": "Sie klären die sequenziellen Abhängigkeiten von Aktivitäten und definieren die zeitliche Reihenfolge.", "max": 4 },
+            { "id": "a4.5", "text": "Sie gruppieren und priorisieren Aktivitäten zur Erreichung eines Zwischenziels anhand von zeitlichen oder funktionellen Vorgaben.", "max": 3 }
+          ]
+        },
+        {
+          "id": "a5",
+          "name": "Varianten für ICT-Lösungen visualisieren und präsentieren",
+          "goals": [
+            { "id": "a5.1", "text": "Sie identifizieren die Zielgruppe und deren Informationsbedürfnisse zu einer ICT-Lösung gemäss Anforderungskatalog.", "max": 4 },
+            { "id": "a5.2", "text": "Sie identifizieren die zielgruppenrelevanten Merkmale einer ICT-Lösung.", "max": 4 },
+            { "id": "a5.3", "text": "Sie bereiten die aus den Merkmalen gewonnenen Erkenntnisse zielgruppen- und problemgerecht visuell auf (z.B. Flipchart, Whiteboard, Präsentationsprogramm, Videoconferencing).", "max": 5 },
+            { "id": "a5.4", "text": "Sie präsentieren ihre Lösungsvorschläge schlüssig und überzeugend (z.B. durch Storytelling).", "max": 5 }
+          ]
+        },
+        {
+          "id": "a6",
+          "name": "Fortschritt von ICT-Projekten und daraus entstehenden Aufgaben gemäss Vorgehensmodell überprüfen und rapportieren",
+          "goals": [
+            { "id": "a6.1", "text": "Sie bringen Bewertungen zum Stand der ihnen zugewiesenen Aufträge ein (persönlich oder über ein Tool).", "max": 3 },
+            { "id": "a6.2", "text": "Sie kategorisieren und priorisieren gesammelte Bewertungen.", "max": 4 },
+            { "id": "a6.3", "text": "Sie konsolidieren die Bewertungen und erarbeiten ggf. Vorschläge für Korrekturmassnahmen.", "max": 5 },
+            { "id": "a6.4", "text": "Sie halten den Fortschritt schriftlich fest und stellen ihn visuell dar.", "max": 3 },
+            { "id": "a6.5", "text": "Sie rapportieren die zusammengefassten Ergebnisse zum Projektfortschritt gemäss projektspezifischem Vorgehensmodell.", "max": 3 }
+          ]
+        },
+        {
+          "id": "a7",
+          "name": "ICT-Lösungen der Kundin oder dem Kunden übergeben und Projekt abschliessen",
+          "goals": [
+            { "id": "a7.1", "text": "Sie eruieren die einzubeziehenden Personen beim Kunden.", "max": 3 },
+            { "id": "a7.2", "text": "Sie legen zusammen mit dem Kunden die Abnahmekriterien und -verfahren sowie den zeitlichen Ablauf der Übergabe fest.", "max": 3 },
+            { "id": "a7.3", "text": "Sie stellen die gemäss Projektauftrag vereinbarte Dokumentation bereit.", "max": 3 },
+            { "id": "a7.4", "text": "Sie planen eine Schulung/Instruktion.", "max": 3 },
+            { "id": "a7.5", "text": "Sie bereiten die Schulungsunterlagen vor.", "max": 5 },
+            { "id": "a7.6", "text": "Sie führen eine Abnahme nach festgelegten Kriterien durch und protokollieren sie.", "max": 3 },
+            { "id": "a7.7", "text": "Sie archivieren und sichern ihre Arbeiten nach betriebsspezifischen Vorgaben.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "name": "Unterstützen und Beraten im ICT-Umfeld",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "b1",
+          "name": "Den eigenen ICT-Arbeitsplatz einrichten",
+          "goals": [
+            { "id": "b1.1", "text": "Sie setzen einen Computer mit einem Betriebssystem auf.", "max": 3 },
+            { "id": "b1.2", "text": "Sie verbinden den Computer mit einem Netzwerk und testen die Verbindung.", "max": 3 },
+            { "id": "b1.3", "text": "Sie konfigurieren die nötigen Sicherheitsmassnahmen (Firewall, Antivirensysteme etc.) gemäss Firmenrichtlinien.", "max": 3 },
+            { "id": "b1.4", "text": "Sie installieren Software, testen sie und führen bei Bedarf Updates aus.", "max": 3 },
+            { "id": "b1.5", "text": "Sie verbinden den Computer mit den zu verwendenden Peripheriegeräten und testen deren Funktionalitäten.", "max": 3 },
+            { "id": "b1.6", "text": "Sie richten ihren Bürotisch und -stuhl nach ergonomischen Grundsätzen ein.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b2",
+          "name": "Komplexe ICT-Supportanfragen entgegennehmen und bearbeiten",
+          "goals": [
+            { "id": "b2.1", "text": "Sie analysieren komplexe Anfragen systematisch (z.B. mit Hilfe eines Fragenkatalogs oder einer Checkliste).", "max": 4 },
+            { "id": "b2.2", "text": "Sie führen mit geeigneten Methoden oder Kollaborationen Lösungen herbei.", "max": 5 },
+            { "id": "b2.3", "text": "Sie dokumentieren Lösungen nach betriebsspezifischen Vorgaben.", "max": 3 },
+            { "id": "b2.4", "text": "Sie bereiten Lösungen für eine Anfrage zielgruppengerecht (z.B. für den 2nd Level Support) auf und kommunizieren sie.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b3",
+          "name": "Kundinnen und Kunden in Bezug auf Datenschutz und Datensicherheit beraten",
+          "goals": [
+            { "id": "b3.1", "text": "Sie klären anhand von gezielten Fragen die Sicherheitssituation beim Kunden in Bezug auf System, Netzwerk, Software und Daten.", "max": 4 },
+            { "id": "b3.2", "text": "Sie informieren Kunden über Gefahren im Netz und den Umgang mit schützenswerten Daten.", "max": 3 },
+            { "id": "b3.3", "text": "Sie schlagen dem Kunden nötige und empfohlene Schutzmassnahmen in den evaluierten Bereichen vor.", "max": 5 },
+            { "id": "b3.4", "text": "Sie schulen Mitarbeitende in der Anwendung der firmeneigenen IT-Richtlinien.", "max": 5 }
+          ]
+        },
+        {
+          "id": "b4",
+          "name": "Geschäftsprozesse von Kundinnen und Kunden analysieren, visualisieren und dokumentieren",
+          "goals": [
+            { "id": "b4.1", "text": "Sie identifizieren relevante Prozessinformationen (Bezeichnung, auslösendes Ereignis, Ergebnis, Auslöser, Empfänger).", "max": 4 },
+            { "id": "b4.2", "text": "Sie zerlegen einen Geschäftsprozess in einer Aufgabenanalyse in einzelne Prozessschritte.", "max": 4 },
+            { "id": "b4.3", "text": "Sie dokumentieren einen Prozessablauf und stellen ihn auf der Basis von anerkannten und üblichen Beschreibungsstandards grafisch dar.", "max": 3 },
+            { "id": "b4.4", "text": "Sie präzisieren den Prozessablauf mit Zusatzinformationen wie benötigten Hilfsmitteln, ausführenden Stellen sowie der Beschreibung des zu erzeugenden Outputs (Ergebnis).", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "name": "Aufbauen und Pflegen von digitalen Daten",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "c1",
+          "name": "Daten identifizieren, analysieren und Datenmodelle entwickeln",
+          "goals": [
+            { "id": "c1.1", "text": "Sie sichten Daten aus verschiedenen strukturierten und unstrukturierten Datenquellen und ordnen sie hinsichtlich des 4V-Modells ein.", "max": 4 },
+            { "id": "c1.2", "text": "Sie untersuchen Daten auf Eindeutigkeit und Widersprüchlichkeit und bereinigen sie falls nötig.", "max": 4 },
+            { "id": "c1.3", "text": "Sie gewinnen Indikatoren/Anhaltspunkte für die Modellbildung aus bestehenden Auswertungsformen (Reports).", "max": 4 },
+            { "id": "c1.4", "text": "Sie bestimmen je nach Datentyp geeignete Testfälle für die Datenkorrektheit.", "max": 3 },
+            { "id": "c1.5", "text": "Sie bestimmen eine geeignete Struktur für die bereinigten Daten.", "max": 4 },
+            { "id": "c1.6", "text": "Sie normalisieren ein Datenmodell.", "max": 3 },
+            { "id": "c1.7", "text": "Sie bilden ein Datenmodell in geeigneter Darstellung ab.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c2",
+          "name": "Datenmodelle in einem digitalen Datenspeicher umsetzen",
+          "goals": [
+            { "id": "c2.1", "text": "Sie wählen einen geeigneten Datenspeicher (z.B. objektrelational, relational, verteilt/zentral).", "max": 3 },
+            { "id": "c2.2", "text": "Sie implementieren ein normalisiertes Datenmodell für die Speicherung unter Berücksichtigung der referentiellen Integrität.", "max": 3 },
+            { "id": "c2.3", "text": "Sie planen Funktions- und Performancetests und bereiten die dazu notwendigen Testdaten vor.", "max": 5 },
+            { "id": "c2.4", "text": "Sie führen Funktions- und Performancetests durch.", "max": 3 },
+            { "id": "c2.5", "text": "Sie werten Funktions- und Performancetests aus.", "max": 4 },
+            { "id": "c2.6", "text": "Sie planen Datenmigrationen aus unterschiedlichen Quellsystemen in ein Zielsystem und führen sie durch.", "max": 5 },
+            { "id": "c2.7", "text": "Sie prüfen die migrierten Daten im Zielsystem auf Vollständigkeit, Integrität und Korrektheit.", "max": 4 }
+          ]
+        },
+        {
+          "id": "c3",
+          "name": "Datensicherheit und Datenschutz für ICT-Lösungen planen, implementieren und dokumentieren",
+          "goals": [
+            { "id": "c3.1", "text": "Sie identifizieren schutzwürdige Daten und kategorisieren sie.", "max": 4 },
+            { "id": "c3.2", "text": "Sie modellieren schützenswerte Daten gemäss Privacy by design.", "max": 3 },
+            { "id": "c3.3", "text": "Sie klären die erforderlichen Schutzmechanismen gemäss Schutzwürdigkeit ab und qualifizieren sie.", "max": 4 },
+            { "id": "c3.4", "text": "Sie erarbeiten ein Datensicherheits- und Rollenkonzept gemäss Auftrag.", "max": 3 },
+            { "id": "c3.5", "text": "Sie erstellen ein Backup und prüfen die erfolgreiche Wiederherstellung.", "max": 3 },
+            { "id": "c3.6", "text": "Sie setzen Zugriffsberechtigungen gemäss Konzept.", "max": 3 },
+            { "id": "c3.7", "text": "Sie verschlüsseln Daten gemäss Konzept.", "max": 3 },
+            { "id": "c3.8", "text": "Sie überprüfen die eingerichteten Datensicherheits- und Schutzmechanismen in Bezug auf ihre Wirksamkeit.", "max": 4 }
+          ]
+        },
+        {
+          "id": "c4",
+          "name": "Daten aus digitalen Datenspeichern aufbereiten",
+          "goals": [
+            { "id": "c4.1", "text": "Sie lesen Daten in eine geeignete Analysesoftware ein.", "max": 3 },
+            { "id": "c4.2", "text": "Sie führen eine explorative Datenanalyse durch und identifizieren mögliche Datenfehler.", "max": 4 },
+            { "id": "c4.3", "text": "Sie vergleichen etablierte Aufbereitungsmethoden und Darstellungsformen und bewerten sie.", "max": 4 },
+            { "id": "c4.4", "text": "Sie wählen geeignete Darstellungsformen aus und setzen sie ein.", "max": 3 },
+            { "id": "c4.5", "text": "Sie prüfen die Validität der aufbereiteten Daten durch Stichproben.", "max": 3 },
+            { "id": "c4.6", "text": "Sie stellen Daten anonymisiert bereit.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "name": "Ausliefern und Betreiben von ICT-Lösungen",
+      "specialty": "platform",
+      "subComps": [
+        {
+          "id": "d1",
+          "name": "ICT-Prozesse aufnehmen, standardisieren und automatisieren",
+          "goals": [
+            { "id": "d1.1", "text": "Sie halten Kundenbedürfnisse in Bezug auf ICT-Prozesse in Form von technischen Anforderungen nachvollziehbar und lösungsneutral fest.", "max": 4 },
+            { "id": "d1.2", "text": "Sie leiten aus den Anforderungen einen technischen Lösungsvorschlag ab und halten diesen übersichtlich fest.", "max": 4 },
+            { "id": "d1.3", "text": "Sie automatisieren definierte ICT-Prozesse mittels Scriptsprachen, Infrastructure as Code (IaC) und/oder Automatisierungsframeworks.", "max": 4 }
+          ]
+        },
+        {
+          "id": "d2",
+          "name": "Auslieferungsprozess von ICT-Lösungen definieren",
+          "goals": [
+            { "id": "d2.1", "text": "Sie identifizieren bestehende Auslieferungsprozesse, betroffene Schnittstellen und Stakeholder.", "max": 4 },
+            { "id": "d2.2", "text": "Sie bestimmen eine geeignete Plattform, nötige Erweiterungen und Anpassungen in Bezug auf die definierten Anforderungen der Lösung.", "max": 4 },
+            { "id": "d2.3", "text": "Sie dokumentieren einen vollständigen Auslieferungsprozess übersichtlich und nachvollziehbar.", "max": 3 },
+            { "id": "d2.4", "text": "Sie präsentieren einen Auslieferungsprozess relevanten Stakeholdern verständlich und übersichtlich.", "max": 3 },
+            { "id": "d2.5", "text": "Sie erstellen ein vollständiges Testkonzept, um Funktion und Integration der Auslieferung zu testen.", "max": 3 }
+          ]
+        },
+        {
+          "id": "d3",
+          "name": "Ausführungsplattform für ICT-Lösungen vorbereiten",
+          "goals": [
+            { "id": "d3.1", "text": "Sie stellen eine definierte Ausführungsplattform bereit.", "max": 3 },
+            { "id": "d3.2", "text": "Sie konfigurieren eine Ausführungsplattform gemäss den geplanten Anforderungen.", "max": 3 },
+            { "id": "d3.3", "text": "Sie dokumentieren die Konfiguration einer Ausführungsplattform nachvollziehbar.", "max": 3 },
+            { "id": "d3.4", "text": "Sie überprüfen eine vorbereitete Plattform in Bezug auf die definierten Anforderungen.", "max": 3 }
+          ]
+        },
+        {
+          "id": "d4",
+          "name": "ICT-Lösungen in Betrieb nehmen",
+          "goals": [
+            { "id": "d4.1", "text": "Sie beantragen die erforderlichen Zugriffsrechte wie auch Berechtigungen für eine Inbetriebnahme.", "max": 3 },
+            { "id": "d4.2", "text": "Sie koordinieren Anpassungen an den Umsystemen.", "max": 4 },
+            { "id": "d4.3", "text": "Sie führen Deployment-Scripts für die Inbetriebnahme aus.", "max": 3 },
+            { "id": "d4.4", "text": "Sie führen einen Software Rollout durch.", "max": 3 },
+            { "id": "d4.5", "text": "Sie koordinieren einen Hardware Rollout mit den betroffenen Stakeholdern.", "max": 4 },
+            { "id": "d4.6", "text": "Sie informieren Auftraggeber regelmässig über den Fortschritt einer Inbetriebnahme.", "max": 3 },
+            { "id": "d4.7", "text": "Sie testen eine in Betrieb genommene ICT-Lösung auf Funktionalität und Sicherheit.", "max": 4 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e",
+      "name": "Betreiben von Netzen",
+      "specialty": "platform",
+      "subComps": [
+        {
+          "id": "e1",
+          "name": "Netze planen und dokumentieren",
+          "goals": [
+            { "id": "e1.1", "text": "Sie erarbeiten zuhanden von Stakeholdern einen Lösungsvorschlag für ein Netz unter Berücksichtigung von betrieblichen Gegebenheiten, technischen Standards und rechtlichen Vorgaben.", "max": 5 },
+            { "id": "e1.2", "text": "Sie schätzen die Ausfallwahrscheinlichkeit eines neuen oder bestehenden Netzes ein und planen bei Bedarf Redundanzen ein.", "max": 4 },
+            { "id": "e1.3", "text": "Sie konzipieren eine Netzinfrastruktur (LAN) unter Berücksichtigung der räumlichen Verhältnisse und weiterer Vorgaben.", "max": 5 },
+            { "id": "e1.4", "text": "Sie konzipieren physische und systemische Sicherheitsmassnahmen im lokalen Netz.", "max": 5 },
+            { "id": "e1.5", "text": "Sie dokumentieren eine physische und logische Netzstruktur systematisch und vollständig.", "max": 3 },
+            { "id": "e1.6", "text": "Sie wählen einen geeigneten Internetdienstanbieter (ISP) gemäss vorgegebenen Anforderungen aus.", "max": 4 },
+            { "id": "e1.7", "text": "Sie erstellen ein Testkonzept zur Überprüfung der Funktionalität, Performance und Sicherheit des Netzes.", "max": 5 }
+          ]
+        },
+        {
+          "id": "e2",
+          "name": "Netzkomponenten auswählen und in Betrieb nehmen",
+          "goals": [
+            { "id": "e2.1", "text": "Sie bestimmen geeignete Netzkomponenten unter Berücksichtigung der Anforderungen und der Budgetvorgaben.", "max": 4 },
+            { "id": "e2.2", "text": "Sie erstellen eine vollständige Materialliste gemäss internem Bestellprozess.", "max": 3 },
+            { "id": "e2.3", "text": "Sie überprüfen Netzkomponenten beim Wareneingang auf Vollständigkeit.", "max": 4 },
+            { "id": "e2.4", "text": "Sie erstellen ein nachvollziehbares Konfigurationskonzept.", "max": 5 },
+            { "id": "e2.5", "text": "Sie nehmen bei Netzkomponenten Vorkonfigurationen und Upgrades vor.", "max": 3 },
+            { "id": "e2.6", "text": "Sie installieren Netzkomponenten vor Ort und nehmen die Endkonfiguration vor.", "max": 3 },
+            { "id": "e2.7", "text": "Sie testen installierte Netzkomponenten auf Funktionsfähigkeit.", "max": 3 },
+            { "id": "e2.8", "text": "Sie erläutern einem Kunden die Funktionsweise eines Netzes in einfachen Worten.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e3",
+          "name": "Netze warten und weiterentwickeln",
+          "goals": [
+            { "id": "e3.1", "text": "Sie überprüfen Netzkomponenten durch Sichtkontrollen und definieren bei Bedarf Wartungsmassnahmen.", "max": 3 },
+            { "id": "e3.2", "text": "Sie führen eine Log-Überprüfung von Netzkomponenten durch.", "max": 4 },
+            { "id": "e3.3", "text": "Sie definieren kurzfristige und langfristige Massnahmen für die Weiterentwicklung von Komponenten.", "max": 4 },
+            { "id": "e3.4", "text": "Sie führen Updates und Upgrades von Komponenten gemäss bestehendem Betriebskonzept und Herstellervorgaben durch.", "max": 3 },
+            { "id": "e3.5", "text": "Sie dokumentieren ausgeführte Wartungsarbeiten sorgfältig.", "max": 3 },
+            { "id": "e3.6", "text": "Sie informieren einen Stakeholder über den Life Cycle von Geräten sowie über aktuelle Standards in Bezug auf Energie und Ökologie.", "max": 3 },
+            { "id": "e3.7", "text": "Sie schätzen den Zeitpunkt für Ersatzanschaffungen von Geräten ab.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e4",
+          "name": "Sicherheit von Netzen implementieren, dokumentieren und überprüfen",
+          "goals": [
+            { "id": "e4.1", "text": "Sie analysieren und bewerten Sicherheitsrisiken eines Netzes anhand von aktuellen und betriebsspezifischen Tools.", "max": 4 },
+            { "id": "e4.2", "text": "Sie implementieren sicherheitsrelevante Dienste und Komponenten.", "max": 3 },
+            { "id": "e4.3", "text": "Sie testen implementierte Sicherheitsmassnahmen systematisch und gemäss Testkonzept.", "max": 3 },
+            { "id": "e4.4", "text": "Sie dokumentieren die Funktionalität von implementierten Sicherheitsmassnahmen.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e5",
+          "name": "Leistungsfähigkeit eines Netzes analysieren, optimieren und dokumentieren",
+          "goals": [
+            { "id": "e5.1", "text": "Sie analysieren mögliche Ursachen im Falle einer eingeschränkten Leistungsfähigkeit des Netzes.", "max": 4 },
+            { "id": "e5.2", "text": "Sie analysieren die Auslastung eines Netzes und legen unter Berücksichtigung möglicher Auswirkungen geeignete Optimierungsmassnahmen fest.", "max": 4 },
+            { "id": "e5.3", "text": "Sie dokumentieren Optimierungsmassnahmen nachvollziehbar.", "max": 3 },
+            { "id": "e5.4", "text": "Sie passen die Konfiguration von Netzkomponenten gemäss den getroffenen Optimierungsmassnahmen an.", "max": 3 },
+            { "id": "e5.5", "text": "Sie testen die Funktionsfähigkeit eines Netzes.", "max": 4 }
+          ]
+        },
+        {
+          "id": "e6",
+          "name": "Netze überwachen",
+          "goals": [
+            { "id": "e6.1", "text": "Sie überwachen Netze mit den vorgegebenen Monitoring-Tools kontinuierlich und zuverlässig.", "max": 4 },
+            { "id": "e6.2", "text": "Sie überprüfen Verfügbarkeit und Funktionsfähigkeit von Netzkomponenten sowie die Auslastung des Netzes.", "max": 4 },
+            { "id": "e6.3", "text": "Sie priorisieren Meldungen und Alarmierungen nach Dringlichkeit und legen geeignete Massnahmen fest.", "max": 4 },
+            { "id": "e6.4", "text": "Sie lokalisieren und identifizieren Fehler auf Ebene der Netzkomponenten durch eine strukturierte Vorgehensweise.", "max": 4 },
+            { "id": "e6.5", "text": "Sie organisieren die Fehlerbehebung im Team oder mit externen Partnern.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f",
+      "name": "Betreiben von Serversystemen und Serverdiensten",
+      "specialty": "platform",
+      "subComps": [
+        {
+          "id": "f1",
+          "name": "Serversysteme und -dienste planen und dokumentieren",
+          "goals": [
+            { "id": "f1.1", "text": "Sie erarbeiten zuhanden von Stakeholdern Lösungsvorschläge für Serverdienste und Serversysteme unter Berücksichtigung von betrieblichen Gegebenheiten, technischen Standards, rechtlichen Vorgaben sowie des IT-Grundschutzes.", "max": 5 },
+            { "id": "f1.2", "text": "Sie klären Fragen von Stakeholdern in Bezug auf Lösungsvorschläge verständlich und hinterfragen Anforderungen kritisch.", "max": 3 },
+            { "id": "f1.3", "text": "Sie halten Lösungsvarianten mit allen Anforderungen schriftlich fest.", "max": 3 },
+            { "id": "f1.4", "text": "Sie bestimmen geeignete Plattformen und Leistungsparameter anhand von messbaren Bewertungskriterien.", "max": 4 },
+            { "id": "f1.5", "text": "Sie wählen geeignete Hard- und Software vorausschauend und unter Berücksichtigung der Rahmenbedingungen.", "max": 4 },
+            { "id": "f1.6", "text": "Sie definieren geeignete Dienste mit den benötigten Ressourcen unter Berücksichtigung relevanter Abhängigkeiten und Auswirkungen.", "max": 4 },
+            { "id": "f1.7", "text": "Sie erstellen ein Testkonzept zur Überprüfung der Funktionalität, Performance und Sicherheit von Systemen und Diensten.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f2",
+          "name": "Serversysteme in Betrieb nehmen",
+          "goals": [
+            { "id": "f2.1", "text": "Sie beschaffen gewählte Komponenten und Ressourcen für ein Serversystem gemäss betrieblichen Prozessen.", "max": 3 },
+            { "id": "f2.2", "text": "Sie installieren Komponenten und Services gemäss definierter Planung sowie internen Anforderungen, Richtlinien und Best Practices und konfigurieren diese.", "max": 3 },
+            { "id": "f2.3", "text": "Sie überprüfen die Funktionalität eines Serversystems mittels geeigneter Tests.", "max": 4 },
+            { "id": "f2.4", "text": "Sie überführen ein Serversystem in den Produktivbetrieb.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f3",
+          "name": "Serverdienste in Betrieb nehmen",
+          "goals": [
+            { "id": "f3.1", "text": "Sie beschaffen gewählte Ressourcen für einen Serverdienst gemäss betrieblichen Prozessen.", "max": 3 },
+            { "id": "f3.2", "text": "Sie installieren und konfigurieren einen Serverdienst unter Berücksichtigung der Anforderungen, Richtlinien, gesetzlichen Vorgaben und Best Practices in Betrieb.", "max": 3 },
+            { "id": "f3.3", "text": "Sie überprüfen die Funktionalität eines Serverdienstes mittels geeigneter Tests.", "max": 4 },
+            { "id": "f3.4", "text": "Sie überführen einen Serverdienst in den Produktivbetrieb.", "max": 3 },
+            { "id": "f3.5", "text": "Sie führen das Betriebshandbuch nach und übergeben es dem Auftraggeber.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f4",
+          "name": "Serversysteme und -dienste warten und verwalten",
+          "goals": [
+            { "id": "f4.1", "text": "Sie definieren Wartungsaufgaben und Wartungszyklen für Serversysteme und Serverdienste.", "max": 4 },
+            { "id": "f4.2", "text": "Sie führen Wartungsaufgaben gemäss Vorgaben zuverlässig durch.", "max": 3 },
+            { "id": "f4.3", "text": "Sie dokumentieren ausgeführte Wartungsaufgaben nachvollziehbar.", "max": 3 },
+            { "id": "f4.4", "text": "Sie testen Updates und spielen diese in die Produktivumgebung ein.", "max": 3 },
+            { "id": "f4.5", "text": "Sie testen Funktionalität, Performance und Sicherheit von Systemen und Diensten systematisch.", "max": 3 },
+            { "id": "f4.6", "text": "Sie dokumentieren Eingriffe und Anpassungen an Systemen und Diensten nachvollziehbar und halten sich an die Schweigepflicht.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f5",
+          "name": "Serversysteme und -dienste überwachen",
+          "goals": [
+            { "id": "f5.1", "text": "Sie definieren in Absprache mit Stakeholdern zu überwachende Serversysteme und Serverdienste.", "max": 3 },
+            { "id": "f5.2", "text": "Sie bestimmen geeignete Überwachungsmethoden.", "max": 4 },
+            { "id": "f5.3", "text": "Sie legen unter Einschätzung der Risiken sinnvolle Schwellenwerte sowie entsprechende Aktionen fest.", "max": 4 },
+            { "id": "f5.4", "text": "Sie überprüfen regelmässig mittels Tests die Funktionalität eines Überwachungssystems und dokumentieren die Ergebnisse.", "max": 4 },
+            { "id": "f5.5", "text": "Sie ergreifen bei Fehler- oder Alarmmeldungen rasch geeignete Massnahmen.", "max": 4 }
+          ]
+        },
+        {
+          "id": "f6",
+          "name": "Sicherheit von Serversystemen und -diensten implementieren, dokumentieren und überprüfen",
+          "goals": [
+            { "id": "f6.1", "text": "Sie erstellen im Team und gemäss Best Practices ein Sicherheitskonzept für Serversysteme und Serverdienste.", "max": 5 },
+            { "id": "f6.2", "text": "Sie konfigurieren Sicherheitselemente effektiv.", "max": 3 },
+            { "id": "f6.3", "text": "Sie testen Sicherheitssysteme in regelmässigen Abständen und dokumentieren die Ergebnisse nachvollziehbar.", "max": 4 },
+            { "id": "f6.4", "text": "Sie überprüfen Sicherheitskonzepte auf Aktualität und passen diese bei Bedarf an technologische Entwicklungen an.", "max": 4 }
+          ]
+        },
+        {
+          "id": "f7",
+          "name": "Verfügbarkeit von Serversystemen und -diensten planen und umsetzen",
+          "goals": [
+            { "id": "f7.1", "text": "Sie eruieren im Gespräch mit Stakeholdern den verkraftbaren Datenverlust (RPO), den verkraftbaren Ausfall von Systemen und Diensten (RTO) sowie Datenvorhaltefristen und dokumentieren die Ergebnisse.", "max": 3 },
+            { "id": "f7.2", "text": "Sie überprüfen aktuelle Systeme und Dienste auf Einhaltung der festgelegten Verfügbarkeiten.", "max": 4 },
+            { "id": "f7.3", "text": "Sie konzipieren Lösungen/Optimierungsmassnahmen, um festgelegte Verfügbarkeiten zu gewährleisten.", "max": 5 },
+            { "id": "f7.4", "text": "Sie erläutern Stakeholdern erarbeitete Lösungen/Optimierungsmassnahmen verständlich und nachvollziehbar entsprechend der Wirtschaftlichkeit.", "max": 3 },
+            { "id": "f7.5", "text": "Sie setzen geplante Lösungen und/oder Optimierungen in der Umgebung um.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f8",
+          "name": "Backup- und Archivierungskonzepte für Daten erstellen und umsetzen",
+          "goals": [
+            { "id": "f8.1", "text": "Sie definieren in Absprache mit Stakeholdern die zu sichernden oder zu archivierenden Daten.", "max": 4 },
+            { "id": "f8.2", "text": "Sie erstellen ein vollständiges Backup- und Archivierungskonzept mit allen relevanten Angaben und unter Berücksichtigung der rechtlichen Vorgaben.", "max": 4 },
+            { "id": "f8.3", "text": "Sie erstellen ein vollständiges Desaster-Recovery-Konzept mit allen relevanten Angaben und unter Berücksichtigung der betrieblichen Vorgaben.", "max": 4 },
+            { "id": "f8.4", "text": "Sie testen in regelmässigen Abständen die Wiederherstellbarkeit von Daten/Services und dokumentieren die Ergebnisse nachvollziehbar.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g",
+      "name": "Entwickeln von Applikationen",
+      "specialty": "app",
+      "subComps": [
+        {
+          "id": "g1",
+          "name": "Anforderungen an Applikationen und Schnittstellen analysieren und dokumentieren",
+          "goals": [
+            { "id": "g1.1", "text": "Sie halten Kundenbedürfnisse in Form von fachlichen und technischen Anforderungen nachvollziehbar und lösungsneutral fest.", "max": 3 },
+            { "id": "g1.2", "text": "Sie entwickeln im Team Nutzermodelle anhand von Personas.", "max": 5 },
+            { "id": "g1.3", "text": "Sie überprüfen fachliche und technische Anforderungen auf Konsistenz, Vollständigkeit und Messbarkeit.", "max": 4 },
+            { "id": "g1.4", "text": "Sie katalogisieren Anforderungen nach branchen- oder projektspezifischen Kriterien und halten diese schriftlich fest.", "max": 4 },
+            { "id": "g1.5", "text": "Sie versehen Anforderungen mit einer eindeutigen Bezeichnung.", "max": 3 },
+            { "id": "g1.6", "text": "Sie schätzen Zeitaufwand, Komplexität, Umfang und Priorisierung von Arbeitspaketen im Team ab.", "max": 4 },
+            { "id": "g1.7", "text": "Sie überprüfen die Anforderungen mit relevanten Stakeholdern auf Validität.", "max": 3 },
+            { "id": "g1.8", "text": "Sie dokumentieren fachliche und technische Anforderungen laufend nach.", "max": 3 }
+          ]
+        },
+        {
+          "id": "g2",
+          "name": "Gestaltungsentwürfe für Benutzerschnittstellen auf technische Machbarkeit überprüfen und weiterentwickeln",
+          "goals": [
+            { "id": "g2.1", "text": "Sie entwickeln Gestaltungsentwürfe für Benutzerschnittstellen anhand von geeigneten grafischen Tools und unter Berücksichtigung von Gestaltungsrichtlinien und Vorgaben.", "max": 5 },
+            { "id": "g2.2", "text": "Sie identifizieren problematische Teile von Benutzerschnittstellen.", "max": 4 },
+            { "id": "g2.3", "text": "Sie entwerfen Prototypen von Benutzerschnittstellen.", "max": 4 },
+            { "id": "g2.4", "text": "Sie überprüfen die technische Machbarkeit von Benutzerschnittstellen unter Berücksichtigung relevanter Aspekte.", "max": 4 },
+            { "id": "g2.5", "text": "Sie besprechen mit Stakeholdern Gestaltungsentwürfe und schlagen alternative Lösungen für technisch nicht umsetzbare Teile vor.", "max": 3 },
+            { "id": "g2.6", "text": "Sie entwickeln anhand von Prototypen funktionale Benutzerschnittstellen.", "max": 5 }
+          ]
+        },
+        {
+          "id": "g3",
+          "name": "Sicherheit von Applikationen und Schnittstellen beurteilen und dokumentieren",
+          "goals": [
+            { "id": "g3.1", "text": "Sie klären sicherheitsrelevante Fragen in Bezug auf ein Systemumfeld vorausschauend und leiten daraus mögliche Risiken ab.", "max": 4 },
+            { "id": "g3.2", "text": "Sie beschaffen sich sicherheitsrelevante Informationen im Team oder in der Community (z.B. OWASP).", "max": 3 },
+            { "id": "g3.3", "text": "Sie halten sicherheitsrelevante Risiken und daraus abgeleitete Massnahmen nachvollziehbar fest.", "max": 3 },
+            { "id": "g3.4", "text": "Sie erläutern Massnahmen zur Sicherung der Applikationen und Schnittstellen im Team.", "max": 3 },
+            { "id": "g3.5", "text": "Sie passen einen Anforderungskatalog entsprechend den Ergebnissen an und besprechen diesen mit dem Stakeholder.", "max": 3 }
+          ]
+        },
+        {
+          "id": "g4",
+          "name": "Umsetzungsvarianten für Applikationen entwerfen und Lösung konzeptionell ausarbeiten",
+          "goals": [
+            { "id": "g4.1", "text": "Sie zeigen grundlegende Umsetzungsvarianten in Bezug auf die Implementierung anhand von Skizzen und Beschreibungen auf.", "max": 5 },
+            { "id": "g4.2", "text": "Sie erstellen in Zusammenarbeit mit dem Stakeholder eine nachvollziehbare Nutzwertanalyse mit sinnvollen, bewertbaren Entscheidungskriterien.", "max": 4 },
+            { "id": "g4.3", "text": "Sie beraten den Stakeholder bei der Entscheidungsfindung für eine optimale, ethisch und rechtlich vertretbare Lösung.", "max": 5 },
+            { "id": "g4.4", "text": "Sie erarbeiten ein fachliches und technisches Realisierungskonzept anhand von geeigneten Hilfsmitteln.", "max": 5 },
+            { "id": "g4.5", "text": "Sie führen eine Machbarkeitsanalyse für die gewählte Umsetzungsvariante durch.", "max": 4 }
+          ]
+        },
+        {
+          "id": "g5",
+          "name": "Applikationen und Schnittstellen gemäss Entwurf implementieren und dabei die Sicherheitsanforderungen erfüllen",
+          "goals": [
+            { "id": "g5.1", "text": "Sie richten eine geeignete Entwicklungs- und Laufzeitumgebung anhand des Realisierungskonzepts sowie Firmenvorgaben ein.", "max": 3 },
+            { "id": "g5.2", "text": "Sie programmieren ein Back-End mittels vorgegebener Programmiersprachen effizient, strukturiert und gemäss den relevanten Vorgaben.", "max": 3 },
+            { "id": "g5.3", "text": "Sie programmieren ein Front-End mittels vorgegebener Programmiersprachen effizient, strukturiert und gemäss den relevanten Vorgaben.", "max": 3 },
+            { "id": "g5.4", "text": "Sie überprüfen Zwischenergebnisse mit den Anforderungen (funktional, nicht-funktional, Sicherheit) und nehmen laufend Korrekturen vor.", "max": 4 },
+            { "id": "g5.5", "text": "Sie überprüfen die Einhaltung von Coderichtlinien.", "max": 3 },
+            { "id": "g5.6", "text": "Sie legen die Änderungen und Erweiterungen der Implementierung übersichtlich und zuverlässig in einem Softwareverwaltungssystem ab.", "max": 3 },
+            { "id": "g5.7", "text": "Sie passen ein Realisierungskonzept nachvollziehbar an.", "max": 3 }
+          ]
+        },
+        {
+          "id": "g6",
+          "name": "Qualität und Sicherheit von Applikationen und Schnittstellen überprüfen",
+          "goals": [
+            { "id": "g6.1", "text": "Sie beschreiben das Testumfeld einer Applikation mit allen relevanten Angaben.", "max": 3 },
+            { "id": "g6.2", "text": "Sie definieren Testmittel anhand der ausgewählten Testarten.", "max": 4 },
+            { "id": "g6.3", "text": "Sie beschreiben wiederholbare Testfälle in Bezug auf Anwendungsfälle und Anforderungen nachvollziehbar und definieren die erwarteten Resultate.", "max": 4 },
+            { "id": "g6.4", "text": "Sie bauen gemäss Testkonzept eine geeignete Testumgebung auf.", "max": 3 },
+            { "id": "g6.5", "text": "Sie implementieren die automatisierbaren Testfälle gemäss den definierten Testmitteln.", "max": 4 },
+            { "id": "g6.6", "text": "Sie führen Testfälle umfassend und sorgfältig durch.", "max": 3 },
+            { "id": "g6.7", "text": "Sie werten den Testlauf aus und protokollieren die Ergebnisse nachvollziehbar.", "max": 4 },
+            { "id": "g6.8", "text": "Sie definieren Korrekturmassnahmen und führen diese durch.", "max": 4 },
+            { "id": "g6.9", "text": "Sie überprüfen die Implementierung gemäss dem definierten Sicherheitskonzept und treffen geeignete Korrekturmassnahmen.", "max": 4 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h",
+      "name": "Ausliefern und Betreiben von Applikationen",
+      "specialty": "app",
+      "subComps": [
+        {
+          "id": "h1",
+          "name": "Geeignete Plattform für die Auslieferung von Applikationen bestimmen",
+          "goals": [
+            { "id": "h1.1", "text": "Sie identifizieren die Abhängigkeiten zwischen verschiedenen Komponenten.", "max": 4 },
+            { "id": "h1.2", "text": "Sie definieren eine geeignete Plattform für den Betrieb einer Applikation.", "max": 4 },
+            { "id": "h1.3", "text": "Sie definieren ein Schichtenmodell innerhalb der Rahmenbedingungen des Stakeholders.", "max": 4 },
+            { "id": "h1.4", "text": "Sie identifizieren die Sicherheitsanforderungen an die Plattform und wählen geeignete Services aus.", "max": 4 },
+            { "id": "h1.5", "text": "Sie wählen die benötigten Ressourcen anhand der Empfehlung des Plattformbetreibers aus.", "max": 3 },
+            { "id": "h1.6", "text": "Sie prüfen im Team ihre Auswahl auf Konsistenz, nehmen Anpassungen vor und halten die Ergebnisse fest.", "max": 4 }
+          ]
+        },
+        {
+          "id": "h2",
+          "name": "Auslieferungsprozess von Applikationen definieren",
+          "goals": [
+            { "id": "h2.1", "text": "Sie analysieren die Abhängigkeit der Komponenten in Bezug auf den Auslieferungsprozess.", "max": 4 },
+            { "id": "h2.2", "text": "Sie bestimmen geeignete Integrationspraktiken und halten diese fest.", "max": 4 },
+            { "id": "h2.3", "text": "Sie bestimmen geeignete Deployment-Praktiken und halten diese fest.", "max": 4 },
+            { "id": "h2.4", "text": "Sie bestimmen eine geeignete Artefakt-Verwaltung und halten diese fest.", "max": 4 }
+          ]
+        },
+        {
+          "id": "h3",
+          "name": "Auslieferungsprozess von Applikationen durchführen",
+          "goals": [
+            { "id": "h3.1", "text": "Sie richten Services für die Auslieferung ein.", "max": 3 },
+            { "id": "h3.2", "text": "Sie schreiben Automatisierungsskripte und definieren Umgebungsvariablen mit geeigneten Methoden und Tools.", "max": 3 },
+            { "id": "h3.3", "text": "Sie stellen Komponenten für die Auslieferung bereit.", "max": 3 },
+            { "id": "h3.4", "text": "Sie paketieren eine Applikation.", "max": 3 },
+            { "id": "h3.5", "text": "Sie verwalten und versionieren Artefakte.", "max": 3 },
+            { "id": "h3.6", "text": "Sie überprüfen den Auslieferungsprozess der Applikation gemäss Vorgaben.", "max": 4 },
+            { "id": "h3.7", "text": "Sie prüfen die Funktionsfähigkeit/das Zusammenspiel der Applikationen anhand eines Testkonzepts.", "max": 4 }
+          ]
+        },
+        {
+          "id": "h4",
+          "name": "Applikationen und Schnittstellen überwachen und Probleme im laufenden Betrieb beheben",
+          "goals": [
+            { "id": "h4.1", "text": "Sie definieren und konfigurieren Tools für das Monitoring einer Applikation.", "max": 3 },
+            { "id": "h4.2", "text": "Sie führen das Monitoring in regelmässigen Abständen zuverlässig und sorgfältig durch.", "max": 3 },
+            { "id": "h4.3", "text": "Sie analysieren ein auftretendes Problem durch eine strukturierte Vorgehensweise.", "max": 4 },
+            { "id": "h4.4", "text": "Sie überprüfen Aktualität und Sicherheitseinstellungen der Applikationen und Schnittstellen anhand der Herstellerinformationen.", "max": 4 },
+            { "id": "h4.5", "text": "Sie legen ein zielführendes Vorgehen zur Problembehebung fest und besprechen dieses im Team und/oder mit dem Stakeholder.", "max": 5 },
+            { "id": "h4.6", "text": "Sie setzen die vereinbarten Massnahmen um und halten sie verständlich und nachvollziehbar fest.", "max": 3 }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Handlungskompetenz-Tracker – Informatik EFZ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
     --primary: #1a3a5c;
@@ -19,7 +21,7 @@
 
     --k0-bg: #94a3b8; --k0-text: #fff;
     --k1-bg: #60a5fa; --k1-text: #fff;
-    --k2-bg: #34d399; --k2-text: #fff;
+    --k2-bg: #30d498; --k2-text: #fff;
     --k3-bg: #a3e635; --k3-text: #1e293b;
     --k4-bg: #fbbf24; --k4-text: #1e293b;
     --k5-bg: #f97316; --k5-text: #fff;
@@ -150,6 +152,14 @@
   .user-card-name { font-weight: 700; font-size: 0.95rem; }
   .user-card-meta { font-size: 0.77rem; color: var(--text-muted); margin-top: 2px; }
   .user-card-progress { font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+  .user-card-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .user-card-actions button {
+    padding: 5px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text-muted); transition: all .15s; line-height: 1;
+  }
+  .user-card-actions .btn-edit:hover { border-color: var(--primary-light); color: var(--primary); background: #f0f6ff; }
+  .user-card-actions .btn-del:hover { border-color: #fca5a5; color: #dc2626; background: #fff1f2; }
 
   /* ── SCREEN 3: REGISTRATION ── */
   .specialty-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -289,6 +299,21 @@
   .ov-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 3px; }
   .ov-pct { font-size: 0.75rem; color: var(--text-muted); }
 
+  /* ── PIE CHART ── */
+  .pie-section { background: var(--surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .pie-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
+  .pie-layout { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .pie-chart-wrap { flex-shrink: 0; }
+  .pie-chart-wrap svg { overflow: visible; }
+  .pie-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 180px; }
+  .pie-legend-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+  .pie-legend-item:hover { background: var(--bg); }
+  .pie-legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .pie-legend-text { display: flex; flex-direction: column; gap: 1px; }
+  .pie-legend-label { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+  .pie-legend-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .pie-legend-inactive { opacity: 0.45; }
+
   /* ── LEHRJAHR ── */
   .lehrjahr-section { background: var(--surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
   .lehrjahr-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
@@ -340,117 +365,28 @@
   }
 
   .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
-
-  /* ── GITHUB OPTION ── */
-  .gh-card {
-    border: 2px solid #d1fae5; border-radius: 12px;
-    padding: 20px 22px; margin-bottom: 4px; cursor: pointer; transition: all .2s;
-    background: #f0fdf4;
-  }
-  .gh-card:hover { border-color: #34d399; background: #ecfdf5; }
-  .gh-card-header { display: flex; align-items: center; gap: 12px; }
-  .gh-icon { font-size: 1.5rem; flex-shrink: 0; }
-  .gh-card-title { font-weight: 700; font-size: 0.95rem; color: #065f46; }
-  .gh-card-desc { font-size: 0.8rem; color: #047857; margin-top: 2px; }
-  .gh-chevron { margin-left: auto; color: #34d399; transition: transform .25s; font-size: 0.85rem; }
-  .gh-form { display: none; margin-top: 18px; border-top: 1px solid #d1fae5; padding-top: 16px; }
-  .gh-form.open { display: block; }
-  .gh-form .form-group { margin-bottom: 14px; }
-  .gh-form .form-group:last-of-type { margin-bottom: 0; }
-  .gh-form label { color: #065f46 !important; }
-  .gh-form input { border-color: #a7f3d0 !important; background: #fff !important; }
-  .gh-form input:focus { border-color: #34d399 !important; box-shadow: 0 0 0 3px rgba(52,211,153,0.2) !important; }
-  .btn-gh { width: 100%; padding: 11px; border: none; border-radius: 8px; background: #059669; color: #fff; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background .2s; margin-top: 14px; }
-  .btn-gh:hover { background: #047857; }
-  .btn-gh:disabled { background: #a7f3d0; color: #fff; cursor: not-allowed; }
-  .gh-token-hint { font-size: 0.75rem; color: #047857; margin-top: 5px; line-height: 1.4; }
-  .gh-saved-banner { display: none; align-items: center; gap: 8px; background: #d1fae5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 10px 14px; font-size: 0.83rem; color: #065f46; margin-top: 10px; cursor: pointer; }
-  .gh-saved-banner.show { display: flex; }
-  .gh-saved-banner strong { font-weight: 700; }
 </style>
 </head>
 <body>
 
 <!-- ══════════════════════════════════════
-     SCREEN 1: FILE PICKER
+     SCREEN 1: LOADING / API ERROR
 ══════════════════════════════════════ -->
 <div class="modal-overlay" id="screenFile">
-  <div class="modal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:2.8rem; margin-bottom:12px">📋</div>
     <h1>Handlungskompetenz-Tracker</h1>
     <p class="subtitle">Informatiker/in EFZ – Bildungsplan 88611</p>
 
-    <div id="fsaNotice" class="no-fsa-notice hidden">
-      ⚠ Dein Browser unterstützt die File System Access API nicht (empfohlen: Chrome oder Edge).
-      Die Daten werden stattdessen im Browser-Speicher (localStorage) gespeichert – sie bleiben nur auf diesem Gerät und in diesem Browser erhalten.
-    </div>
+    <p id="loadingMsg" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px">
+      Verbinde mit Server…
+    </p>
 
-    <div class="file-picker-card" onclick="openExistingFile()" style="cursor:pointer">
-      <div class="file-picker-icon">📂</div>
-      <div class="file-picker-title">Bestehende Datei öffnen</div>
-      <div class="file-picker-desc">Öffne eine vorhandene <code>.json</code>-Datei mit bereits erfassten Lernenden und Kompetenzen.</div>
-      <button class="file-picker-btn open" onclick="openExistingFile(); event.stopPropagation()">Datei öffnen …</button>
-    </div>
+    <div id="apiError" class="alert alert-error hidden" style="margin-top:8px; text-align:left; background:#fff1f2; border:1px solid #fca5a5; border-radius:8px; padding:12px 14px; font-size:0.87rem; color:#dc2626;"></div>
 
-    <div class="divider"><span>oder</span></div>
-
-    <div class="file-picker-card" onclick="createNewFile()" style="cursor:pointer">
-      <div class="file-picker-icon">✨</div>
-      <div class="file-picker-title">Neue Datei erstellen</div>
-      <div class="file-picker-desc">Erstelle eine neue leere JSON-Datei und beginne mit der ersten Person.</div>
-      <button class="file-picker-btn new" onclick="createNewFile(); event.stopPropagation()">Neue Datei …</button>
-    </div>
-
-    <div class="divider"><span>oder</span></div>
-
-    <!-- GITHUB OPTION -->
-    <div class="gh-card" onclick="toggleGhForm()">
-      <div class="gh-card-header">
-        <span class="gh-icon">🐙</span>
-        <div>
-          <div class="gh-card-title">GitHub Repository</div>
-          <div class="gh-card-desc">Daten direkt aus einem GitHub-Repo laden und speichern</div>
-        </div>
-        <span class="gh-chevron" id="ghChevron">▼</span>
-      </div>
-
-      <div class="gh-form" id="ghForm" onclick="event.stopPropagation()">
-        <div id="ghSavedBanner" class="gh-saved-banner" onclick="loadSavedGhConfig()">
-          <span>🔗</span>
-          <span>Gespeicherte Verbindung: <strong id="ghSavedLabel"></strong></span>
-          <span style="margin-left:auto; font-weight:600">Wiederverwenden →</span>
-        </div>
-
-        <div class="form-group">
-          <label>GitHub Benutzername / Organisation</label>
-          <input type="text" id="ghOwner" placeholder="z.B. muster-schule" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Repository Name</label>
-          <input type="text" id="ghRepo" placeholder="z.B. kompetenz-tracker" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Dateiname (im Repo)</label>
-          <input type="text" id="ghPath" placeholder="kompetenzen.json" value="kompetenzen.json" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Branch</label>
-          <input type="text" id="ghBranch" placeholder="main" value="main" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Personal Access Token (PAT)</label>
-          <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-          <div class="gh-token-hint">
-            GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens<br>
-            Berechtigung: <strong>Contents: Read and write</strong> für das gewählte Repository
-          </div>
-        </div>
-        <button class="btn-gh" id="btnGhConnect" onclick="connectToGitHub()" disabled>
-          Mit GitHub verbinden
-        </button>
-      </div>
-    </div>
-
-    <div id="fileError" class="alert alert-error hidden" style="margin-top:12px"></div>
+    <button id="btnRetry" class="btn-primary hidden" onclick="initApp()" style="margin-top:12px">
+      Erneut versuchen
+    </button>
   </div>
 </div>
 
@@ -465,9 +401,6 @@
     <div id="userList" class="user-list"></div>
 
     <button class="btn-secondary" onclick="showRegistration(null)">+ Neue Person erfassen</button>
-    <div style="margin-top:8px; display:flex; gap:8px;">
-      <button class="btn-ghost" style="flex:1" onclick="goBackToFile()">← Andere Datei</button>
-    </div>
   </div>
 </div>
 
@@ -538,6 +471,7 @@
       </div>
       <button class="header-btn" onclick="showUserSwitcher()" title="Person wechseln">👤 Wechseln</button>
       <button class="header-btn" onclick="showEditCurrentUser()" title="Profil bearbeiten">⚙</button>
+      <button class="header-btn" onclick="generatePDF()" title="PDF-Bericht erstellen">📄 PDF</button>
     </div>
   </header>
 
@@ -571,414 +505,78 @@
 const BLOOM_SHORT = ['–','Wissen','Verstehen','Anwenden','Analysieren','Synthese','Beurteilen'];
 const BLOOM_FULL  = ['K0 – Nicht bewertet','K1 – Wissen','K2 – Verstehen','K3 – Anwenden','K4 – Analysieren','K5 – Synthese','K6 – Beurteilen'];
 
-const AREAS = [
-  { id:'a', name:'Begleiten von ICT-Projekten', specialty:'both', subComps:[
-    { id:'a1', name:'Bedürfnisse von Stakeholdern abklären und dokumentieren', goals:[
-      {id:'a1.1',text:'Projektziele und übergeordnete Parameter (Kosten, Zeit, Qualität, Ressourcen) abklären',max:3},
-      {id:'a1.2',text:'Verschiedene Befragungs- und Beobachtungstechniken beschreiben und anwenden',max:5},
-      {id:'a1.3',text:'Ergebnisse aus Befragungen und Beobachtungen strukturiert dokumentieren',max:5},
-      {id:'a1.4',text:'Anforderungen in geeigneter Form (z.B. Use Cases, User Stories) aufnehmen und dokumentieren',max:5},
-      {id:'a1.5',text:'Anforderungen priorisieren und auf Vollständigkeit und Widerspruchsfreiheit prüfen',max:5},
-      {id:'a1.6',text:'Aufwand für einfache ICT-Vorhaben schätzen',max:3},
-      {id:'a1.7',text:'Anforderungen in einem Lasten- oder Pflichtenheft dokumentieren',max:5},
-    ]},
-    { id:'a2', name:'Lösungen evaluieren und vorschlagen', goals:[
-      {id:'a2.1',text:'Verschiedene Lösungsvarianten erarbeiten und gegenüberstellen',max:5},
-      {id:'a2.2',text:'Lösungsvarianten nach festgelegten Kriterien bewerten (z.B. Nutzwertanalyse)',max:5},
-      {id:'a2.3',text:'Eine begründete Lösungsempfehlung erarbeiten und präsentieren',max:5},
-    ]},
-    { id:'a3', name:'Vorhaben strukturiert durchführen', goals:[
-      {id:'a3.1',text:'Klassische und agile Projektmanagementmethoden unterscheiden und einordnen',max:4},
-      {id:'a3.2',text:'Ein einfaches Vorhaben nach einer vorgegebenen Projektmanagementmethode planen',max:5},
-      {id:'a3.3',text:'Rollen und Verantwortlichkeiten im Projektteam beschreiben',max:2},
-      {id:'a3.4',text:'Projektfortschritt anhand von Meilensteinen überwachen und dokumentieren',max:5},
-      {id:'a3.5',text:'In einem Projektteam mitwirken und die eigenen Aufgaben eigenverantwortlich erfüllen',max:3},
-    ]},
-    { id:'a4', name:'Qualitätssichernde Massnahmen anwenden', goals:[
-      {id:'a4.1',text:'Qualitätsbegriff für ICT-Lösungen definieren und erläutern',max:2},
-      {id:'a4.2',text:'Einfache Testfälle ableiten und dokumentieren',max:5},
-      {id:'a4.3',text:'Tests durchführen, Ergebnisse protokollieren und auswerten',max:5},
-      {id:'a4.4',text:'Fehler systematisch suchen, eingrenzen und beheben',max:5},
-      {id:'a4.5',text:'Übergabeprotokolle und Abnahmeprüfungen erstellen und durchführen',max:5},
-    ]},
-    { id:'a5', name:'Beschaffungsvorhaben abwickeln', goals:[
-      {id:'a5.1',text:'Beschaffungsanforderungen erfassen und ein Pflichtenheft erstellen',max:5},
-      {id:'a5.2',text:'Offerten einholen, vergleichen und bewerten',max:5},
-      {id:'a5.3',text:'Eine Bestellung abwickeln und die Lieferung prüfen',max:3},
-      {id:'a5.4',text:'Gesetzliche Vorschriften und Unternehmensrichtlinien bei der Beschaffung beachten',max:3},
-    ]},
-    { id:'a6', name:'Prozesse und Daten analysieren und optimieren', goals:[
-      {id:'a6.1',text:'Geschäftsprozesse beschreiben und mit geeigneten Mitteln darstellen',max:5},
-      {id:'a6.2',text:'Schwachstellen in bestehenden Prozessen erkennen und Optimierungsvorschläge erarbeiten',max:5},
-      {id:'a6.3',text:'Prozessoptimierungen umsetzen und deren Wirkung überprüfen',max:5},
-      {id:'a6.4',text:'Datenstrukturen analysieren und Optimierungsmöglichkeiten aufzeigen',max:4},
-      {id:'a6.5',text:'Migration von Daten planen und durchführen',max:5},
-    ]},
-    { id:'a7', name:'Informationen und Daten sicher handhaben', goals:[
-      {id:'a7.1',text:'Rechtliche Grundlagen des Datenschutzes (DSG, DSGVO) erklären',max:2},
-      {id:'a7.2',text:'Massnahmen zum Schutz von Personendaten in ICT-Systemen umsetzen',max:3},
-      {id:'a7.3',text:'Datensicherungskonzepte erstellen und Wiederherstellung testen',max:5},
-      {id:'a7.4',text:'Daten verschlüsseln und sicher übermitteln',max:3},
-      {id:'a7.5',text:'Informationssicherheitsrisiken erkennen und geeignete Massnahmen ergreifen',max:4},
-      {id:'a7.6',text:'Richtlinien zur Informationssicherheit in einfachen Situationen anwenden',max:3},
-      {id:'a7.7',text:'Vorgaben zum Umgang mit vertraulichen Informationen einhalten',max:3},
-    ]},
-  ]},
-  { id:'b', name:'Unterstützen und Beraten im ICT-Umfeld', specialty:'both', subComps:[
-    { id:'b1', name:'Anwender und Anwenderinnen beraten und schulen', goals:[
-      {id:'b1.1',text:'Den Bedarf von Anwender/innen ermitteln, aufnehmen und dokumentieren',max:5},
-      {id:'b1.2',text:'Störungen und Anfragen im ICT-Umfeld aufnehmen, priorisieren und bearbeiten',max:5},
-      {id:'b1.3',text:'Anwender/innen zu ICT-Themen und -Produkten beraten',max:5},
-      {id:'b1.4',text:'Schulungsunterlagen erstellen und einfache Schulungen durchführen',max:5},
-      {id:'b1.5',text:'Die eigene Kommunikation situationsgerecht auf die Anwender/innen abstimmen',max:3},
-    ]},
-    { id:'b2', name:'ICT-Systeme und Lösungen dokumentieren', goals:[
-      {id:'b2.1',text:'Technische Dokumentationen lesen, verstehen und anwenden',max:3},
-      {id:'b2.2',text:'ICT-Systeme und -Lösungen technisch dokumentieren',max:5},
-      {id:'b2.3',text:'Benutzeranleitung und Hilfedokumentation für ICT-Lösungen erstellen',max:5},
-      {id:'b2.4',text:'Bestehende Dokumentationen pflegen und aktuell halten',max:3},
-    ]},
-    { id:'b3', name:'Sich in der Branche orientieren und weiterbilden', goals:[
-      {id:'b3.1',text:'Aktuelle ICT-Trends beschreiben und deren Auswirkungen einschätzen',max:2},
-      {id:'b3.2',text:'Berufs- und Weiterbildungsmöglichkeiten in der ICT-Branche beschreiben',max:2},
-      {id:'b3.3',text:'Geeignete Quellen für technische Information nutzen und kritisch bewerten',max:3},
-    ]},
-  ]},
-  { id:'c', name:'Aufbauen und Pflegen von digitalen Daten', specialty:'both', subComps:[
-    { id:'c1', name:'Daten modellieren und implementieren', goals:[
-      {id:'c1.1',text:'Datenbankmodelle (ER-Modell, relationales Modell) beschreiben und erstellen',max:5},
-      {id:'c1.2',text:'Eine Datenbank anhand eines Datenbankmodells implementieren',max:5},
-      {id:'c1.3',text:'Daten mit SQL abfragen, einfügen, ändern und löschen (DML)',max:5},
-      {id:'c1.4',text:'Datenbankzugriffe aus Applikationen implementieren',max:5},
-    ]},
-    { id:'c2', name:'Daten beschaffen, integrieren und bereinigen', goals:[
-      {id:'c2.1',text:'Datenquellen beschreiben und deren Eignung bewerten',max:4},
-      {id:'c2.2',text:'Daten aus verschiedenen Quellen importieren und integrieren',max:5},
-      {id:'c2.3',text:'Datenqualität prüfen und Daten systematisch bereinigen',max:5},
-    ]},
-    { id:'c3', name:'Daten auswerten', goals:[
-      {id:'c3.1',text:'Einfache Datenauswertungen und statistische Analysen durchführen',max:5},
-      {id:'c3.2',text:'Ergebnisse von Datenauswertungen geeignet visualisieren',max:5},
-      {id:'c3.3',text:'Resultate von Datenauswertungen interpretieren und kommentieren',max:4},
-    ]},
-  ]},
-  { id:'d', name:'Ausliefern und Betreiben von ICT-Lösungen', specialty:'platform', subComps:[
-    { id:'d1', name:'Systeme aufbauen, konfigurieren und dokumentieren', goals:[
-      {id:'d1.1',text:'Hardwarekomponenten und deren Zusammenspiel beschreiben',max:2},
-      {id:'d1.2',text:'Betriebssysteme installieren und konfigurieren',max:5},
-      {id:'d1.3',text:'ICT-Arbeitsplatzsysteme installieren und in Betrieb nehmen',max:5},
-      {id:'d1.4',text:'Peripheriegeräte installieren und konfigurieren',max:3},
-      {id:'d1.5',text:'Systeme und Konfigurationen nachvollziehbar dokumentieren',max:5},
-    ]},
-    { id:'d2', name:'ICT-Systeme virtualisieren und automatisieren', goals:[
-      {id:'d2.1',text:'Virtualisierungstechnologien beschreiben und zielgerichtet einsetzen',max:5},
-      {id:'d2.2',text:'Virtuelle Maschinen erstellen, konfigurieren und verwalten',max:5},
-      {id:'d2.3',text:'Container-Technologien (z.B. Docker) einsetzen',max:5},
-      {id:'d2.4',text:'Automatisierungsskripte erstellen und einsetzen',max:5},
-    ]},
-    { id:'d3', name:'ICT-Lösungen in Betrieb nehmen', goals:[
-      {id:'d3.1',text:'Inbetriebnahme von ICT-Lösungen planen und durchführen',max:5},
-      {id:'d3.2',text:'Deployment-Prozesse beschreiben und umsetzen',max:5},
-      {id:'d3.3',text:'Übergabe und Abnahme von ICT-Lösungen durchführen',max:3},
-    ]},
-  ]},
-  { id:'e', name:'Betreiben von Netzen', specialty:'platform', subComps:[
-    { id:'e1', name:'Netzwerkinfrastruktur aufbauen und in Betrieb nehmen', goals:[
-      {id:'e1.1',text:'Netzwerktopologien, Protokolle und Adressierungskonzepte beschreiben',max:2},
-      {id:'e1.2',text:'Netzwerkkomponenten (Router, Switch, AP) installieren und konfigurieren',max:5},
-      {id:'e1.3',text:'Netzwerkverbindungen einrichten und testen',max:5},
-      {id:'e1.4',text:'WLAN-Infrastruktur aufbauen und konfigurieren',max:5},
-    ]},
-    { id:'e2', name:'Netzwerke überwachen und optimieren', goals:[
-      {id:'e2.1',text:'Netzwerke mit geeigneten Tools überwachen und Monitoring einsetzen',max:5},
-      {id:'e2.2',text:'Netzwerkprobleme diagnostizieren und beheben',max:5},
-      {id:'e2.3',text:'Netzwerkperformance messen und Optimierungsmassnahmen ableiten',max:4},
-    ]},
-    { id:'e3', name:'Netzwerke schützen', goals:[
-      {id:'e3.1',text:'Bedrohungen und Angriffsvektoren für Netzwerke beschreiben',max:2},
-      {id:'e3.2',text:'Firewall-Regeln und weitere Schutzmassnahmen konfigurieren',max:5},
-      {id:'e3.3',text:'VPN-Verbindungen einrichten und konfigurieren',max:5},
-      {id:'e3.4',text:'Sicherheitsaudits für Netzwerke planen und durchführen',max:4},
-    ]},
-  ]},
-  { id:'f', name:'Betreiben von Serversystemen und Serverdiensten', specialty:'platform', subComps:[
-    { id:'f1', name:'Serversysteme installieren und konfigurieren', goals:[
-      {id:'f1.1',text:'Serverrollen, -dienste und Einsatzbereiche beschreiben',max:2},
-      {id:'f1.2',text:'Serverbetriebssysteme installieren und konfigurieren',max:5},
-      {id:'f1.3',text:'Serversysteme in eine bestehende Infrastruktur integrieren',max:5},
-    ]},
-    { id:'f2', name:'Serverdienste einrichten und in Betrieb nehmen', goals:[
-      {id:'f2.1',text:'Verzeichnisdienste (z.B. Active Directory, LDAP) einrichten und konfigurieren',max:5},
-      {id:'f2.2',text:'Web- und Applikationsserver einrichten und konfigurieren',max:5},
-      {id:'f2.3',text:'E-Mail-Dienste einrichten und konfigurieren',max:5},
-      {id:'f2.4',text:'Datei- und Druckdienste einrichten und konfigurieren',max:5},
-    ]},
-    { id:'f3', name:'Serversysteme überwachen und optimieren', goals:[
-      {id:'f3.1',text:'Monitoring-Systeme für Server einrichten und einsetzen',max:5},
-      {id:'f3.2',text:'Serverperformance analysieren und Optimierungsmassnahmen umsetzen',max:5},
-      {id:'f3.3',text:'Protokolldateien (Logs) auswerten und Massnahmen ableiten',max:4},
-    ]},
-    { id:'f4', name:'Serversysteme schützen', goals:[
-      {id:'f4.1',text:'Sicherheitskonzepte für Serversysteme erarbeiten',max:5},
-      {id:'f4.2',text:'Zugriffsrechte und Berechtigungen nach Least-Privilege-Prinzip verwalten',max:5},
-      {id:'f4.3',text:'Backup-Strategien umsetzen und Wiederherstellungen regelmässig testen',max:5},
-      {id:'f4.4',text:'Sicherheitsupdates und Patches systematisch einspielen',max:3},
-    ]},
-  ]},
-  { id:'g', name:'Entwickeln von Applikationen', specialty:'app', subComps:[
-    { id:'g1', name:'Applikationen konzipieren', goals:[
-      {id:'g1.1',text:'Software-Architekturen und -muster beschreiben und zielgerichtet einsetzen',max:5},
-      {id:'g1.2',text:'Applikationen mit geeigneten Methoden konzipieren (z.B. UML)',max:5},
-      {id:'g1.3',text:'Benutzeroberflächen konzipieren und prototypisch umsetzen (UI/UX)',max:5},
-      {id:'g1.4',text:'Datenbankdesign für Applikationen entwerfen',max:5},
-    ]},
-    { id:'g2', name:'Applikationen realisieren', goals:[
-      {id:'g2.1',text:'Code in einer objektorientierten Programmiersprache sauber und verständlich schreiben',max:5},
-      {id:'g2.2',text:'Programmierprinzipien (z.B. DRY, KISS, SOLID) anwenden',max:3},
-      {id:'g2.3',text:'Bestehende Bibliotheken und Frameworks zielgerichtet einsetzen',max:5},
-      {id:'g2.4',text:'Datenbankzugriffe in Applikationen implementieren',max:5},
-      {id:'g2.5',text:'Schnittstellen (APIs) implementieren und konsumieren',max:5},
-      {id:'g2.6',text:'Sicherheitsaspekte (z.B. Input-Validierung, Authentifizierung) berücksichtigen',max:5},
-    ]},
-    { id:'g3', name:'Applikationen prüfen und dokumentieren', goals:[
-      {id:'g3.1',text:'Teststufen und -methoden (Unit, Integration, System) beschreiben und anwenden',max:5},
-      {id:'g3.2',text:'Testfälle und Testpläne erstellen',max:5},
-      {id:'g3.3',text:'Automatisierte Tests implementieren und in den Entwicklungsprozess integrieren',max:5},
-      {id:'g3.4',text:'Technische Dokumentation für Applikationen verständlich erstellen',max:5},
-    ]},
-    { id:'g4', name:'Bestehende Applikationen warten und weiterentwickeln', goals:[
-      {id:'g4.1',text:'Bestehenden Code analysieren, verstehen und Verbesserungspotenzial identifizieren',max:4},
-      {id:'g4.2',text:'Refactoring-Techniken anwenden um Code-Qualität zu verbessern',max:5},
-      {id:'g4.3',text:'Versionskontrollsysteme (z.B. Git) im Entwicklungsprozess einsetzen',max:5},
-      {id:'g4.4',text:'Code-Reviews durchführen und konstruktives Feedback geben und empfangen',max:5},
-    ]},
-  ]},
-  { id:'h', name:'Ausliefern und Betreiben von Applikationen', specialty:'app', subComps:[
-    { id:'h1', name:'Applikationen ausliefern', goals:[
-      {id:'h1.1',text:'Build- und Deployment-Prozesse beschreiben und umsetzen',max:5},
-      {id:'h1.2',text:'CI/CD-Pipelines einrichten und im Entwicklungsprozess nutzen',max:5},
-      {id:'h1.3',text:'Applikationen in verschiedene Umgebungen (Dev, Test, Prod) ausliefern',max:5},
-      {id:'h1.4',text:'Releases planen, vorbereiten und durchführen',max:5},
-    ]},
-    { id:'h2', name:'Applikationen betreiben', goals:[
-      {id:'h2.1',text:'Applikationen überwachen und Logdaten systematisch auswerten',max:5},
-      {id:'h2.2',text:'Performance-Probleme erkennen, analysieren und beheben',max:4},
-      {id:'h2.3',text:'Applikationen skalieren (horizontal/vertikal)',max:4},
-      {id:'h2.4',text:'Incidents bearbeiten, dokumentieren und nachhaltige Massnahmen ableiten',max:5},
-    ]},
-  ]},
-];
+let AREAS = []; // wird via API geladen
 
 // ═══════════════════════════════════════════
-// STORAGE LAYER
+// API LAYER
 // ═══════════════════════════════════════════
-const LS_KEY     = 'kompetenz_tracker_v2';
-const LS_GH_KEY  = 'kompetenz_tracker_gh_config';
-let fileHandle   = null;
-let hasFSA       = ('showOpenFilePicker' in window);
-let db           = { version: 2, users: [] };
+const API_URL = 'http://127.0.0.1:8000';
+let users = [];
 let currentUserId = null;
-let saveTimer    = null;
 
-// GitHub state
-let ghConfig     = null;   // { owner, repo, path, branch, token }
-let ghFileSha    = null;   // SHA of current file version on GitHub (needed for updates)
-
-function setFileStatus(state, text, filename) {
+function setApiStatus(state, text) {
   const dot = document.getElementById('fileStatusDot');
   const txt = document.getElementById('fileStatusText');
-  const name = document.getElementById('fileStatusName');
   dot.className = 'file-status-dot ' + (state || '');
   if (txt) txt.textContent = text || '';
-  if (name && filename !== undefined) name.textContent = filename || '';
 }
 
-async function persistDB() {
-  const json = JSON.stringify(db, null, 2);
-
-  if (ghConfig) {
-    // ── GitHub API save ──
-    await githubWriteFile(json);
-  } else if (fileHandle) {
-    // ── Local File System ──
-    try {
-      setFileStatus('saving', 'Speichert …');
-      const writable = await fileHandle.createWritable();
-      await writable.write(json);
-      await writable.close();
-      setFileStatus('saved', 'Gespeichert', fileHandle.name);
-    } catch(e) {
-      console.error('Write error', e);
-      setFileStatus('error', 'Fehler beim Speichern!');
-    }
-  } else {
-    // ── localStorage fallback ──
-    localStorage.setItem(LS_KEY, json);
-    setFileStatus('saved', 'Im Browser gespeichert (localStorage)');
-  }
-}
-
-function scheduleSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(persistDB, 800);
-}
-
-// ═══════════════════════════════════════════
-// GITHUB API
-// ═══════════════════════════════════════════
-function ghApiUrl() {
-  return `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
-}
-
-function ghHeaders() {
+function normalizeUser(apiUser) {
   return {
-    'Authorization': `Bearer ${ghConfig.token}`,
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'Content-Type': 'application/json',
+    id: apiUser.id,
+    name: apiUser.name,
+    specialty: apiUser.specialty,
+    startDate: apiUser.start_date,
+    goals: {}
   };
 }
 
-async function githubReadFile() {
-  const url = ghApiUrl() + `?ref=${encodeURIComponent(ghConfig.branch)}&t=${Date.now()}`;
-  const res = await fetch(url, { headers: ghHeaders() });
-  if (res.status === 404) return null;             // file doesn't exist yet
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `GitHub API ${res.status}`);
-  }
-  const data = await res.json();
-  ghFileSha = data.sha;
-  // GitHub returns base64 with line breaks
-  const content = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
-  return JSON.parse(content);
-}
-
-async function githubWriteFile(jsonString) {
-  setFileStatus('saving', 'Speichert auf GitHub …');
+async function initApp() {
+  document.getElementById('loadingMsg').textContent = 'Verbinde mit Server…';
+  document.getElementById('apiError').classList.add('hidden');
+  document.getElementById('btnRetry').classList.add('hidden');
+  show('screenFile');
   try {
-    // Re-fetch SHA before writing to avoid conflicts
-    const checkUrl = ghApiUrl() + `?ref=${encodeURIComponent(ghConfig.branch)}&t=${Date.now()}`;
-    const checkRes = await fetch(checkUrl, { headers: ghHeaders() });
-    if (checkRes.ok) {
-      const checkData = await checkRes.json();
-      ghFileSha = checkData.sha;
-    }
-
-    const body = {
-      message: `Update Kompetenzen [${new Date().toLocaleString('de-CH')}]`,
-      content: btoa(unescape(encodeURIComponent(jsonString))),
-      branch: ghConfig.branch,
-    };
-    if (ghFileSha) body.sha = ghFileSha;
-
-    const res = await fetch(ghApiUrl(), {
-      method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub API ${res.status}`);
-    }
-    const data = await res.json();
-    ghFileSha = data.content.sha;
-    setFileStatus('saved', 'Auf GitHub gespeichert',
-      `${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`);
-  } catch(e) {
-    console.error('GitHub write error', e);
-    setFileStatus('error', 'GitHub Fehler: ' + e.message);
-  }
-}
-
-// ── GitHub Form UI ──
-function toggleGhForm() {
-  const form = document.getElementById('ghForm');
-  const chevron = document.getElementById('ghChevron');
-  form.classList.toggle('open');
-  chevron.style.transform = form.classList.contains('open') ? 'rotate(180deg)' : '';
-  if (form.classList.contains('open')) checkSavedGhConfig();
-}
-
-function checkSavedGhConfig() {
-  const saved = localStorage.getItem(LS_GH_KEY);
-  if (!saved) return;
-  try {
-    const cfg = JSON.parse(saved);
-    const banner = document.getElementById('ghSavedBanner');
-    document.getElementById('ghSavedLabel').textContent =
-      `${cfg.owner}/${cfg.repo}/${cfg.path}`;
-    banner.classList.add('show');
-  } catch(e) {}
-}
-
-function loadSavedGhConfig() {
-  const saved = localStorage.getItem(LS_GH_KEY);
-  if (!saved) return;
-  try {
-    const cfg = JSON.parse(saved);
-    document.getElementById('ghOwner').value  = cfg.owner  || '';
-    document.getElementById('ghRepo').value   = cfg.repo   || '';
-    document.getElementById('ghPath').value   = cfg.path   || 'kompetenzen.json';
-    document.getElementById('ghBranch').value = cfg.branch || 'main';
-    document.getElementById('ghToken').value  = cfg.token  || '';
-    validateGhForm();
-  } catch(e) {}
-}
-
-function validateGhForm() {
-  const ok = ['ghOwner','ghRepo','ghPath','ghBranch','ghToken']
-    .every(id => document.getElementById(id).value.trim() !== '');
-  document.getElementById('btnGhConnect').disabled = !ok;
-}
-
-['ghOwner','ghRepo','ghPath','ghBranch','ghToken'].forEach(id => {
-  document.getElementById(id).addEventListener('input', validateGhForm);
-});
-
-async function connectToGitHub() {
-  hideFileError();
-  const btn = document.getElementById('btnGhConnect');
-  btn.disabled = true;
-  btn.textContent = 'Verbinde …';
-
-  ghConfig = {
-    owner:  document.getElementById('ghOwner').value.trim(),
-    repo:   document.getElementById('ghRepo').value.trim(),
-    path:   document.getElementById('ghPath').value.trim() || 'kompetenzen.json',
-    branch: document.getElementById('ghBranch').value.trim() || 'main',
-    token:  document.getElementById('ghToken').value.trim(),
-  };
-
-  try {
-    const data = await githubReadFile();
-    if (data === null) {
-      // File doesn't exist yet – create empty
-      db = { version: 2, users: [] };
-      await githubWriteFile(JSON.stringify(db, null, 2));
+    // Kompetenzen und User parallel laden
+    const [compRes, usersRes] = await Promise.all([
+      fetch(`${API_URL}/competencies/kompetenzen-informatiker-efz`),
+      fetch(`${API_URL}/users`)
+    ]);
+    if (!compRes.ok) throw new Error(`Kompetenzen: HTTP ${compRes.status}`);
+    if (!usersRes.ok) throw new Error(`Users: HTTP ${usersRes.status}`);
+    const compData = await compRes.json();
+    AREAS = compData.areas;
+    users = (await usersRes.json()).map(normalizeUser);
+    // Ziele für alle User vorladen (für Fortschrittsanzeige)
+    await Promise.all(users.map(async u => {
+      try {
+        const gr = await fetch(`${API_URL}/users/${u.id}/goals`);
+        const goalList = await gr.json();
+        goalList.forEach(g => {
+          u.goals[g.goal_id] = { level: g.level, comment: g.comment || '', date: g.updated_at };
+        });
+      } catch(e) { /* goals bleiben leer */ }
+    }));
+    hide('screenFile');
+    if (users.length === 0) {
+      showRegistration(null);
     } else {
-      db = data;
-      if (!db.users) db.users = [];
+      showUserSelectScreen();
     }
-    // Save config (including token) to localStorage for reuse
-    localStorage.setItem(LS_GH_KEY, JSON.stringify(ghConfig));
-    afterFileLoaded();
   } catch(e) {
-    ghConfig = null;
-    showFileError('GitHub-Verbindung fehlgeschlagen: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Mit GitHub verbinden';
+    document.getElementById('loadingMsg').textContent = '';
+    document.getElementById('apiError').textContent =
+      'Server nicht erreichbar. Ist das Backend gestartet? (' + e.message + ')';
+    document.getElementById('apiError').classList.remove('hidden');
+    document.getElementById('btnRetry').classList.remove('hidden');
   }
 }
 
 // ═══════════════════════════════════════════
 // USER HELPERS
 // ═══════════════════════════════════════════
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
 function getUser(id) {
-  return db.users.find(u => u.id === id);
+  return users.find(u => u.id === id);
 }
 
 function currentUser() {
@@ -990,101 +588,44 @@ function getGoalState(goalId) {
   return (u && u.goals && u.goals[goalId]) || { level: 0, date: null, comment: '' };
 }
 
-function setGoalLevel(goalId, level) {
+async function setGoalLevel(goalId, level) {
   const u = currentUser();
   if (!u) return;
   if (!u.goals) u.goals = {};
   if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
   u.goals[goalId].level = level;
   u.goals[goalId].date = new Date().toISOString();
-  scheduleSave();
+  setApiStatus('saving', 'Speichert…');
+  try {
+    await fetch(`${API_URL}/users/${currentUserId}/goals/${goalId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal_id: goalId, level, comment: u.goals[goalId].comment || '' })
+    });
+    setApiStatus('saved', 'Gespeichert');
+  } catch(e) {
+    setApiStatus('error', 'Fehler beim Speichern!');
+  }
 }
 
-function setGoalComment(goalId, comment) {
+async function setGoalComment(goalId, comment) {
   const u = currentUser();
   if (!u) return;
   if (!u.goals) u.goals = {};
   if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
   u.goals[goalId].comment = comment;
   u.goals[goalId].date = new Date().toISOString();
-  scheduleSave();
-}
-
-// ═══════════════════════════════════════════
-// FILE HANDLING
-// ═══════════════════════════════════════════
-async function openExistingFile() {
-  hideFileError();
-  if (!hasFSA) {
-    // localStorage fallback: load from LS
-    const raw = localStorage.getItem(LS_KEY);
-    if (raw) {
-      try {
-        db = JSON.parse(raw);
-        if (!db.users) db.users = [];
-      } catch(e) { db = { version:2, users:[] }; }
-    } else {
-      db = { version:2, users:[] };
-    }
-    afterFileLoaded();
-    return;
-  }
+  setApiStatus('saving', 'Speichert…');
   try {
-    const [handle] = await window.showOpenFilePicker({
-      types: [{ description:'JSON-Datei', accept:{'application/json':['.json']} }],
-      multiple: false,
+    await fetch(`${API_URL}/users/${currentUserId}/goals/${goalId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal_id: goalId, level: u.goals[goalId].level || 0, comment })
     });
-    fileHandle = handle;
-    const file = await handle.getFile();
-    const text = await file.text();
-    db = JSON.parse(text);
-    if (!db.users) db.users = [];
-    afterFileLoaded();
+    setApiStatus('saved', 'Gespeichert');
   } catch(e) {
-    if (e.name !== 'AbortError') showFileError('Datei konnte nicht geöffnet werden: ' + e.message);
+    setApiStatus('error', 'Fehler beim Speichern!');
   }
-}
-
-async function createNewFile() {
-  hideFileError();
-  db = { version: 2, users: [] };
-  if (!hasFSA) {
-    localStorage.setItem(LS_KEY, JSON.stringify(db, null, 2));
-    afterFileLoaded();
-    return;
-  }
-  try {
-    fileHandle = await window.showSaveFilePicker({
-      suggestedName: 'kompetenzen.json',
-      types: [{ description:'JSON-Datei', accept:{'application/json':['.json']} }],
-    });
-    await persistDB();
-    afterFileLoaded();
-  } catch(e) {
-    if (e.name !== 'AbortError') showFileError('Datei konnte nicht erstellt werden: ' + e.message);
-  }
-}
-
-function afterFileLoaded() {
-  hide('screenFile');
-  if (db.users.length === 0) {
-    showRegistration(null);
-  } else {
-    showUserSelectScreen();
-  }
-}
-
-function goBackToFile() {
-  hide('screenUserSelect');
-  show('screenFile');
-}
-
-function showFileError(msg) {
-  const el = document.getElementById('fileError');
-  el.textContent = msg; el.classList.remove('hidden');
-}
-function hideFileError() {
-  document.getElementById('fileError').classList.add('hidden');
 }
 
 // ═══════════════════════════════════════════
@@ -1092,15 +633,12 @@ function hideFileError() {
 // ═══════════════════════════════════════════
 function showUserSelectScreen() {
   hide('screenRegister');
-  const fname = ghConfig
-    ? `GitHub: ${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`
-    : fileHandle ? fileHandle.name : 'localStorage';
   document.getElementById('userSelectSubtitle').textContent =
-    `${fname} · ${db.users.length} Person${db.users.length !== 1 ? 'en' : ''}`;
+    `Backend-API · ${users.length} Person${users.length !== 1 ? 'en' : ''}`;
 
   const list = document.getElementById('userList');
   list.innerHTML = '';
-  db.users.forEach(user => {
+  users.forEach(user => {
     const prog = getUserProgress(user);
     const initials = user.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
     const specialtyLabel = user.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
@@ -1114,6 +652,10 @@ function showUserSelectScreen() {
         <div class="user-card-meta">${specialtyLabel} · Lehrstart: ${startStr}</div>
         <div class="user-card-progress">${prog.achieved}/${prog.total} Leistungsziele bewertet (${prog.pct}%)</div>
       </div>
+      <div class="user-card-actions">
+        <button class="btn-edit" title="Bearbeiten" onclick="event.stopPropagation(); editUserFromSwitcher('${user.id}')">✏ Bearbeiten</button>
+        <button class="btn-del"  title="Löschen"    onclick="event.stopPropagation(); deleteUser('${user.id}')">🗑 Löschen</button>
+      </div>
     `;
     card.onclick = () => selectAndEnterApp(user.id);
     list.appendChild(card);
@@ -1124,6 +666,7 @@ function showUserSelectScreen() {
 function selectAndEnterApp(userId) {
   currentUserId = userId;
   hide('screenUserSelect');
+  hide('screenRegister');
   enterApp();
 }
 
@@ -1138,6 +681,27 @@ function showUserSwitcher() {
 // ═══════════════════════════════════════════
 let editingUserId = null;
 let selectedSpecialty = '';
+let editReturnToSwitcher = false;
+
+function editUserFromSwitcher(userId) {
+  editReturnToSwitcher = true;
+  showRegistration(userId);
+}
+
+async function deleteUser(userId) {
+  const user = getUser(userId);
+  if (!user) return;
+  if (!confirm(`Person "${user.name}" wirklich löschen?\n\nAlle erfassten Kompetenzdaten dieser Person gehen verloren.`)) return;
+  try {
+    await fetch(`${API_URL}/users/${userId}`, { method: 'DELETE' });
+  } catch(e) {
+    alert('Fehler beim Löschen: ' + e.message);
+    return;
+  }
+  users = users.filter(u => u.id !== userId);
+  if (currentUserId === userId) currentUserId = null;
+  showUserSelectScreen();
+}
 
 function showRegistration(userId) {
   editingUserId = userId;
@@ -1159,12 +723,10 @@ function showEditCurrentUser() {
 }
 
 function cancelRegistration() {
+  const returnToSwitcher = editReturnToSwitcher;
+  editReturnToSwitcher = false;
   hide('screenRegister');
-  if (db.users.length > 0) {
-    showUserSelectScreen();
-  } else {
-    show('screenFile');
-  }
+  showUserSelectScreen();
 }
 
 function selectSpecialty(card) {
@@ -1183,23 +745,44 @@ function validateRegForm() {
 document.getElementById('inputName').addEventListener('input', validateRegForm);
 document.getElementById('inputStartDate').addEventListener('input', validateRegForm);
 
-function saveUser() {
+async function saveUser() {
   const name = document.getElementById('inputName').value.trim();
   const startDate = document.getElementById('inputStartDate').value;
+  const body = JSON.stringify({ name, specialty: selectedSpecialty, start_date: startDate });
+
   if (editingUserId) {
-    const u = getUser(editingUserId);
-    u.name = name;
-    u.specialty = selectedSpecialty;
-    u.startDate = startDate;
+    try {
+      const res = await fetch(`${API_URL}/users/${editingUserId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body
+      });
+      const updated = await res.json();
+      const u = getUser(editingUserId);
+      u.name = updated.name;
+      u.specialty = updated.specialty;
+      u.startDate = updated.start_date;
+    } catch(e) {
+      alert('Fehler beim Speichern: ' + e.message);
+      return;
+    }
   } else {
-    const newUser = { id: generateId(), name, specialty: selectedSpecialty, startDate, goals: {} };
-    db.users.push(newUser);
-    editingUserId = newUser.id;
+    try {
+      const res = await fetch(`${API_URL}/users`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body
+      });
+      const created = await res.json();
+      const newUser = normalizeUser(created);
+      users.push(newUser);
+      editingUserId = newUser.id;
+    } catch(e) {
+      alert('Fehler beim Speichern: ' + e.message);
+      return;
+    }
   }
-  scheduleSave();
   hide('screenRegister');
-  if (editingUserId === currentUserId) {
-    // re-entered app after edit
+  if (editReturnToSwitcher) {
+    editReturnToSwitcher = false;
+    showUserSelectScreen();
+  } else if (editingUserId === currentUserId) {
     enterApp();
   } else {
     currentUserId = editingUserId;
@@ -1211,10 +794,7 @@ function saveUser() {
 // APP ENTRY
 // ═══════════════════════════════════════════
 function enterApp() {
-  const fname = ghConfig
-    ? `${ghConfig.owner}/${ghConfig.repo}/${ghConfig.path}`
-    : fileHandle ? fileHandle.name : 'localStorage';
-  setFileStatus('saved', 'Bereit', fname);
+  setApiStatus('saved', 'Verbunden mit Backend');
   document.getElementById('app').classList.add('visible');
   renderHeader();
   renderSidebar();
@@ -1235,7 +815,7 @@ function getAllGoalsForArea(area) {
 
 function getAreaProgress(area) {
   const goals = getAllGoalsForArea(area);
-  const achieved = goals.filter(g => getGoalState(g.id).level > 0).length;
+  const achieved = goals.filter(g => getGoalState(g.id).level >= g.max).length;
   return { achieved, total: goals.length, pct: goals.length ? Math.round(achieved/goals.length*100) : 0 };
 }
 
@@ -1244,7 +824,7 @@ function getUserProgress(user) {
   const allGoals = areas.flatMap(a => getAllGoalsForArea(a));
   const achieved = allGoals.filter(g => {
     const gs = (user.goals && user.goals[g.id]) || {};
-    return (gs.level || 0) > 0;
+    return (gs.level || 0) >= g.max;
   }).length;
   return { achieved, total: allGoals.length, pct: allGoals.length ? Math.round(achieved/allGoals.length*100) : 0 };
 }
@@ -1343,7 +923,127 @@ function showOverview(btn) {
       </div>`;
   });
   html += `</div>`;
+  html += buildPieChart();
   document.getElementById('mainContent').innerHTML = html;
+}
+
+function buildPieChart() {
+  const AREA_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+  const visibleAreas = getVisibleAreas();
+
+  let totalAll = 0, totalAchieved = 0;
+  const areaData = visibleAreas.map((area, i) => {
+    const prog = getAreaProgress(area);
+    totalAll += prog.total;
+    totalAchieved += prog.achieved;
+    return { area, prog, color: AREA_COLORS[i % AREA_COLORS.length] };
+  });
+
+  const globalPct = totalAll ? Math.round(totalAchieved / totalAll * 100) : 0;
+
+  const cx = 140, cy = 140, r = 105, holeR = 58, labelR = 120;
+  let currentAngle = -90;
+
+  function polarXY(angleDeg, radius) {
+    const rad = angleDeg * Math.PI / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  }
+
+  function slicePath(startAngle, endAngle) {
+    const s = polarXY(startAngle, r);
+    const e = polarXY(endAngle, r);
+    const si = polarXY(startAngle, holeR);
+    const ei = polarXY(endAngle, holeR);
+    const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+    return [
+      `M${si.x.toFixed(2)},${si.y.toFixed(2)}`,
+      `L${s.x.toFixed(2)},${s.y.toFixed(2)}`,
+      `A${r},${r} 0 ${largeArc} 1 ${e.x.toFixed(2)},${e.y.toFixed(2)}`,
+      `L${ei.x.toFixed(2)},${ei.y.toFixed(2)}`,
+      `A${holeR},${holeR} 0 ${largeArc} 0 ${si.x.toFixed(2)},${si.y.toFixed(2)}`,
+      'Z'
+    ].join(' ');
+  }
+
+  let pathsHtml = '';
+  let labelsHtml = '';
+  let legendHtml = '';
+
+  areaData.forEach(({ area, prog, color }) => {
+    const sliceDeg = totalAll > 0 ? (prog.achieved / totalAll) * 360 : 0;
+    if (sliceDeg < 0.1) {
+      currentAngle += sliceDeg;
+      return;
+    }
+    const endAngle = currentAngle + sliceDeg;
+    const midAngle = currentAngle + sliceDeg / 2;
+
+    pathsHtml += `<path d="${slicePath(currentAngle, endAngle)}" fill="${color}" stroke="white" stroke-width="1.5"/>`;
+
+    if (sliceDeg > 12) {
+      const lp = polarXY(midAngle, labelR + 14);
+      const anchor = lp.x > cx ? 'start' : 'end';
+      labelsHtml += `<text x="${lp.x.toFixed(1)}" y="${lp.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}">${area.id.toUpperCase()} ${prog.pct}%</text>`;
+    }
+
+    currentAngle = endAngle;
+  });
+
+  // Unachieved slice (use two half-arcs if full circle to avoid SVG 360° bug)
+  const unachievedDeg = totalAll > 0 ? ((totalAll - totalAchieved) / totalAll) * 360 : 360;
+  if (unachievedDeg > 0.1) {
+    if (unachievedDeg >= 359.9) {
+      // Full circle: draw as two 180° arcs
+      const mid = currentAngle + 180;
+      const end = currentAngle + 360;
+      pathsHtml += `<path d="${slicePath(currentAngle, mid)}" fill="#e2e8f0" stroke="white" stroke-width="0"/>`;
+      pathsHtml += `<path d="${slicePath(mid, end)}" fill="#e2e8f0" stroke="white" stroke-width="0"/>`;
+    } else {
+      const endAngle = currentAngle + unachievedDeg;
+      pathsHtml += `<path d="${slicePath(currentAngle, endAngle)}" fill="#e2e8f0" stroke="white" stroke-width="1.5"/>`;
+    }
+  }
+
+  const svgW = 280, svgH = 290;
+  const svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="overflow:visible">
+    ${pathsHtml}
+    <circle cx="${cx}" cy="${cy}" r="${holeR - 2}" fill="white"/>
+    <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-size="24" font-weight="800" fill="#1e293b">${globalPct}%</text>
+    <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="9" fill="#64748b">Gesamt-</text>
+    <text x="${cx}" y="${cy + 26}" text-anchor="middle" font-size="9" fill="#64748b">fortschritt</text>
+    ${labelsHtml}
+  </svg>`;
+
+  // Legend
+  areaData.forEach(({ area, prog, color }) => {
+    const inactive = prog.achieved === 0 ? ' pie-legend-inactive' : '';
+    legendHtml += `
+      <div class="pie-legend-item${inactive}" onclick="showArea('${area.id}')">
+        <div class="pie-legend-dot" style="background:${color}"></div>
+        <div class="pie-legend-text">
+          <span class="pie-legend-label">Bereich ${area.id.toUpperCase()}: ${area.name}</span>
+          <span class="pie-legend-sub">${prog.achieved}/${prog.total} Leistungsziele (${prog.pct}%)</span>
+        </div>
+      </div>`;
+  });
+  // Legend: unachieved
+  legendHtml += `
+    <div class="pie-legend-item" style="cursor:default">
+      <div class="pie-legend-dot" style="background:#e2e8f0;border:1px solid #cbd5e1"></div>
+      <div class="pie-legend-text">
+        <span class="pie-legend-label">Noch nicht erreicht</span>
+        <span class="pie-legend-sub">${totalAll - totalAchieved}/${totalAll} (${100 - globalPct}%)</span>
+      </div>
+    </div>`;
+
+  return `
+    <div class="pie-section">
+      <h3 class="pie-title">Gesamtfortschritt / Leistungszielerreichung</h3>
+      <div class="pie-layout">
+        <div class="pie-chart-wrap">${svg}</div>
+        <div class="pie-legend">${legendHtml}</div>
+      </div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -1383,7 +1083,7 @@ function showArea(areaId, sidebarBtn) {
   `;
 
   area.subComps.forEach((sc, i) => {
-    const scAchieved = sc.goals.filter(g => getGoalState(g.id).level > 0).length;
+    const scAchieved = sc.goals.filter(g => getGoalState(g.id).level >= g.max).length;
     html += `
       <div class="sub-comp${i===0?' open':''}" id="sc-${sc.id}">
         <button class="sub-comp-header" onclick="toggleSubComp('sc-${sc.id}')">
@@ -1489,11 +1189,348 @@ function show(id) { document.getElementById(id).classList.remove('hidden'); }
 function hide(id) { document.getElementById(id).classList.add('hidden'); }
 
 // ═══════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════
+function generatePDF() {
+  if (typeof window.jspdf === 'undefined') {
+    alert('PDF-Bibliothek noch nicht geladen. Bitte kurz warten und nochmals versuchen.');
+    return;
+  }
+  const user = currentUser();
+  if (!user) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // ── Farben ──
+  const C_PRI   = [26, 58, 92];
+  const C_PRILT = [45, 90, 142];
+  const C_BG    = [240, 244, 248];
+  const C_BDR   = [209, 219, 230];
+  const C_TEXT  = [30, 41, 59];
+  const C_MUTED = [100, 116, 139];
+  const K_COL   = [
+    [148,163,184], [96,165,250], [52,211,153],
+    [163,230,53],  [251,191,36], [249,115,22], [168,85,247],
+  ];
+  const K_DARK = [false, false, false, true, true, false, false];
+
+  // Fortschrittsfarbe: rot → gelb → grün je nach Erreichungsgrad
+  function goalProgressColor(lv, max) {
+    if (lv >= max) return { bg: [22, 163, 74],  dark: false }; // grün
+    if (lv === 0)  return { bg: [220, 38, 38],  dark: false }; // rot
+    const t = lv / max;
+    let bg;
+    if (t < 0.5) {
+      const s = t * 2;
+      bg = [Math.round(220+s*(234-220)), Math.round(38+s*(179-38)), Math.round(38+s*(8-38))];
+    } else {
+      const s = (t - 0.5) * 2;
+      bg = [Math.round(234+s*(22-234)), Math.round(179+s*(163-179)), Math.round(8+s*(74-8))];
+    }
+    const dark = bg[0] > 160 && bg[1] > 100 && bg[2] < 80;
+    return { bg, dark };
+  }
+
+  const PW = 210, M = 15, CW = PW - 2 * M;
+
+  // ── KOPFZEILE ──────────────────────────────────────────────────
+  doc.setFillColor(...C_PRI);
+  doc.rect(0, 0, PW, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text('Handlungskompetenz-Bericht', M, 12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('Informatiker/in EFZ – Bildungsplan 88611', M, 19);
+  const heute = new Date().toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric' });
+  doc.text(`Erstellt: ${heute}`, PW - M, 19, { align: 'right' });
+
+  let y = 36;
+
+  // ── ÜBERSICHTS-KARTE (Person + Pie Chart) ────────────────────
+  const lj       = getLehrjahrInfo();
+  const spLabel   = user.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
+  const startStr  = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
+  const overall   = getOverallProgress();
+  const initials  = user.name.split(' ').map(p => p[0]||'').join('').substring(0,2).toUpperCase();
+
+  // Pre-compute pie data so we can size the box correctly
+  const AREA_COLORS_PDF = [
+    [59,130,246],[16,185,129],[245,158,11],[239,68,68],
+    [139,92,246],[6,182,212],[249,115,22],[236,72,153]
+  ];
+  const pieAreas = getVisibleAreas(user);
+  let pieTotal = 0, pieAchieved = 0;
+  const pieData = pieAreas.map((area, i) => {
+    const prog = getAreaProgress(area);
+    pieTotal += prog.total; pieAchieved += prog.achieved;
+    return { area, prog, color: AREA_COLORS_PDF[i % AREA_COLORS_PDF.length] };
+  });
+  const piePct = pieTotal ? Math.round(pieAchieved / pieTotal * 100) : 0;
+  const CHART_MM = 48;
+  const LEG_ROW_H = 5.8;
+  const PIE_SECTION_H = Math.max(CHART_MM, (pieData.length + 1) * LEG_ROW_H) + 8;
+  const BOX_H = 40 + PIE_SECTION_H; // person info (40) + pie section
+
+  // Draw the unified card
+  doc.setFillColor(...C_BG);
+  doc.setDrawColor(...C_BDR);
+  doc.roundedRect(M, y, CW, BOX_H, 2, 2, 'FD');
+
+  // Avatar
+  doc.setFillColor(...C_PRILT);
+  doc.circle(M + 10, y + 14, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(initials, M + 10, y + 15.5, { align: 'center' });
+
+  // Name & Details
+  doc.setTextColor(...C_TEXT);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text(user.name, M + 22, y + 10);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...C_MUTED);
+  doc.text(spLabel, M + 22, y + 17);
+  doc.text(`Lehrbeginn: ${startStr}  ·  ${lj.current}. Lehrjahr`, M + 22, y + 23);
+
+  // Gesamtfortschritt rechts
+  doc.setTextColor(...C_PRI);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text(`${overall.pct}%`, PW - M - 4, y + 12, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...C_MUTED);
+  doc.text('Gesamtfortschritt', PW - M - 4, y + 18, { align: 'right' });
+  doc.text(`${overall.achieved} / ${overall.total} Leistungsziele`, PW - M - 4, y + 23, { align: 'right' });
+
+  // Progress bar inside card
+  const barY = y + 28;
+  doc.setFillColor(...C_BDR);
+  doc.roundedRect(M + 5, barY, CW - 10, 3.5, 1, 1, 'F');
+  if (overall.pct > 0) {
+    doc.setFillColor(...C_PRILT);
+    doc.roundedRect(M + 5, barY, (CW - 10) * overall.pct / 100, 3.5, 1, 1, 'F');
+  }
+
+  // Divider within card
+  const divY = barY + 7;
+  doc.setDrawColor(...C_BDR);
+  doc.setLineWidth(0.3);
+  doc.line(M + 5, divY, M + CW - 5, divY);
+
+  // Pie section label
+  const pieStartY = divY + 5;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+  doc.setTextColor(...C_PRI);
+  doc.text('Fortschritt je Bereich', M + 5, pieStartY + 3);
+
+  // Build canvas pie chart
+  const CHART_PX = CHART_MM * 4;
+  const cv = document.createElement('canvas');
+  cv.width = CHART_PX; cv.height = CHART_PX;
+  const ctx2 = cv.getContext('2d');
+  const ccx = CHART_PX / 2, ccy = CHART_PX / 2;
+  const cr = CHART_PX * 0.44, ch = CHART_PX * 0.22;
+
+  let ang = -Math.PI / 2;
+  pieData.forEach(({ prog, color }) => {
+    const a = pieTotal > 0 ? (prog.achieved / pieTotal) * 2 * Math.PI : 0;
+    if (a < 0.002) { ang += a; return; }
+    ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+    ctx2.arc(ccx, ccy, cr, ang, ang + a);
+    ctx2.closePath();
+    ctx2.fillStyle = `rgb(${color.join(',')})`;
+    ctx2.fill();
+    ctx2.strokeStyle = '#fff'; ctx2.lineWidth = 3; ctx2.stroke();
+    ang += a;
+  });
+
+  const uA = pieTotal > 0 ? ((pieTotal - pieAchieved) / pieTotal) * 2 * Math.PI : 2 * Math.PI;
+  if (uA > 0.002) {
+    if (uA >= 2 * Math.PI - 0.01) {
+      [0, Math.PI].forEach(start => {
+        ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+        ctx2.arc(ccx, ccy, cr, start, start + Math.PI);
+        ctx2.closePath(); ctx2.fillStyle = '#e2e8f0'; ctx2.fill();
+      });
+    } else {
+      ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+      ctx2.arc(ccx, ccy, cr, ang, ang + uA);
+      ctx2.closePath(); ctx2.fillStyle = '#e2e8f0'; ctx2.fill();
+      ctx2.strokeStyle = '#fff'; ctx2.lineWidth = 3; ctx2.stroke();
+    }
+  }
+
+  ctx2.beginPath(); ctx2.arc(ccx, ccy, ch, 0, 2 * Math.PI);
+  ctx2.fillStyle = 'white'; ctx2.fill();
+
+  ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+  ctx2.fillStyle = '#1e293b';
+  ctx2.font = `bold ${Math.round(CHART_PX * 0.16)}px Arial`;
+  ctx2.fillText(`${piePct}%`, ccx, ccy - CHART_PX * 0.04);
+  ctx2.font = `${Math.round(CHART_PX * 0.075)}px Arial`;
+  ctx2.fillStyle = '#64748b';
+  ctx2.fillText('Gesamt-', ccx, ccy + CHART_PX * 0.14);
+  ctx2.fillText('fortschritt', ccx, ccy + CHART_PX * 0.22);
+
+  const chartDrawY = pieStartY + 6;
+  doc.addImage(cv.toDataURL('image/png'), 'PNG', M + 4, chartDrawY, CHART_MM, CHART_MM);
+
+  // Area legend beside pie (compact single-column)
+  const legX = M + 4 + CHART_MM + 5;
+  let ly = chartDrawY + 2;
+  pieData.forEach(({ area, prog, color }) => {
+    doc.setFillColor(...color);
+    doc.roundedRect(legX, ly + 0.8, 3, 3, 0.4, 0.4, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C_TEXT);
+    doc.text(`${area.id.toUpperCase()}: ${area.name}`, legX + 4.5, ly + 2.8);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_MUTED);
+    doc.text(`${prog.achieved}/${prog.total} (${prog.pct}%)`, legX + 4.5, ly + 6);
+    ly += LEG_ROW_H + 1.5;
+  });
+  doc.setFillColor(226, 232, 240);
+  doc.roundedRect(legX, ly + 0.8, 3, 3, 0.4, 0.4, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C_TEXT);
+  doc.text('Noch nicht erreicht', legX + 4.5, ly + 2.8);
+  doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_MUTED);
+  doc.text(`${pieTotal - pieAchieved}/${pieTotal} (${100 - piePct}%)`, legX + 4.5, ly + 6);
+
+  y += BOX_H + 10;
+
+  // ── LEISTUNGSSTAND-LEGENDE ─────────────────────────────────────
+  doc.setFillColor(...C_PRI);
+  doc.roundedRect(M, y, CW, 7, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.text('Leistungsstand je Leistungsziel', M + 4, y + 5);
+  y += 10;
+
+  const LEGEND = [
+    { col: [220,38,38],  label: 'Nicht bewertet (K0)' },
+    { col: [234,109,8],  label: 'Begonnen (< 50% des Ziels)' },
+    { col: [234,179,8],  label: 'Auf Kurs (>= 50% des Ziels)' },
+    { col: [22,163,74],  label: 'Ziel erreicht' },
+  ];
+  doc.setFontSize(7);
+  const legW = CW / LEGEND.length;
+  LEGEND.forEach(({ col, label }, i) => {
+    const lx = M + i * legW;
+    doc.setFillColor(...col);
+    doc.roundedRect(lx, y, 4, 3, 0.5, 0.5, 'F');
+    doc.setTextColor(...C_TEXT);
+    doc.text(label, lx + 5.5, y + 2.3);
+  });
+  y += 10;
+
+  // ── BEREICHE ───────────────────────────────────────────────────
+  const areas = getVisibleAreas(user);
+
+  for (const area of areas) {
+    const ap = getAreaProgress(area);
+
+    if (y > 252) { doc.addPage(); y = 15; }
+
+    // Bereich-Header
+    doc.setFillColor(...C_PRI);
+    doc.roundedRect(M, y, CW, 9, 1, 1, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.text(`${area.id.toUpperCase()}  ${area.name}`, M + 3, y + 6.3);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text(`${ap.achieved} / ${ap.total}  (${ap.pct}%)`, PW - M - 3, y + 6.3, { align: 'right' });
+
+    y += 10;
+
+    // Kleiner Fortschrittsbalken
+    doc.setFillColor(...C_BDR);
+    doc.rect(M, y, CW, 2, 'F');
+    if (ap.pct > 0) {
+      doc.setFillColor(...C_PRILT);
+      doc.rect(M, y, CW * ap.pct / 100, 2, 'F');
+    }
+    y += 3;
+
+    // Tabelle aufbauen
+    const rows = [];
+    for (const sc of area.subComps) {
+      rows.push([{
+        content: sc.name, colSpan: 5,
+        styles: { fillColor: [248, 250, 252], textColor: C_PRI, fontStyle: 'bold', fontSize: 7.5, cellPadding: [2, 3, 2, 0] },
+      }]);
+      for (const goal of sc.goals) {
+        const gs  = getGoalState(goal.id);
+        const lv  = gs.level || 0;
+        const max = goal.max || 6;
+        const dt  = gs.date ? new Date(gs.date).toLocaleDateString('de-CH') : '–';
+        const { bg, dark } = goalProgressColor(lv, max);
+        rows.push([
+          goal.id,
+          goal.text,
+          {
+            content: `K${lv} / K${max}`,
+            styles: {
+              fillColor: bg,
+              textColor: dark ? C_TEXT : [255, 255, 255],
+              halign: 'center', fontStyle: 'bold',
+            },
+          },
+          dt,
+          gs.comment || '',
+        ]);
+      }
+    }
+
+    doc.autoTable({
+      startY: y,
+      margin: { left: M, right: M },
+      tableWidth: CW,
+      head: [['Nr.', 'Leistungsziel', 'Ist / Ziel', 'Datum', 'Kommentar']],
+      body: rows,
+      theme: 'grid',
+      styles: { fontSize: 7.5, cellPadding: [1.8, 2.5, 1.8, 2.5], textColor: C_TEXT, lineColor: C_BDR, lineWidth: 0.15 },
+      headStyles: { fillColor: C_PRILT, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 13, halign: 'center', valign: 'middle' },
+        1: { cellWidth: 69 },
+        2: { cellWidth: 17, halign: 'center', valign: 'middle' },
+        3: { cellWidth: 24, halign: 'center', valign: 'middle' },
+        4: { cellWidth: 57 },
+      },
+      didDrawPage: () => {},
+    });
+
+    y = doc.lastAutoTable.finalY + 7;
+  }
+
+  // ── SEITENZAHLEN ───────────────────────────────────────────────
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(...C_MUTED);
+    doc.text(`Seite ${i} von ${total}`, PW / 2, 291, { align: 'center' });
+    doc.setTextColor(...C_BDR);
+    doc.line(M, 288, PW - M, 288);
+  }
+
+  const safeName = user.name.replace(/[^a-zA-Z0-9äöüÄÖÜ]/g, '_');
+  const isoDate  = new Date().toISOString().slice(0, 10);
+  doc.save(`HK-Bericht_${safeName}_${isoDate}.pdf`);
+}
+
+// ═══════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════
-if (!hasFSA) {
-  document.getElementById('fsaNotice').classList.remove('hidden');
-}
+initApp();
 </script>
 </body>
 </html>
