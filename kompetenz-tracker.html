@@ -8,22 +8,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
+    /* FHNW Corporate Identity */
+    --fhnw-yellow: #FDE70E;
+    --fhnw-yellow-hover: #E8D200;
+    --fhnw-dark: #1a1a1a;
+    --fhnw-gray-block: #efefef;
+    --fhnw-gray-hover: #e2e2e2;
+
     --primary: #1a3a5c;
     --primary-light: #2d5a8e;
     --primary-dark: #0f2236;
     --accent: #e63946;
-    --bg: #f0f4f8;
+    --bg: #f2f2f2;     
     --surface: #ffffff;
-    --border: #d1dbe6;
-    --text: #1e293b;
-    --text-muted: #64748b;
-    --sidebar-w: 260px;
+    --border: #d0d0d0;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --sidebar-w: 240px;
 
     --k0-bg: #94a3b8; --k0-text: #fff;
     --k1-bg: #60a5fa; --k1-text: #fff;
-    --k2-bg: #30d498; --k2-text: #fff;
-    --k3-bg: #a3e635; --k3-text: #1e293b;
-    --k4-bg: #fbbf24; --k4-text: #1e293b;
+    --k2-bg: #34d399; --k2-text: #fff;
+    --k3-bg: #a3e635; --k3-text: #1a1a1a;
+    --k4-bg: #fbbf24; --k4-text: #1a1a1a;
     --k5-bg: #f97316; --k5-text: #fff;
     --k6-bg: #a855f7; --k6-text: #fff;
   }
@@ -71,12 +78,12 @@
   }
 
   .btn-primary {
-    width: 100%; padding: 12px; border: none; border-radius: 8px;
-    background: var(--primary); color: #fff;
-    font-size: 1rem; font-weight: 600; cursor: pointer;
+    width: 100%; padding: 12px; border: none; border-radius: 3px;
+    background: var(--fhnw-yellow); color: var(--fhnw-dark);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
     transition: background .2s; margin-top: 8px;
   }
-  .btn-primary:hover { background: var(--primary-light); }
+  .btn-primary:hover { background: var(--fhnw-yellow-hover); }
   .btn-primary:disabled { background: var(--border); color: #94a3b8; cursor: not-allowed; }
 
   .btn-secondary {
@@ -180,68 +187,81 @@
   /* ── HEADER ── */
   .header {
     position: fixed; top: 0; left: 0; right: 0; height: 58px;
-    background: var(--primary-dark);
+    background: var(--fhnw-yellow);
     display: flex; align-items: center;
-    padding: 0 20px; gap: 16px; z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    padding: 0; gap: 0; z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
   }
-  .header-title { font-size: 1rem; font-weight: 700; color: #fff; white-space: nowrap; flex-shrink: 0; }
-  .header-user { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .header-logo-wrap {
+    width: var(--sidebar-w); flex-shrink: 0; display: flex; align-items: center;
+    padding: 0 14px; height: 100%; border-right: 1px solid rgba(0,0,0,0.1);
+  }
+  .header-logo-wrap img { height: 28px; width: auto; }
+  .hamburger {
+    display: none; background: none; border: none; cursor: pointer;
+    font-size: 1.5rem; color: var(--fhnw-dark); padding: 10px 12px; line-height: 1; flex-shrink: 0;
+  }
+  .header-title { font-size: 0.88rem; font-weight: 700; color: var(--fhnw-dark); white-space: nowrap; flex-shrink: 0; padding: 0 16px; }
+  .header-user { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 0 8px; }
   .avatar {
-    width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light);
+    width: 32px; height: 32px; border-radius: 50%; background: var(--fhnw-dark);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+    font-weight: 700; font-size: 0.85rem; color: var(--fhnw-yellow); flex-shrink: 0;
   }
   .user-info { min-width: 0; }
-  .user-name { font-size: 0.88rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-detail { font-size: 0.72rem; color: #93c5fd; }
-  .header-progress { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .user-name { font-size: 0.88rem; font-weight: 600; color: var(--fhnw-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-detail { font-size: 0.72rem; color: #555; }
+  .header-progress { display: flex; align-items: center; gap: 8px; margin-left: auto; padding-right: 12px; }
   .progress-ring-wrap { position: relative; width: 36px; height: 36px; }
   .progress-ring-wrap svg { transform: rotate(-90deg); }
   .progress-ring-value {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-size: 0.6rem; font-weight: 700; color: #fff;
+    font-size: 0.6rem; font-weight: 700; color: var(--fhnw-dark);
   }
   .lehrjahr-badge {
-    background: var(--primary-light); color: #fff;
-    padding: 4px 10px; border-radius: 20px;
+    background: var(--fhnw-dark); color: var(--fhnw-yellow);
+    padding: 4px 10px; border-radius: 3px;
     font-size: 0.75rem; font-weight: 600; white-space: nowrap;
   }
   .header-btn {
-    background: none; border: none; color: #93c5fd;
-    cursor: pointer; font-size: 1.1rem; padding: 6px 8px;
-    border-radius: 6px; transition: background .2s; white-space: nowrap; font-size: 0.8rem;
+    background: none; border: 1.5px solid rgba(0,0,0,0.2); color: var(--fhnw-dark);
+    cursor: pointer; padding: 5px 10px;
+    border-radius: 4px; transition: background .2s; white-space: nowrap; font-size: 0.8rem; font-weight: 600;
   }
-  .header-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .header-btn:hover { background: rgba(0,0,0,0.1); }
 
   /* ── SIDEBAR ── */
   .sidebar {
     position: fixed; left: 0; top: 58px; bottom: 0; width: var(--sidebar-w);
-    background: var(--primary); overflow-y: auto; z-index: 90;
-    border-right: 1px solid var(--primary-light);
+    background: var(--fhnw-yellow); overflow-y: auto; z-index: 90;
+    border-right: 1px solid rgba(0,0,0,0.1);
   }
   .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 2px; }
-  .sidebar-section { padding: 14px 14px 6px; }
-  .sidebar-section-title { font-size: 0.68rem; font-weight: 700; color: #93c5fd; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 2px; }
+  .sidebar-brand { padding: 14px 12px 12px; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 4px; }
+  .sidebar-brand-title { font-size: 0.85rem; font-weight: 700; color: var(--fhnw-dark); line-height: 1.3; }
+  .sidebar-brand-sub { font-size: 0.7rem; color: rgba(0,0,0,0.5); margin-top: 2px; }
+  .sidebar-section { padding: 10px 10px 4px; }
+  .sidebar-section-title { font-size: 0.65rem; font-weight: 700; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
   .sidebar-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; border-radius: 8px; cursor: pointer;
-    color: #cbd5e1; font-size: 0.85rem; transition: all .15s;
-    margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 3px; cursor: pointer;
+    color: var(--fhnw-dark); font-size: 0.85rem; transition: background .12s;
+    margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left;
   }
-  .sidebar-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-  .sidebar-item.active { background: rgba(255,255,255,0.15); color: #fff; }
-  .sidebar-item .item-badge { margin-left: auto; font-size: 0.72rem; font-weight: 700; background: rgba(255,255,255,0.15); padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .sidebar-item:hover { background: rgba(0,0,0,0.08); }
+  .sidebar-item.active { background: #fff; font-weight: 700; }
+  .sidebar-item .item-badge { margin-left: auto; font-size: 0.7rem; font-weight: 700; background: rgba(0,0,0,0.12); padding: 2px 6px; border-radius: 10px; white-space: nowrap; }
   .sidebar-item .item-id { font-weight: 800; font-size: 0.82rem; width: 20px; flex-shrink: 0; text-align: center; }
   .sidebar-item .item-name { flex: 1; font-size: 0.8rem; line-height: 1.3; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 89; }
 
   /* ── MAIN ── */
   .main { margin-left: var(--sidebar-w); margin-top: 58px; flex: 1; overflow-y: auto; padding: 24px; }
 
   .area-header {
-    background: var(--surface); border-radius: 14px; padding: 22px 24px; margin-bottom: 20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 5px solid var(--primary);
+    background: var(--surface); border-radius: 2px; padding: 22px 24px; margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 5px solid var(--fhnw-yellow);
   }
   .area-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
   .area-header .area-id { display: inline-block; background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-bottom: 8px; }
@@ -251,17 +271,20 @@
   .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 4px; transition: width .4s ease; }
 
-  /* ── SUB-COMPETENCY ── */
-  .sub-comp { background: var(--surface); border-radius: 12px; margin-bottom: 12px; border: 1.5px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  .sub-comp-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; background: none; border: none; width: 100%; text-align: left; transition: background .15s; color: var(--text); }
-  .sub-comp-header:hover { background: #f8fafc; }
-  .sub-comp.open .sub-comp-header { background: #f0f6ff; }
-  .sub-comp-id { font-size: 0.75rem; font-weight: 800; color: var(--primary); background: #e0ecff; padding: 3px 9px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
-  .sub-comp-name { font-weight: 600; font-size: 0.9rem; flex: 1; text-align: left; }
-  .sub-comp-stats { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
-  .chevron { transition: transform .25s; color: var(--text-muted); font-size: 0.8rem; }
-  .sub-comp.open .chevron { transform: rotate(180deg); }
-  .sub-comp-body { display: none; border-top: 1.5px solid var(--border); }
+  /* ── SUB-COMPETENCY (FHNW Accordion) ── */
+  .sub-comp { background: var(--surface); border-radius: 0; margin-bottom: 5px; border: 1px solid #d0d0d0; overflow: hidden; }
+  .sub-comp-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; background: var(--fhnw-gray-block); border: none; width: 100%; text-align: left; transition: background .12s; color: var(--fhnw-dark); }
+  .sub-comp-header:hover { background: var(--fhnw-gray-hover); }
+  .sub-comp.open .sub-comp-header { background: var(--fhnw-yellow); }
+  .sub-comp-id { font-size: 0.72rem; font-weight: 700; color: #555; white-space: nowrap; flex-shrink: 0; }
+  .sub-comp-name { font-weight: 500; font-size: 0.9rem; flex: 1; text-align: left; color: var(--fhnw-dark); }
+  .sub-comp.open .sub-comp-name { font-weight: 700; }
+  .sub-comp-stats { font-size: 0.78rem; color: #666; white-space: nowrap; margin-right: 6px; }
+  .accordion-icon { font-size: 1.4rem; font-weight: 300; color: #333; line-height: 1; flex-shrink: 0; width: 20px; text-align: center; }
+  .accordion-icon::before { content: '+'; }
+  .sub-comp.open .accordion-icon::before { content: '×'; }
+  .chevron { display: none; }
+  .sub-comp-body { display: none; border-top: 1px solid #d0d0d0; }
   .sub-comp.open .sub-comp-body { display: block; }
 
   /* ── GOAL ROW ── */
@@ -356,12 +379,20 @@
 
   @media (max-width: 768px) {
     :root { --sidebar-w: 0px; }
-    .sidebar { transform: translateX(-260px); width: 260px; transition: transform .3s; }
-    .sidebar.open { transform: translateX(0); }
-    .main { margin-left: 0; }
+    .header-logo-wrap { display: none; }
+    .header { padding: 0; gap: 0; }
+    .hamburger { display: flex; align-items: center; }
+    .header-title { flex: 1; padding: 0 8px; }
+    .sidebar { transform: translateX(-260px); width: 260px; transition: transform .3s; top: 58px; }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.2); }
+    .sidebar-overlay.visible { display: block; }
+    .main { margin-left: 0; padding: 14px; }
     .goal-row { grid-template-columns: 60px 1fr; }
     .specialty-cards { grid-template-columns: 1fr; }
     .file-status-bar { left: 0; }
+    .lehrjahr-badge { display: none; }
+    .progress-ring-wrap { display: none; }
+    .header-btn span { display: none; }
   }
 
   .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
@@ -450,7 +481,11 @@
 ══════════════════════════════════════ -->
 <div class="app" id="app">
   <header class="header">
-    <div class="header-title">HK-Tracker</div>
+    <div class="header-logo-wrap">
+      <img src="FHNW_Logo.webp" alt="FHNW Nordwestschweiz">
+    </div>
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Navigation">☰</button>
+    <div class="header-title">Handlungskompetenz-Tracker</div>
     <div class="header-user">
       <div class="avatar" id="headerAvatar">?</div>
       <div class="user-info">
@@ -462,8 +497,8 @@
       <div class="lehrjahr-badge" id="lehrjahrBadge">LJ 1</div>
       <div class="progress-ring-wrap" title="Gesamtfortschritt">
         <svg width="36" height="36">
-          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
-          <circle cx="18" cy="18" r="14" fill="none" stroke="#60a5fa" stroke-width="3"
+          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="3"/>
+          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(0,0,0,0.6)" stroke-width="3"
             stroke-dasharray="87.96" stroke-dashoffset="87.96"
             id="progressCircle" stroke-linecap="round"/>
         </svg>
@@ -471,15 +506,20 @@
       </div>
       <button class="header-btn" onclick="showUserSwitcher()" title="Person wechseln">👤 Wechseln</button>
       <button class="header-btn" onclick="showEditCurrentUser()" title="Profil bearbeiten">⚙</button>
-      <button class="header-btn" onclick="generatePDF()" title="PDF-Bericht erstellen">📄 PDF</button>
+      <button class="header-btn" onclick="generatePDF()" title="PDF-Bericht erstellen" style="border:none;padding:4px 6px;"><img src="IconPDF.png" style="height:22px;display:block"></button>
     </div>
   </header>
 
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
   <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-title">Handlungskompetenz-<br>Tracker</div>
+      <div class="sidebar-brand-sub">Informatiker/in EFZ</div>
+    </div>
     <div class="sidebar-section">
       <div class="sidebar-section-title">Navigation</div>
-      <button class="sidebar-item active" onclick="showOverview(this)">
-        <span class="item-id">🏠</span>
+      <button class="sidebar-item active" onclick="showOverview(this); closeSidebar()">
+        <span class="item-id"><img src="IconBuch.png" style="height:16px;width:16px;object-fit:contain;display:block"></span>
         <span class="item-name">Übersicht</span>
       </button>
     </div>
@@ -513,6 +553,23 @@ let AREAS = []; // wird via API geladen
 const API_URL = 'http://127.0.0.1:8000';
 let users = [];
 let currentUserId = null;
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const open = sidebar.classList.toggle('open');
+  overlay.classList.toggle('visible', open);
+  document.getElementById('hamburgerBtn').textContent = open ? '✕' : '☰';
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('visible');
+  const btn = document.getElementById('hamburgerBtn');
+  if (btn) btn.textContent = '☰';
+}
 
 function setApiStatus(state, text) {
   const dot = document.getElementById('fileStatusDot');
@@ -880,7 +937,7 @@ function renderSidebar() {
     const btn = document.createElement('button');
     btn.className = 'sidebar-item';
     btn.dataset.areaId = area.id;
-    btn.onclick = function() { showArea(area.id, this); };
+    btn.onclick = function() { showArea(area.id, this); closeSidebar(); };
     btn.innerHTML = `
       <span class="item-id">${area.id.toUpperCase()}</span>
       <span class="item-name">${area.name}</span>
@@ -1085,12 +1142,12 @@ function showArea(areaId, sidebarBtn) {
   area.subComps.forEach((sc, i) => {
     const scAchieved = sc.goals.filter(g => getGoalState(g.id).level >= g.max).length;
     html += `
-      <div class="sub-comp${i===0?' open':''}" id="sc-${sc.id}">
+      <div class="sub-comp" id="sc-${sc.id}">
         <button class="sub-comp-header" onclick="toggleSubComp('sc-${sc.id}')">
           <span class="sub-comp-id">${sc.id}</span>
           <span class="sub-comp-name">${sc.name}</span>
           <span class="sub-comp-stats">${scAchieved}/${sc.goals.length}</span>
-          <span class="chevron">▼</span>
+          <span class="accordion-icon"></span>
         </button>
         <div class="sub-comp-body">
           ${sc.goals.map(g => renderGoalRow(g)).join('')}
