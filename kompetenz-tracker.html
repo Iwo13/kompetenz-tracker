@@ -169,7 +169,7 @@
   .user-card-actions .btn-del:hover { border-color: #fca5a5; color: #dc2626; background: #fff1f2; }
 
   /* ── SCREEN 3: REGISTRATION ── */
-  .specialty-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .specialty-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .specialty-card {
     border: 2px solid var(--border); border-radius: 10px;
     padding: 16px 14px; cursor: pointer; transition: all .2s; user-select: none;
@@ -388,7 +388,7 @@
     .sidebar-overlay.visible { display: block; }
     .main { margin-left: 0; padding: 14px; }
     .goal-row { grid-template-columns: 60px 1fr; }
-    .specialty-cards { grid-template-columns: 1fr; }
+    .specialty-cards { grid-template-columns: 1fr 1fr; }
     .file-status-bar { left: 0; }
     .lehrjahr-badge { display: none; }
     .progress-ring-wrap { display: none; }
@@ -407,7 +407,7 @@
   <div class="modal" style="text-align:center">
     <div style="font-size:2.8rem; margin-bottom:12px">📋</div>
     <h1>Handlungskompetenz-Tracker</h1>
-    <p class="subtitle">Informatiker/in EFZ – Bildungsplan 88611</p>
+    <p class="subtitle">Informatiker/in EFZ · ICT-Fachmann/-frau EFZ</p>
 
     <p id="loadingMsg" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px">
       Verbinde mit Server…
@@ -449,17 +449,22 @@
     </div>
 
     <div class="form-group">
-      <label>Fachrichtung</label>
+      <label>Ausbildung</label>
       <div class="specialty-cards">
         <div class="specialty-card" data-value="platform" onclick="selectSpecialty(this)">
           <div class="card-icon">🖥️</div>
           <div class="card-title">Plattformentwicklung</div>
-          <div class="card-desc">Bereiche a–f</div>
+          <div class="card-desc">Informatiker/in EFZ</div>
         </div>
         <div class="specialty-card" data-value="app" onclick="selectSpecialty(this)">
           <div class="card-icon">💻</div>
           <div class="card-title">Applikationsentwicklung</div>
-          <div class="card-desc">Bereiche a–c, g–h</div>
+          <div class="card-desc">Informatiker/in EFZ</div>
+        </div>
+        <div class="specialty-card" data-value="ict-fachmann" onclick="selectSpecialty(this)">
+          <div class="card-icon">🔧</div>
+          <div class="card-title">ICT-Fachmann/-frau</div>
+          <div class="card-desc">ICT-Fachmann/-frau EFZ</div>
         </div>
       </div>
     </div>
@@ -514,7 +519,7 @@
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-brand-title">Handlungskompetenz-<br>Tracker</div>
-      <div class="sidebar-brand-sub">Informatiker/in EFZ</div>
+      <div class="sidebar-brand-sub" id="sidebarLehrberuf">Informatiker/in EFZ</div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-section-title">Navigation</div>
@@ -545,7 +550,8 @@
 const BLOOM_SHORT = ['–','Wissen','Verstehen','Anwenden','Analysieren','Synthese','Beurteilen'];
 const BLOOM_FULL  = ['K0 – Nicht bewertet','K1 – Wissen','K2 – Verstehen','K3 – Anwenden','K4 – Analysieren','K5 – Synthese','K6 – Beurteilen'];
 
-let AREAS = []; // wird via API geladen
+let AREAS_INFORMATIKER = []; // Informatiker/in EFZ (platform + app)
+let AREAS_ICT = [];          // ICT-Fachmann/-frau EFZ
 
 // ═══════════════════════════════════════════
 // API LAYER
@@ -595,14 +601,16 @@ async function initApp() {
   show('screenFile');
   try {
     // Kompetenzen und User parallel laden
-    const [compRes, usersRes] = await Promise.all([
+    const [compInfoRes, compIctRes, usersRes] = await Promise.all([
       fetch(`${API_URL}/competencies/kompetenzen-informatiker-efz`),
+      fetch(`${API_URL}/competencies/kompetenzen-ict-fachmann-efz`),
       fetch(`${API_URL}/users`)
     ]);
-    if (!compRes.ok) throw new Error(`Kompetenzen: HTTP ${compRes.status}`);
+    if (!compInfoRes.ok) throw new Error(`Kompetenzen Informatiker: HTTP ${compInfoRes.status}`);
+    if (!compIctRes.ok) throw new Error(`Kompetenzen ICT-Fachmann: HTTP ${compIctRes.status}`);
     if (!usersRes.ok) throw new Error(`Users: HTTP ${usersRes.status}`);
-    const compData = await compRes.json();
-    AREAS = compData.areas;
+    AREAS_INFORMATIKER = (await compInfoRes.json()).areas;
+    AREAS_ICT = (await compIctRes.json()).areas;
     users = (await usersRes.json()).map(normalizeUser);
     // Ziele für alle User vorladen (für Fortschrittsanzeige)
     await Promise.all(users.map(async u => {
@@ -698,7 +706,7 @@ function showUserSelectScreen() {
   users.forEach(user => {
     const prog = getUserProgress(user);
     const initials = user.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
-    const specialtyLabel = user.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
+    const specialtyLabel = getSpecialtyLabel(user.specialty);
     const startStr = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
     const card = document.createElement('div');
     card.className = 'user-card';
@@ -861,9 +869,24 @@ function enterApp() {
 // ═══════════════════════════════════════════
 // PROGRESS HELPERS
 // ═══════════════════════════════════════════
+function getAreas(user) {
+  const u = user || currentUser();
+  return (u && u.specialty === 'ict-fachmann') ? AREAS_ICT : AREAS_INFORMATIKER;
+}
+
+function getSpecialtyLabel(specialty) {
+  if (specialty === 'platform') return 'Plattformentwicklung';
+  if (specialty === 'app') return 'Applikationsentwicklung';
+  if (specialty === 'ict-fachmann') return 'ICT-Fachmann/-frau EFZ';
+  return specialty || '–';
+}
+
 function getVisibleAreas(user) {
-  const sp = user ? user.specialty : (currentUser() ? currentUser().specialty : 'both');
-  return AREAS.filter(a => a.specialty === 'both' || a.specialty === sp);
+  const u = user || currentUser();
+  const sp = u ? u.specialty : 'both';
+  const areas = getAreas(u);
+  if (sp === 'ict-fachmann') return areas;
+  return areas.filter(a => a.specialty === 'both' || a.specialty === sp);
 }
 
 function getAllGoalsForArea(area) {
@@ -916,8 +939,9 @@ function renderHeader() {
   const initials = u.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
   document.getElementById('headerAvatar').textContent = initials || '?';
   document.getElementById('headerName').textContent = u.name;
-  const specialtyLabel = u.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
-  document.getElementById('headerDetail').textContent = specialtyLabel;
+  document.getElementById('headerDetail').textContent = getSpecialtyLabel(u.specialty);
+  document.getElementById('sidebarLehrberuf').textContent =
+    u.specialty === 'ict-fachmann' ? 'ICT-Fachmann/-frau EFZ' : 'Informatiker/in EFZ';
   const lj = getLehrjahrInfo();
   document.getElementById('lehrjahrBadge').textContent = `${lj.current}. Lehrjahr`;
   const overall = getOverallProgress();
@@ -1114,11 +1138,14 @@ function showArea(areaId, sidebarBtn) {
   else document.querySelectorAll(`.sidebar-item[data-area-id="${areaId}"]`).forEach(b => b.classList.add('active'));
 
   const prog = getAreaProgress(area);
-  const specialtyTag = {
-    both:     '<span class="tag-specialty tag-both">Beide Fachrichtungen</span>',
-    platform: '<span class="tag-specialty tag-platform">Plattformentwicklung</span>',
-    app:      '<span class="tag-specialty tag-app">Applikationsentwicklung</span>',
-  }[area.specialty];
+  const userSp = currentUser() ? currentUser().specialty : '';
+  const specialtyTag = userSp === 'ict-fachmann'
+    ? '<span class="tag-specialty tag-both">ICT-Fachmann/-frau EFZ</span>'
+    : ({
+        both:     '<span class="tag-specialty tag-both">Beide Fachrichtungen</span>',
+        platform: '<span class="tag-specialty tag-platform">Plattformentwicklung</span>',
+        app:      '<span class="tag-specialty tag-app">Applikationsentwicklung</span>',
+      }[area.specialty] || '');
 
   let html = `
     <div class="area-header">
@@ -1300,7 +1327,10 @@ function generatePDF() {
   doc.text('Handlungskompetenz-Bericht', M, 12);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  doc.text('Informatiker/in EFZ – Bildungsplan 88611', M, 19);
+  const pdfLehrberuf = user.specialty === 'ict-fachmann'
+    ? 'ICT-Fachmann/-frau EFZ – Bildungsplan 88616'
+    : 'Informatiker/in EFZ – Bildungsplan 88611';
+  doc.text(pdfLehrberuf, M, 19);
   const heute = new Date().toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric' });
   doc.text(`Erstellt: ${heute}`, PW - M, 19, { align: 'right' });
 
@@ -1308,7 +1338,7 @@ function generatePDF() {
 
   // ── ÜBERSICHTS-KARTE (Person + Pie Chart) ────────────────────
   const lj       = getLehrjahrInfo();
-  const spLabel   = user.specialty === 'platform' ? 'Plattformentwicklung' : 'Applikationsentwicklung';
+  const spLabel   = getSpecialtyLabel(user.specialty);
   const startStr  = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
   const overall   = getOverallProgress();
   const initials  = user.name.split(' ').map(p => p[0]||'').join('').substring(0,2).toUpperCase();
