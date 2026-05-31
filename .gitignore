@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# .NET
+backend-dotnet/**/bin/
+backend-dotnet/**/obj/
+backend-dotnet/**/*.user
+
+# Umgebungsvariablen (sensible Daten)
+.env.local
+.env*.local
+
+# Temp-Dateien (Word/Excel)
+doku/~$*
+
+# Diverses
+test.txt
+*.DS_Store

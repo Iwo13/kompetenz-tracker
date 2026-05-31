@@ -165,6 +165,138 @@ def get_competencies(name: str):
         return json.load(f)
 
 
+# ── Endpunkte: Rotationen ────────────────────────────────────
+
+class RotationCreate(BaseModel):
+    ap_code: str
+    von: date
+    bis: Optional[date] = None
+
+class RotationOut(BaseModel):
+    id: str
+    user_id: str
+    ap_code: str
+    von: date
+    bis: Optional[date]
+    class Config:
+        from_attributes = True
+
+@app.get("/users/{user_id}/rotations", response_model=list[RotationOut])
+def get_rotations(user_id: str, db: Session = Depends(get_db)):
+    return (db.query(models.UserRotation)
+              .filter_by(user_id=user_id)
+              .order_by(models.UserRotation.von)
+              .all())
+
+@app.post("/users/{user_id}/rotations", response_model=RotationOut, status_code=201)
+def add_rotation(user_id: str, body: RotationCreate, db: Session = Depends(get_db)):
+    """Neuen Ausbildungsplatz-Eintrag hinzufügen. Überschneidungen sind erlaubt (werden im UI markiert)."""
+    rot = models.UserRotation(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        ap_code=body.ap_code,
+        von=body.von,
+        bis=body.bis,
+    )
+    db.add(rot)
+    db.commit()
+    db.refresh(rot)
+    return rot
+
+@app.put("/users/{user_id}/rotations/{rotation_id}", response_model=RotationOut)
+def update_rotation(user_id: str, rotation_id: str, body: RotationCreate, db: Session = Depends(get_db)):
+    rot = db.query(models.UserRotation).filter_by(id=rotation_id, user_id=user_id).first()
+    if not rot:
+        raise HTTPException(status_code=404, detail="Rotation nicht gefunden")
+    rot.ap_code = body.ap_code
+    rot.von     = body.von
+    rot.bis     = body.bis
+    db.commit()
+    db.refresh(rot)
+    return rot
+
+@app.delete("/users/{user_id}/rotations/{rotation_id}", status_code=204)
+def delete_rotation(user_id: str, rotation_id: str, db: Session = Depends(get_db)):
+    rot = db.query(models.UserRotation).filter_by(id=rotation_id, user_id=user_id).first()
+    if not rot:
+        raise HTTPException(status_code=404, detail="Rotation nicht gefunden")
+    db.delete(rot)
+    db.commit()
+
+
+# ── Endpunkte: Ausbildungsplätze ────────────────────────────
+
+AP_FILE = os.path.join(os.path.dirname(__file__), 'ausbildungsplaetze.json')
+
+@app.get("/ausbildungsplaetze")
+def get_ausbildungsplaetze():
+    """Alle Ausbildungsplätze mit Bereich-Mapping zurückgeben."""
+    with open(AP_FILE, encoding='utf-8') as f:
+        return json.load(f)
+
+class BereicheUpdate(BaseModel):
+    bereiche: dict
+
+@app.put("/ausbildungsplaetze/{code}/bereiche")
+def update_ap_bereiche(code: str, body: BereicheUpdate):
+    """Bereich-Zuordnung eines Ausbildungsplatzes aktualisieren (Legacy)."""
+    with open(AP_FILE, encoding='utf-8') as f:
+        data = json.load(f)
+    ap = next((a for a in data['ausbildungsplaetze'] if a['code'] == code), None)
+    if not ap:
+        raise HTTPException(status_code=404, detail="Ausbildungsplatz nicht gefunden")
+    if 'bereiche' not in ap:
+        ap['bereiche'] = {}
+    ap['bereiche'].update(body.bereiche)
+    with open(AP_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return ap
+
+class HkCoverageUpdate(BaseModel):
+    bildungsplan: str   # 'informatiker' | 'ict-fachmann'
+    hk_id: str
+    coverage: Optional[str] = None  # 'primary' | 'secondary' | null
+
+@app.put("/ausbildungsplaetze/{code}/hk")
+def update_ap_hk(code: str, body: HkCoverageUpdate):
+    """Einzelne Handlungskompetenz-Abdeckung speichern (Auto-Save)."""
+    with open(AP_FILE, encoding='utf-8') as f:
+        data = json.load(f)
+    ap = next((a for a in data['ausbildungsplaetze'] if a['code'] == code), None)
+    if not ap:
+        raise HTTPException(status_code=404, detail="Ausbildungsplatz nicht gefunden")
+    if 'hk_coverage' not in ap:
+        ap['hk_coverage'] = {}
+    if body.bildungsplan not in ap['hk_coverage']:
+        ap['hk_coverage'][body.bildungsplan] = {}
+    ap['hk_coverage'][body.bildungsplan][body.hk_id] = body.coverage
+    with open(AP_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return {'code': code, 'bildungsplan': body.bildungsplan,
+            'hk_id': body.hk_id, 'coverage': body.coverage}
+
+@app.post("/ausbildungsplaetze")
+def create_ausbildungsplatz(body: dict):
+    """Neuen Ausbildungsplatz anlegen."""
+    with open(AP_FILE, encoding='utf-8') as f:
+        data = json.load(f)
+    code = body.get('code', '').strip().upper()
+    if not code:
+        raise HTTPException(status_code=400, detail="Code fehlt")
+    if any(a['code'] == code for a in data['ausbildungsplaetze']):
+        raise HTTPException(status_code=409, detail="AP-Code bereits vorhanden")
+    new_ap = {
+        'code': code,
+        'name': body.get('name', code),
+        'abLehrjahr': body.get('abLehrjahr', 2),
+        'hk_coverage': {'informatiker': {}, 'ict-fachmann': {}},
+    }
+    data['ausbildungsplaetze'].append(new_ap)
+    with open(AP_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return new_ap
+
+
 # ── Startpunkt ───────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
