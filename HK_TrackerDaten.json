@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "users": [
+    {
+      "id": "mnui5ofekakgt",
+      "name": "PeterLehrling",
+      "specialty": "app",
+      "startDate": "2025-08-11",
+      "goals": {
+        "a1.2": {
+          "level": 2,
+          "date": "2026-04-11T15:41:45.816Z",
+          "comment": ""
+        },
+        "a1.1": {
+          "level": 3,
+          "date": "2026-04-11T16:06:48.136Z",
+          "comment": ""
+        },
+        "a1.3": {
+          "level": 3,
+          "date": "2026-04-11T15:42:16.506Z",
+          "comment": ""
+        }
+      }
+    },
+    {
+      "id": "mnui7l553a2s7",
+      "name": "MaxLehling",
+      "specialty": "platform",
+      "startDate": "2024-08-10",
+      "goals": {
+        "a1.1": {
+          "level": 3,
+          "date": "2026-04-11T18:01:41.526Z",
+          "comment": ""
+        }
+      }
+    },
+    {
+      "id": "mnuido8z46mip",
+      "name": "FelixApplikationsentwickler",
+      "specialty": "app",
+      "startDate": "2023-08-11",
+      "goals": {
+        "a1.6": {
+          "level": 2,
+          "date": "2026-04-11T15:50:05.823Z",
+          "comment": ""
+        },
+        "a1.1": {
+          "level": 3,
+          "date": "2026-04-11T15:51:09.373Z",
+          "comment": "ja"
+        },
+        "a1.2": {
+          "level": 5,
+          "date": "2026-04-11T15:51:05.380Z",
+          "comment": ""
+        }
+      }
+    },
+    {
+      "id": "mnuj9zkacv7m8",
+      "name": "Lehrling Appi",
+      "specialty": "app",
+      "startDate": "2025-08-10",
+      "goals": {}
+    }
+  ]
+}

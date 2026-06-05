@@ -1,0 +1,224 @@
+{
+  "lehrberuf": "ICT-Fachfrau / ICT-Fachmann EFZ",
+  "berufsnummer": "88616",
+  "version": "Bildungsplan SBFI vom 3. Juli 2025",
+  "areas": [
+    {
+      "id": "a",
+      "name": "Inbetriebnehmen von ICT-Benutzerendgeräten",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "a1",
+          "name": "ICT-Benutzerendgeräte beschaffen",
+          "goals": [
+            { "id": "a1.1", "text": "Sie nehmen Kundenanforderungen auf und erstellen daraus einen gewichteten Anforderungskatalog.", "max": 4 },
+            { "id": "a1.2", "text": "Sie beschaffen sich aufgrund des Anforderungskatalogs die notwendigen Produktinformationen.", "max": 4 },
+            { "id": "a1.3", "text": "Sie bewerten die gesammelten Produktinformationen im Anforderungskatalog und schaffen eine Entscheidungsgrundlage.", "max": 4 },
+            { "id": "a1.4", "text": "Sie klären die Verfügbarkeit, ökologische Aspekte sowie den Preis der gewählten Produktvariante ab.", "max": 3 },
+            { "id": "a1.5", "text": "Sie präsentieren dem Kunden oder der Kundin Empfehlungen und Alternativen (in mündlicher oder schriftlicher Form) und begründen diese nachvollziehbar.", "max": 3 },
+            { "id": "a1.6", "text": "Sie lösen den Beschaffungsprozess gemäss den betrieblichen Vorgaben und Dokumenten aus.", "max": 3 }
+          ]
+        },
+        {
+          "id": "a2",
+          "name": "ICT-Benutzerendgeräte installieren und konfigurieren",
+          "goals": [
+            { "id": "a2.1", "text": "Sie montieren Hardware-Komponenten wie z.B. Speichermedien, Anschlüsse, Gehäuseteile, Akkus unter Einhaltung von Vorgaben oder wechseln diese aus.", "max": 3 },
+            { "id": "a2.2", "text": "Sie installieren und konfigurieren Betriebssysteme nach Vorgaben auf unterschiedlichen ICT-Benutzerendgeräten.", "max": 3 },
+            { "id": "a2.3", "text": "Sie installieren und konfigurieren Peripheriegeräte und Geräteerweiterungen für den vorgesehenen Einsatz entsprechend den Firmenspezifikationen.", "max": 3 },
+            { "id": "a2.4", "text": "Sie installieren alle benötigten Updates/Patches wie z.B. OS, Software, BIOS, Firmware entsprechend den Firmen- oder Herstellervorgaben.", "max": 3 },
+            { "id": "a2.5", "text": "Sie löschen Daten auf alten Geräten.", "max": 3 },
+            { "id": "a2.6", "text": "Sie führen alte Geräte der Wiederverwendung zu oder entsorgen diese fachgerecht.", "max": 3 }
+          ]
+        },
+        {
+          "id": "a3",
+          "name": "ICT-Benutzerendgeräte auf ihre Funktion testen und die Tests auswerten",
+          "goals": [
+            { "id": "a3.1", "text": "Sie erstellen einen Plan für Funktionstests unter Berücksichtigung von betrieblichen Vorgaben.", "max": 4 },
+            { "id": "a3.2", "text": "Sie führen Funktionstests nach Vorgabe oder Testkonzept durch und protokollieren diese.", "max": 3 },
+            { "id": "a3.3", "text": "Sie beurteilen die Testresultate und bestimmen allfällige Massnahmen.", "max": 4 },
+            { "id": "a3.4", "text": "Sie passen bestehende Funktionstests aufgrund von neuen Rahmenbedingungen an.", "max": 4 }
+          ]
+        },
+        {
+          "id": "a4",
+          "name": "Die Inbetriebnahme von ICT-Benutzerendgeräten automatisieren",
+          "goals": [
+            { "id": "a4.1", "text": "Sie wenden die vorhandene Automatisierung zur Inbetriebnahme von ICT-Benutzerendgeräten an und kontrollieren deren Ausführung.", "max": 3 },
+            { "id": "a4.2", "text": "Sie nehmen einfache Anpassungen bei der Funktionalität von Automatisierungsmechanismen vor und achten dabei auf die Energieeffizienz (minimaler Energieverbrauch, maximale Effizienz).", "max": 4 },
+            { "id": "a4.3", "text": "Sie bestimmen und kommunizieren mögliche Massnahmen, wenn die automatisierte Inbetriebnahme fehlerhaft war (z.B. Test wiederholen, Logfiles sammeln und Fachabteilungen involvieren).", "max": 5 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "name": "Sicherstellen des Betriebs von ICT-Mitteln",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "b1",
+          "name": "Netzfähige Geräte konfigurieren und dazugehörige Dienste an Netzinfrastruktur anbinden und Störungen beheben",
+          "goals": [
+            { "id": "b1.1", "text": "Sie nehmen die Anforderungen von Kundinnen und Kunden auf und definieren die benötigten Geräte, Dienste und Komponenten.", "max": 4 },
+            { "id": "b1.2", "text": "Sie installieren und konfigurieren eine einfache Netzwerkumgebung (z.B. Switch, Router, Access-Point in einer LAN-Umgebung).", "max": 3 },
+            { "id": "b1.3", "text": "Sie integrieren ICT-Benutzerendgeräte und netzwerkfähige Peripheriegeräte (z.B. PC, Notebook, Thin Clients, mobile Geräte, Drucker, Multifunktionsgeräte und Telekommunikationsgeräte) in eine bestehende Netzwerkumgebung und achten dabei auf energieeffiziente Einstellungen.", "max": 3 },
+            { "id": "b1.4", "text": "Sie analysieren Störungen und grenzen diese innerhalb der Netzwerkumgebung ein.", "max": 4 },
+            { "id": "b1.5", "text": "Sie beheben Störungen oder leiten diese an die korrekte Stelle weiter.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b2",
+          "name": "ICT-Benutzerendgeräte an Dienste anbinden und Störungen beheben",
+          "goals": [
+            { "id": "b2.1", "text": "Sie konfigurieren ICT-Benutzerendgeräte, um diese an eingesetzte Dienste anzubinden (z.B. Server, Cloud).", "max": 3 },
+            { "id": "b2.2", "text": "Sie analysieren Störungen und legen Massnahmen fest.", "max": 4 },
+            { "id": "b2.3", "text": "Sie beheben einfache Störungen selbstständig oder leiten eine Störung mit allen benötigten Informationen an die korrekte Stelle weiter.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b3",
+          "name": "Einfache Sicherheitsstandards umsetzen, überprüfen und optimieren",
+          "goals": [
+            { "id": "b3.1", "text": "Sie installieren und konfigurieren auf ICT-Benutzerendgeräten gängige, ressourcenschonende Schutzsoftware.", "max": 3 },
+            { "id": "b3.2", "text": "Sie überprüfen und definieren den Unterhalt der eingesetzten Schutzmassnahmen (z.B. Aktualisierung, Überprüfung) unter Berücksichtigung von aktuellen Gefahren.", "max": 4 },
+            { "id": "b3.3", "text": "Sie setzen Schutzmassnahmen und Prozesse unter Berücksichtigung der Sicherheitsrichtlinien um (z.B. Erkennung und Beseitigung bei Befall durch Schadsoftware, Vorgehen bei Phishingversuchen).", "max": 3 }
+          ]
+        },
+        {
+          "id": "b4",
+          "name": "Anwendungen und Dienste installieren und konfigurieren",
+          "goals": [
+            { "id": "b4.1", "text": "Sie nehmen Kundenanforderungen auf und definieren die benötigten Anwendungen und Dienste sowie deren Spezifikationen (inkl. Integrations- und Kompatibilitätsüberprüfung).", "max": 4 },
+            { "id": "b4.2", "text": "Sie betreiben und konfigurieren Dienste zur Nutzung auf den Benutzerendgeräten.", "max": 3 },
+            { "id": "b4.3", "text": "Sie installieren und konfigurieren Anwendungen gemäss Vorgaben auf Benutzerendgeräten.", "max": 3 },
+            { "id": "b4.4", "text": "Sie passen die Lösung den Bedürfnissen der Endbenutzerin / des Endbenutzers an.", "max": 3 },
+            { "id": "b4.5", "text": "Sie analysieren Störungen bei Anwendungen und Diensten und definieren Massnahmen (z.B. Dienste neu starten).", "max": 5 },
+            { "id": "b4.6", "text": "Sie beheben einfache Störungen bei Anwendungen und Diensten selbstständig oder leiten diese an die korrekte Stelle weiter.", "max": 4 }
+          ]
+        },
+        {
+          "id": "b5",
+          "name": "Einfache Konfigurationen von ICT-Mitteln und ICT-Prozessen automatisieren",
+          "goals": [
+            { "id": "b5.1", "text": "Sie schätzen den zeitlichen Aufwand, die Wirtschaftlichkeit sowie die Energie- und Ressourceneffizienz für eine Automatisierung ab.", "max": 4 },
+            { "id": "b5.2", "text": "Sie wählen geeignete und aktuelle Technologien für die Automatisierung von Konfigurationen aus (z.B. Github, KI).", "max": 4 },
+            { "id": "b5.3", "text": "Sie automatisieren Konfigurationen mit aktuellen Technologien (z.B. Massenmutation, Daten kumulieren).", "max": 3 },
+            { "id": "b5.4", "text": "Sie interpretieren bestehende Automatisierungen und passen diese auf die neuen Bedürfnisse an.", "max": 4 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "name": "Unterstützen der Benutzerinnen und Benutzer",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "c1",
+          "name": "Benutzerinnen und Benutzer im Umgang mit ICT-Mitteln instruieren und unterstützen",
+          "goals": [
+            { "id": "c1.1", "text": "Sie bestimmen die Zielgruppe und deren Bedürfnisse.", "max": 4 },
+            { "id": "c1.2", "text": "Sie bereiten eine adressatengerechte Instruktion/Präsentation systematisch und sorgfältig vor.", "max": 3 },
+            { "id": "c1.3", "text": "Sie erstellen Hilfsmittel für die Instruktion (z.B. Präsentation, Lernvideo) anhand von geeigneten Tools und Medien.", "max": 3 },
+            { "id": "c1.4", "text": "Sie erstellen einfache Hilfsmittel für die Instruktion auf Englisch.", "max": 3 },
+            { "id": "c1.5", "text": "Sie instruieren Benutzerinnen und Benutzer adressatengerecht und zielgerichtet.", "max": 3 },
+            { "id": "c1.6", "text": "Sie erläutern Benutzerinnen und Benutzer energieoptimierte Geräteeinstellungen.", "max": 3 },
+            { "id": "c1.7", "text": "Sie beantworten Fragen verständlich und nachvollziehbar.", "max": 3 },
+            { "id": "c1.8", "text": "Sie holen gezielt Rückmeldungen bei den Teilnehmenden ein.", "max": 3 },
+            { "id": "c1.9", "text": "Sie instruieren Benutzerinnen und Benutzer auf Englisch und beantworten deren Fragen.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c2",
+          "name": "Anleitungen und Hilfsmittel für Benutzerinnen und Benutzer erstellen oder anpassen",
+          "goals": [
+            { "id": "c2.1", "text": "Sie bestimmen die Zielgruppe und deren Bedürfnisse.", "max": 4 },
+            { "id": "c2.2", "text": "Sie formulieren einfache und klare Ziele unter Berücksichtigung der betrieblichen Vorgaben.", "max": 3 },
+            { "id": "c2.3", "text": "Sie recherchieren die benötigten Informationen für die Umsetzung.", "max": 3 },
+            { "id": "c2.4", "text": "Sie erstellen Anleitungen und Hilfsmittel (z.B. Video) verständlich und klar strukturiert. Dabei wenden sie zeitgemässe Technologien an (z.B. Bots, KI, Self-Service).", "max": 3 },
+            { "id": "c2.5", "text": "Sie unterstützen zentrale Aussagen und Informationen mit geeigneten Visualisierungstechniken nachvollziehbar und wirksam.", "max": 3 },
+            { "id": "c2.6", "text": "Sie erstellen Anleitungen und Hilfsmittel auf Englisch.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c3",
+          "name": "Benutzerinnen und Benutzer im Umgang mit dem Datenschutz und der Datensicherheit sensibilisieren",
+          "goals": [
+            { "id": "c3.1", "text": "Sie klären Benutzerinnen und Benutzer über aktuelle Bedrohungen in Bezug auf Datenschutz und Datensicherheit auf.", "max": 3 },
+            { "id": "c3.2", "text": "Sie zeigen einer Benutzerin / einem Benutzer relevante Massnahmen für einen grundlegenden Datenschutz auf (z.B. Umgang mit Passwörtern / sensitiven Daten, Integrität, Vertraulichkeit).", "max": 3 },
+            { "id": "c3.3", "text": "Sie zeigen einer Benutzerin / einem Benutzer geeignete Massnahmen für die Gewährleistung der Datensicherheit auf (z.B. Verfügbarkeit, Phishing, Viren).", "max": 3 },
+            { "id": "c3.4", "text": "Sie unterstützen die Fachabteilung bei der Durchführung von Sensibilisierungskampagnen.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "name": "Planen, Organisieren und Abwickeln von ICT-Supportaufgaben",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "d1",
+          "name": "ICT-Supportanfragen entgegennehmen und bearbeiten",
+          "goals": [
+            { "id": "d1.1", "text": "Sie nehmen Kundenanfragen und Kundenbedürfnisse zuvorkommend entgegen.", "max": 3 },
+            { "id": "d1.2", "text": "Sie kategorisieren und priorisieren Kundenanfragen gemäss betrieblichen Vorgaben.", "max": 3 },
+            { "id": "d1.3", "text": "Sie grenzen mit gezielten Fragen die Problemstellung ein.", "max": 4 },
+            { "id": "d1.4", "text": "Sie beheben Supportanfragen eigenständig, effizient und zielgerichtet mit geeigneten Mitteln.", "max": 3 },
+            { "id": "d1.5", "text": "Sie leiten bei Bedarf Anfragen und Probleme mit allen nötigen Informationen an die korrekten Stellen weiter.", "max": 3 },
+            { "id": "d1.6", "text": "Sie dokumentieren die getätigten Arbeiten vollständig und nachvollziehbar für alle Beteiligten.", "max": 3 },
+            { "id": "d1.7", "text": "Sie informieren Endanwenderinnen und Endanwender adressatengerecht über den Stand der Arbeiten.", "max": 3 },
+            { "id": "d1.8", "text": "Sie unterstützen Endanwenderinnen und Endanwender bei der Lösung von Problemen mit geeigneten Methoden und Hilfsmitteln.", "max": 3 },
+            { "id": "d1.9", "text": "Sie bearbeiten ICT-Supportanfragen auf Englisch.", "max": 3 }
+          ]
+        },
+        {
+          "id": "d2",
+          "name": "Herausfordernde ICT-Supportanfragen analysieren und geeignete Deeskalationsstrategien anwenden",
+          "goals": [
+            { "id": "d2.1", "text": "Sie erkennen in der Kommunikation mit Benutzerinnen und Benutzern mögliches Konfliktpotenzial.", "max": 4 },
+            { "id": "d2.2", "text": "Sie deeskalieren Konflikte situationsgerecht, empathisch und mit geeigneten Kommunikationstechniken.", "max": 3 },
+            { "id": "d2.3", "text": "Sie erläutern mögliche technische Ursachen und Lösungswege sachlich, adressatengerecht und nachvollziehbar.", "max": 3 },
+            { "id": "d2.4", "text": "Sie legen die nächsten Schritte und Massnahmen gemeinsam mit dem Gegenüber fest (z.B. Weiterleiten an vorgesetzte Personen oder nächste Supportstufe).", "max": 3 },
+            { "id": "d2.5", "text": "Sie reflektieren die Konfliktsituation und halten die eigenen Erkenntnisse fest.", "max": 3 },
+            { "id": "d2.6", "text": "Sie deeskalieren Konflikte auf Englisch.", "max": 3 }
+          ]
+        },
+        {
+          "id": "d3",
+          "name": "Eigene Arbeiten im ICT-Geschäftsalltag priorisieren und organisieren",
+          "goals": [
+            { "id": "d3.1", "text": "Sie verschaffen sich eine Übersicht über die anstehenden Aufgaben und Tätigkeiten anhand von geeigneten Methoden und Hilfsmitteln.", "max": 3 },
+            { "id": "d3.2", "text": "Sie priorisieren Tagesgeschäft und anstehende Aufgaben nach Dringlichkeit und Wichtigkeit.", "max": 3 },
+            { "id": "d3.3", "text": "Sie erstellen eine Planung mit möglichst genauen Aufwandschätzungen.", "max": 3 },
+            { "id": "d3.4", "text": "Sie verschaffen sich nötige Informationen zu anfallenden Aufgaben zielgerichtet und eigenständig.", "max": 3 },
+            { "id": "d3.5", "text": "Sie reflektieren laufend getätigte Arbeiten unter Berücksichtigung von Zeitaufwand, Effizienz und Qualität.", "max": 3 }
+          ]
+        },
+        {
+          "id": "d4",
+          "name": "Aufgaben in ICT-Projekten planen, überprüfen und reflektieren",
+          "goals": [
+            { "id": "d4.1", "text": "Sie erstellen Pläne zur systematischen Abwicklung von Aufträgen unter Berücksichtigung der Ressourcen, Termine, Problemstellungen und Arbeitsteilungen.", "max": 4 },
+            { "id": "d4.2", "text": "Sie überprüfen im Projekt ausgeführte Arbeitsschritte und treffen geeignete Massnahmen (z.B. Terminbestätigungen einfordern, Abhängigkeiten prüfen).", "max": 3 },
+            { "id": "d4.3", "text": "Sie reflektieren ihren Beitrag zu den Projekten.", "max": 3 },
+            { "id": "d4.4", "text": "Sie geben konkrete Rückmeldungen zur fachlichen und organisatorischen Optimierung von Projekten.", "max": 4 }
+          ]
+        },
+        {
+          "id": "d5",
+          "name": "ICT-Mittel überwachen",
+          "goals": [
+            { "id": "d5.1", "text": "Sie nehmen ICT-Mittel in vorhandene Überwachungssysteme auf.", "max": 3 },
+            { "id": "d5.2", "text": "Sie bearbeiten automatisierte Störungsmeldungen gemäss betrieblichen Vorgaben.", "max": 3 },
+            { "id": "d5.3", "text": "Sie prüfen und identifizieren Störungen bei ICT-Mitteln gezielt.", "max": 3 },
+            { "id": "d5.4", "text": "Sie leiten bei Notwendigkeit die Störungsmeldung mit den vollständigen Informationen an die zuständige Stelle weiter.", "max": 3 }
+          ]
+        }
+      ]
+    }
+  ]
+}

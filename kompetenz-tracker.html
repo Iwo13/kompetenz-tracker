@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handlungskompetenz-Tracker – Informatik EFZ</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  :root {
+    /* FHNW Corporate Identity */
+    --fhnw-yellow: #FDE70E;
+    --fhnw-yellow-hover: #E8D200;
+    --fhnw-dark: #1a1a1a;
+    --fhnw-gray-block: #efefef;
+    --fhnw-gray-hover: #e2e2e2;
+
+    --primary: #1a3a5c;
+    --primary-light: #2d5a8e;
+    --primary-dark: #0f2236;
+    --accent: #e63946;
+    --bg: #f2f2f2;     
+    --surface: #ffffff;
+    --border: #d0d0d0;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --sidebar-w: 240px;
+
+    --k0-bg: #94a3b8; --k0-text: #fff;
+    --k1-bg: #60a5fa; --k1-text: #fff;
+    --k2-bg: #34d399; --k2-text: #fff;
+    --k3-bg: #a3e635; --k3-text: #1a1a1a;
+    --k4-bg: #fbbf24; --k4-text: #1a1a1a;
+    --k5-bg: #f97316; --k5-text: #fff;
+    --k6-bg: #a855f7; --k6-text: #fff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+
+  /* ── MODAL BASE ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,34,54,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: var(--surface); border-radius: 16px; padding: 40px;
+    width: min(540px, 95vw); box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
+  .modal .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
+  .modal h2 { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block; font-size: 0.82rem; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: .06em; margin-bottom: 7px;
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.95rem; color: var(--text); background: var(--surface);
+    transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none; border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(45,90,142,0.15);
+  }
+
+  .btn-primary {
+    width: 100%; padding: 12px; border: none; border-radius: 3px;
+    background: var(--fhnw-yellow); color: var(--fhnw-dark);
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background .2s; margin-top: 8px;
+  }
+  .btn-primary:hover { background: var(--fhnw-yellow-hover); }
+  .btn-primary:disabled { background: var(--border); color: #94a3b8; cursor: not-allowed; }
+
+  .btn-secondary {
+    width: 100%; padding: 11px; border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--text);
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: all .2s; margin-top: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--primary-light); background: #f0f6ff; }
+
+  .btn-danger {
+    padding: 8px 14px; border: 1.5px solid #fca5a5; border-radius: 8px;
+    background: #fff1f2; color: #dc2626;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-danger:hover { background: #fee2e2; border-color: #f87171; }
+
+  .btn-ghost {
+    padding: 8px 14px; border: none; border-radius: 8px;
+    background: none; color: var(--text-muted);
+    font-size: 0.85rem; cursor: pointer; transition: all .2s;
+  }
+  .btn-ghost:hover { background: #f1f5f9; color: var(--text); }
+
+  /* ── SCREEN 1: FILE PICKER ── */
+  .file-picker-card {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 32px 24px; text-align: center; margin-bottom: 16px;
+    transition: all .2s;
+  }
+  .file-picker-card:hover { border-color: var(--primary-light); background: #f8faff; }
+  .file-picker-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .file-picker-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; color: var(--primary); }
+  .file-picker-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+  .file-picker-btn {
+    margin-top: 14px; padding: 10px 24px; border: none; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all .2s;
+  }
+  .file-picker-btn.open { background: var(--primary); color: #fff; }
+  .file-picker-btn.open:hover { background: var(--primary-light); }
+  .file-picker-btn.new { background: #e8f0fb; color: var(--primary); border: 1.5px solid var(--primary-light); }
+  .file-picker-btn.new:hover { background: #d0e4f7; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+
+  .alert {
+    padding: 10px 14px; border-radius: 8px; font-size: 0.84rem;
+    margin-bottom: 16px; line-height: 1.5;
+  }
+  .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+  .alert-warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+  .alert-error { background: #fff1f2; border: 1px solid #fca5a5; color: #dc2626; }
+
+  /* ── SCREEN 2: USER SELECT ── */
+  .user-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .user-card {
+    display: flex; align-items: center; gap: 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: all .2s;
+    background: var(--surface);
+  }
+  .user-card:hover { border-color: var(--primary-light); background: #f0f6ff; }
+  .user-card.selected { border-color: var(--primary); background: #e8f0fb; }
+  .user-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+  }
+  .user-card-info { flex: 1; min-width: 0; }
+  .user-card-name { font-weight: 700; font-size: 0.95rem; }
+  .user-card-meta { font-size: 0.77rem; color: var(--text-muted); margin-top: 2px; }
+  .user-card-progress { font-size: 0.75rem; font-weight: 600; color: var(--primary); }
+  .user-card-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .user-card-actions button {
+    padding: 5px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text-muted); transition: all .15s; line-height: 1;
+  }
+  .user-card-actions .btn-edit:hover { border-color: var(--primary-light); color: var(--primary); background: #f0f6ff; }
+  .user-card-actions .btn-del:hover { border-color: #fca5a5; color: #dc2626; background: #fff1f2; }
+
+  /* ── SCREEN 3: REGISTRATION ── */
+  .specialty-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .specialty-card {
+    border: 2px solid var(--border); border-radius: 10px;
+    padding: 16px 14px; cursor: pointer; transition: all .2s; user-select: none;
+  }
+  .specialty-card:hover { border-color: var(--primary-light); background: #f0f6ff; }
+  .specialty-card.selected { border-color: var(--primary); background: #e8f0fb; }
+  .specialty-card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .specialty-card .card-title { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+  .specialty-card .card-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── LAYOUT ── */
+  .app { display: none; height: 100vh; overflow: hidden; }
+  .app.visible { display: flex; }
+
+  /* ── HEADER ── */
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; height: 58px;
+    background: var(--fhnw-yellow);
+    display: flex; align-items: center;
+    padding: 0; gap: 0; z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  }
+  .header-logo-wrap {
+    width: var(--sidebar-w); flex-shrink: 0; display: flex; align-items: center;
+    padding: 0 14px; height: 100%; border-right: 1px solid rgba(0,0,0,0.1);
+  }
+  .header-logo-wrap img { height: 28px; width: auto; }
+  .hamburger {
+    display: none; background: none; border: none; cursor: pointer;
+    font-size: 1.5rem; color: var(--fhnw-dark); padding: 10px 12px; line-height: 1; flex-shrink: 0;
+  }
+  .header-title { font-size: 0.88rem; font-weight: 700; color: var(--fhnw-dark); white-space: nowrap; flex-shrink: 0; padding: 0 16px; }
+  .header-user { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 0 8px; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--fhnw-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; color: var(--fhnw-yellow); flex-shrink: 0;
+  }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 0.88rem; font-weight: 600; color: var(--fhnw-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-detail { font-size: 0.72rem; color: #555; }
+  .header-progress { display: flex; align-items: center; gap: 8px; margin-left: auto; padding-right: 12px; }
+  .progress-ring-wrap { position: relative; width: 36px; height: 36px; }
+  .progress-ring-wrap svg { transform: rotate(-90deg); }
+  .progress-ring-value {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700; color: var(--fhnw-dark);
+  }
+  .lehrjahr-badge {
+    background: var(--fhnw-dark); color: var(--fhnw-yellow);
+    padding: 4px 10px; border-radius: 3px;
+    font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  }
+  .header-btn {
+    background: none; border: 1.5px solid rgba(0,0,0,0.2); color: var(--fhnw-dark);
+    cursor: pointer; padding: 5px 10px;
+    border-radius: 4px; transition: background .2s; white-space: nowrap; font-size: 0.8rem; font-weight: 600;
+  }
+  .header-btn:hover { background: rgba(0,0,0,0.1); }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; left: 0; top: 58px; bottom: 0; width: var(--sidebar-w);
+    background: var(--fhnw-yellow); overflow-y: auto; z-index: 90;
+    border-right: 1px solid rgba(0,0,0,0.1);
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 2px; }
+  .sidebar-brand { padding: 14px 12px 12px; border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 4px; }
+  .sidebar-brand-title { font-size: 0.85rem; font-weight: 700; color: var(--fhnw-dark); line-height: 1.3; }
+  .sidebar-brand-sub { font-size: 0.7rem; color: rgba(0,0,0,0.5); margin-top: 2px; }
+  .sidebar-section { padding: 10px 10px 4px; }
+  .sidebar-section-title { font-size: 0.65rem; font-weight: 700; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 3px; cursor: pointer;
+    color: var(--fhnw-dark); font-size: 0.85rem; transition: background .12s;
+    margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left;
+  }
+  .sidebar-item:hover { background: rgba(0,0,0,0.08); }
+  .sidebar-item.active { background: #fff; font-weight: 700; }
+  .sidebar-item .item-badge { margin-left: auto; font-size: 0.7rem; font-weight: 700; background: rgba(0,0,0,0.12); padding: 2px 6px; border-radius: 10px; white-space: nowrap; }
+  .sidebar-item .item-id { font-weight: 800; font-size: 0.82rem; width: 20px; flex-shrink: 0; text-align: center; }
+  .sidebar-item .item-name { flex: 1; font-size: 0.8rem; line-height: 1.3; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 89; }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); margin-top: 58px; flex: 1; overflow-y: auto; padding: 24px; }
+
+  .area-header {
+    background: var(--surface); border-radius: 2px; padding: 22px 24px; margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-left: 5px solid var(--fhnw-yellow);
+  }
+  .area-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+  .area-header .area-id { display: inline-block; background: var(--primary); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .area-header .area-meta { font-size: 0.82rem; color: var(--text-muted); }
+  .area-progress-bar-wrap { margin-top: 14px; }
+  .area-progress-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 5px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 4px; transition: width .4s ease; }
+
+  /* ── SUB-COMPETENCY (FHNW Accordion) ── */
+  .sub-comp { background: var(--surface); border-radius: 0; margin-bottom: 5px; border: 1px solid #d0d0d0; overflow: hidden; }
+  .sub-comp-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; background: var(--fhnw-gray-block); border: none; width: 100%; text-align: left; transition: background .12s; color: var(--fhnw-dark); }
+  .sub-comp-header:hover { background: var(--fhnw-gray-hover); }
+  .sub-comp.open .sub-comp-header { background: var(--fhnw-yellow); }
+  .sub-comp-id { font-size: 0.72rem; font-weight: 700; color: #555; white-space: nowrap; flex-shrink: 0; }
+  .sub-comp-name { font-weight: 500; font-size: 0.9rem; flex: 1; text-align: left; color: var(--fhnw-dark); }
+  .sub-comp.open .sub-comp-name { font-weight: 700; }
+  .sub-comp-stats { font-size: 0.78rem; color: #666; white-space: nowrap; margin-right: 6px; }
+  .accordion-icon { font-size: 1.4rem; font-weight: 300; color: #333; line-height: 1; flex-shrink: 0; width: 20px; text-align: center; }
+  .accordion-icon::before { content: '+'; }
+  .sub-comp.open .accordion-icon::before { content: '×'; }
+  .chevron { display: none; }
+  .sub-comp-body { display: none; border-top: 1px solid #d0d0d0; }
+  .sub-comp.open .sub-comp-body { display: block; }
+
+  /* ── GOAL ROW ── */
+  .goal-row { display: grid; grid-template-columns: 80px 1fr; gap: 0; border-bottom: 1px solid #f1f5f9; padding: 14px 18px; align-items: start; }
+  .goal-row:last-child { border-bottom: none; }
+  .goal-id { font-size: 0.78rem; font-weight: 700; color: var(--primary); padding-top: 4px; }
+  .goal-content { min-width: 0; }
+  .goal-text { font-size: 0.87rem; line-height: 1.5; margin-bottom: 10px; }
+  .goal-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .k-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+  .k-btn { width: 36px; height: 28px; border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 0.73rem; font-weight: 700; transition: all .15s; line-height: 1; }
+  .k-btn[data-level="0"] { background: var(--k0-bg); color: var(--k0-text); }
+  .k-btn[data-level="1"] { background: var(--k1-bg); color: var(--k1-text); }
+  .k-btn[data-level="2"] { background: var(--k2-bg); color: var(--k2-text); }
+  .k-btn[data-level="3"] { background: var(--k3-bg); color: var(--k3-text); }
+  .k-btn[data-level="4"] { background: var(--k4-bg); color: var(--k4-text); }
+  .k-btn[data-level="5"] { background: var(--k5-bg); color: var(--k5-text); }
+  .k-btn[data-level="6"] { background: var(--k6-bg); color: var(--k6-text); }
+  .k-btn.selected { border-color: #1e293b; box-shadow: 0 0 0 2px rgba(30,41,59,0.3); transform: scale(1.1); }
+  .k-btn:hover:not(.selected):not(:disabled) { opacity: 0.85; transform: scale(1.05); }
+  .k-btn.over-max { opacity: 0.3; cursor: not-allowed; }
+  .goal-max-badge { font-size: 0.7rem; color: var(--text-muted); background: #f1f5f9; padding: 3px 8px; border-radius: 20px; white-space: nowrap; align-self: center; }
+  .goal-date { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
+  .goal-comment { width: 100%; resize: vertical; min-height: 52px; border: 1.5px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 0.83rem; font-family: inherit; color: var(--text); transition: border-color .2s; }
+  .goal-comment:focus { outline: none; border-color: var(--primary-light); }
+  .goal-comment.saving { border-color: #fbbf24; }
+
+  /* ── OVERVIEW ── */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .overview-card { background: var(--surface); border-radius: 12px; padding: 16px; border: 1.5px solid var(--border); cursor: pointer; transition: all .2s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .overview-card:hover { border-color: var(--primary-light); box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .ov-id { font-size: 0.78rem; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+  .ov-name { font-size: 0.82rem; font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+  .ov-progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .ov-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), #60a5fa); border-radius: 3px; }
+  .ov-pct { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* ── PIE CHART ── */
+  .pie-section { background: var(--surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .pie-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
+  .pie-layout { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .pie-chart-wrap { flex-shrink: 0; }
+  .pie-chart-wrap svg { overflow: visible; }
+  .pie-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 180px; }
+  .pie-legend-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+  .pie-legend-item:hover { background: var(--bg); }
+  .pie-legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .pie-legend-text { display: flex; flex-direction: column; gap: 1px; }
+  .pie-legend-label { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+  .pie-legend-sub { font-size: 0.72rem; color: var(--text-muted); }
+  .pie-legend-inactive { opacity: 0.45; }
+
+  /* ── LEHRJAHR ── */
+  .lehrjahr-section { background: var(--surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .lehrjahr-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; color: var(--primary); }
+  .lehrjahr-bars { display: flex; gap: 10px; align-items: center; }
+  .lj-bar-wrap { flex: 1; }
+  .lj-label { font-size: 0.73rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-align: center; }
+  .lj-bar { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+  .lj-fill { height: 100%; border-radius: 5px; transition: width .4s; }
+  .lj-fill.lj-done { background: #34d399; }
+  .lj-fill.lj-current { background: linear-gradient(90deg, var(--primary-light), #60a5fa); }
+  .lj-pct { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 3px; }
+
+  .bloom-legend { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 18px; background: #f8fafc; border-top: 1px solid var(--border); }
+  .bloom-item { display: flex; align-items: center; gap: 5px; font-size: 0.73rem; color: var(--text-muted); }
+  .bloom-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  .tag-specialty { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+  .tag-both { background: #dbeafe; color: #1d4ed8; }
+  .tag-platform { background: #dcfce7; color: #166534; }
+  .tag-app { background: #fae8ff; color: #86198f; }
+
+  /* ── FILE STATUS BAR ── */
+  .file-status-bar {
+    position: fixed; bottom: 0; left: var(--sidebar-w); right: 0;
+    background: #f8fafc; border-top: 1px solid var(--border);
+    padding: 5px 16px; display: flex; align-items: center; gap: 10px;
+    font-size: 0.76rem; color: var(--text-muted); z-index: 80;
+  }
+  .file-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+  .file-status-dot.saved { background: #34d399; }
+  .file-status-dot.saving { background: #fbbf24; animation: pulse 1s infinite; }
+  .file-status-dot.error { background: #ef4444; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── USER SWITCHER MODAL ── */
+  .modal-sm { width: min(440px, 95vw); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions .btn-primary { flex: 1; margin-top: 0; }
+  .modal-actions .btn-secondary { flex: 1; margin-top: 0; }
+
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; }
+    .header-logo-wrap { display: none; }
+    .header { padding: 0; gap: 0; }
+    .hamburger { display: flex; align-items: center; }
+    .header-title { flex: 1; padding: 0 8px; }
+    .sidebar { transform: translateX(-260px); width: 260px; transition: transform .3s; top: 58px; }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.2); }
+    .sidebar-overlay.visible { display: block; }
+    .main { margin-left: 0; padding: 14px; }
+    .goal-row { grid-template-columns: 60px 1fr; }
+    .specialty-cards { grid-template-columns: 1fr 1fr; }
+    .file-status-bar { left: 0; }
+    .lehrjahr-badge { display: none; }
+    .progress-ring-wrap { display: none; }
+    .header-btn span { display: none; }
+  }
+
+  .no-fsa-notice { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #92400e; margin-bottom: 16px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: LOADING / API ERROR
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="screenFile">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:2.8rem; margin-bottom:12px">📋</div>
+    <h1>Handlungskompetenz-Tracker</h1>
+    <p class="subtitle">Informatiker/in EFZ · ICT-Fachmann/-frau EFZ</p>
+
+    <p id="loadingMsg" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px">
+      Verbinde mit Server…
+    </p>
+
+    <div id="apiError" class="alert alert-error hidden" style="margin-top:8px; text-align:left; background:#fff1f2; border:1px solid #fca5a5; border-radius:8px; padding:12px 14px; font-size:0.87rem; color:#dc2626;"></div>
+
+    <button id="btnRetry" class="btn-primary hidden" onclick="initApp()" style="margin-top:12px">
+      Erneut versuchen
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2: USER SELECT
+══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="screenUserSelect">
+  <div class="modal">
+    <h1>Person auswählen</h1>
+    <p class="subtitle" id="userSelectSubtitle">Wähle dein Profil oder erfasse eine neue Person.</p>
+
+    <div id="userList" class="user-list"></div>
+
+    <button class="btn-secondary" onclick="showRegistration(null)">+ Neue Person erfassen</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3: REGISTRATION / EDIT
+══════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="screenRegister">
+  <div class="modal">
+    <h1 id="registerTitle">Neue Person</h1>
+    <p class="subtitle">Grunddaten erfassen</p>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="inputName" placeholder="Vorname Nachname" autocomplete="off">
+    </div>
+
+    <div class="form-group">
+      <label>Ausbildung</label>
+      <div class="specialty-cards">
+        <div class="specialty-card" data-value="platform" onclick="selectSpecialty(this)">
+          <div class="card-icon">🖥️</div>
+          <div class="card-title">Plattformentwicklung</div>
+          <div class="card-desc">Informatiker/in EFZ</div>
+        </div>
+        <div class="specialty-card" data-value="app" onclick="selectSpecialty(this)">
+          <div class="card-icon">💻</div>
+          <div class="card-title">Applikationsentwicklung</div>
+          <div class="card-desc">Informatiker/in EFZ</div>
+        </div>
+        <div class="specialty-card" data-value="ict-fachmann" onclick="selectSpecialty(this)">
+          <div class="card-icon">🔧</div>
+          <div class="card-title">ICT-Fachmann/-frau</div>
+          <div class="card-desc">ICT-Fachmann/-frau EFZ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Lehrstart</label>
+      <input type="date" id="inputStartDate">
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn-ghost" style="flex:0 0 auto" onclick="cancelRegistration()">Abbrechen</button>
+      <button class="btn-primary" id="btnSaveUser" onclick="saveUser()" disabled style="flex:1; margin-top:0">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+<div class="app" id="app">
+  <header class="header">
+    <div class="header-logo-wrap">
+      <img src="FHNW_Logo.webp" alt="FHNW Nordwestschweiz">
+    </div>
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Navigation">☰</button>
+    <div class="header-title">Handlungskompetenz-Tracker</div>
+    <div class="header-user">
+      <div class="avatar" id="headerAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="headerName">–</div>
+        <div class="user-detail" id="headerDetail">–</div>
+      </div>
+    </div>
+    <div class="header-progress">
+      <div class="lehrjahr-badge" id="lehrjahrBadge">LJ 1</div>
+      <div class="progress-ring-wrap" title="Gesamtfortschritt">
+        <svg width="36" height="36">
+          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="3"/>
+          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(0,0,0,0.6)" stroke-width="3"
+            stroke-dasharray="87.96" stroke-dashoffset="87.96"
+            id="progressCircle" stroke-linecap="round"/>
+        </svg>
+        <div class="progress-ring-value" id="progressPct">0%</div>
+      </div>
+      <button class="header-btn" onclick="showUserSwitcher()" title="Person wechseln">👤 Wechseln</button>
+      <button class="header-btn" onclick="showEditCurrentUser()" title="Profil bearbeiten">⚙</button>
+      <button class="header-btn" onclick="generatePDF()" title="PDF-Bericht erstellen" style="border:none;padding:4px 6px;"><img src="IconPDF.png" style="height:22px;display:block"></button>
+    </div>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-title">Handlungskompetenz-<br>Tracker</div>
+      <div class="sidebar-brand-sub" id="sidebarLehrberuf">Informatiker/in EFZ</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Navigation</div>
+      <button class="sidebar-item active" onclick="showOverview(this); closeSidebar()">
+        <span class="item-id"><img src="IconBuch.png" style="height:16px;width:16px;object-fit:contain;display:block"></span>
+        <span class="item-name">Übersicht</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Bereiche</div>
+      <div id="sidebarItems"></div>
+    </div>
+  </nav>
+
+  <main class="main" id="mainContent" style="padding-bottom:36px"></main>
+
+  <div class="file-status-bar" id="fileStatusBar">
+    <div class="file-status-dot saved" id="fileStatusDot"></div>
+    <span id="fileStatusText">Gespeichert</span>
+    <span style="margin-left:auto; opacity:0.6" id="fileStatusName"></span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// COMPETENCY DATA
+// ═══════════════════════════════════════════
+const BLOOM_SHORT = ['–','Wissen','Verstehen','Anwenden','Analysieren','Synthese','Beurteilen'];
+const BLOOM_FULL  = ['K0 – Nicht bewertet','K1 – Wissen','K2 – Verstehen','K3 – Anwenden','K4 – Analysieren','K5 – Synthese','K6 – Beurteilen'];
+
+let AREAS_INFORMATIKER = []; // Informatiker/in EFZ (platform + app)
+let AREAS_ICT = [];          // ICT-Fachmann/-frau EFZ
+
+// ═══════════════════════════════════════════
+// API LAYER
+// ═══════════════════════════════════════════
+const API_URL = 'http://127.0.0.1:8000';
+let users = [];
+let currentUserId = null;
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const open = sidebar.classList.toggle('open');
+  overlay.classList.toggle('visible', open);
+  document.getElementById('hamburgerBtn').textContent = open ? '✕' : '☰';
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('visible');
+  const btn = document.getElementById('hamburgerBtn');
+  if (btn) btn.textContent = '☰';
+}
+
+function setApiStatus(state, text) {
+  const dot = document.getElementById('fileStatusDot');
+  const txt = document.getElementById('fileStatusText');
+  dot.className = 'file-status-dot ' + (state || '');
+  if (txt) txt.textContent = text || '';
+}
+
+function normalizeUser(apiUser) {
+  return {
+    id: apiUser.id,
+    name: apiUser.name,
+    specialty: apiUser.specialty,
+    startDate: apiUser.start_date,
+    goals: {}
+  };
+}
+
+async function initApp() {
+  document.getElementById('loadingMsg').textContent = 'Verbinde mit Server…';
+  document.getElementById('apiError').classList.add('hidden');
+  document.getElementById('btnRetry').classList.add('hidden');
+  show('screenFile');
+  try {
+    // Kompetenzen und User parallel laden
+    const [compInfoRes, compIctRes, usersRes] = await Promise.all([
+      fetch(`${API_URL}/competencies/kompetenzen-informatiker-efz`),
+      fetch(`${API_URL}/competencies/kompetenzen-ict-fachmann-efz`),
+      fetch(`${API_URL}/users`)
+    ]);
+    if (!compInfoRes.ok) throw new Error(`Kompetenzen Informatiker: HTTP ${compInfoRes.status}`);
+    if (!compIctRes.ok) throw new Error(`Kompetenzen ICT-Fachmann: HTTP ${compIctRes.status}`);
+    if (!usersRes.ok) throw new Error(`Users: HTTP ${usersRes.status}`);
+    AREAS_INFORMATIKER = (await compInfoRes.json()).areas;
+    AREAS_ICT = (await compIctRes.json()).areas;
+    users = (await usersRes.json()).map(normalizeUser);
+    // Ziele für alle User vorladen (für Fortschrittsanzeige)
+    await Promise.all(users.map(async u => {
+      try {
+        const gr = await fetch(`${API_URL}/users/${u.id}/goals`);
+        const goalList = await gr.json();
+        goalList.forEach(g => {
+          u.goals[g.goal_id] = { level: g.level, comment: g.comment || '', date: g.updated_at };
+        });
+      } catch(e) { /* goals bleiben leer */ }
+    }));
+    hide('screenFile');
+    if (users.length === 0) {
+      showRegistration(null);
+    } else {
+      showUserSelectScreen();
+    }
+  } catch(e) {
+    document.getElementById('loadingMsg').textContent = '';
+    document.getElementById('apiError').textContent =
+      'Server nicht erreichbar. Ist das Backend gestartet? (' + e.message + ')';
+    document.getElementById('apiError').classList.remove('hidden');
+    document.getElementById('btnRetry').classList.remove('hidden');
+  }
+}
+
+// ═══════════════════════════════════════════
+// USER HELPERS
+// ═══════════════════════════════════════════
+function getUser(id) {
+  return users.find(u => u.id === id);
+}
+
+function currentUser() {
+  return getUser(currentUserId);
+}
+
+function getGoalState(goalId) {
+  const u = currentUser();
+  return (u && u.goals && u.goals[goalId]) || { level: 0, date: null, comment: '' };
+}
+
+async function setGoalLevel(goalId, level) {
+  const u = currentUser();
+  if (!u) return;
+  if (!u.goals) u.goals = {};
+  if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
+  u.goals[goalId].level = level;
+  u.goals[goalId].date = new Date().toISOString();
+  setApiStatus('saving', 'Speichert…');
+  try {
+    await fetch(`${API_URL}/users/${currentUserId}/goals/${goalId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal_id: goalId, level, comment: u.goals[goalId].comment || '' })
+    });
+    setApiStatus('saved', 'Gespeichert');
+  } catch(e) {
+    setApiStatus('error', 'Fehler beim Speichern!');
+  }
+}
+
+async function setGoalComment(goalId, comment) {
+  const u = currentUser();
+  if (!u) return;
+  if (!u.goals) u.goals = {};
+  if (!u.goals[goalId]) u.goals[goalId] = { level: 0, date: null, comment: '' };
+  u.goals[goalId].comment = comment;
+  u.goals[goalId].date = new Date().toISOString();
+  setApiStatus('saving', 'Speichert…');
+  try {
+    await fetch(`${API_URL}/users/${currentUserId}/goals/${goalId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal_id: goalId, level: u.goals[goalId].level || 0, comment })
+    });
+    setApiStatus('saved', 'Gespeichert');
+  } catch(e) {
+    setApiStatus('error', 'Fehler beim Speichern!');
+  }
+}
+
+// ═══════════════════════════════════════════
+// USER SELECT SCREEN
+// ═══════════════════════════════════════════
+function showUserSelectScreen() {
+  hide('screenRegister');
+  document.getElementById('userSelectSubtitle').textContent =
+    `Backend-API · ${users.length} Person${users.length !== 1 ? 'en' : ''}`;
+
+  const list = document.getElementById('userList');
+  list.innerHTML = '';
+  users.forEach(user => {
+    const prog = getUserProgress(user);
+    const initials = user.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
+    const specialtyLabel = getSpecialtyLabel(user.specialty);
+    const startStr = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
+    const card = document.createElement('div');
+    card.className = 'user-card';
+    card.innerHTML = `
+      <div class="user-avatar">${initials}</div>
+      <div class="user-card-info">
+        <div class="user-card-name">${escHtml(user.name)}</div>
+        <div class="user-card-meta">${specialtyLabel} · Lehrstart: ${startStr}</div>
+        <div class="user-card-progress">${prog.achieved}/${prog.total} Leistungsziele bewertet (${prog.pct}%)</div>
+      </div>
+      <div class="user-card-actions">
+        <button class="btn-edit" title="Bearbeiten" onclick="event.stopPropagation(); editUserFromSwitcher('${user.id}')">✏ Bearbeiten</button>
+        <button class="btn-del"  title="Löschen"    onclick="event.stopPropagation(); deleteUser('${user.id}')">🗑 Löschen</button>
+      </div>
+    `;
+    card.onclick = () => selectAndEnterApp(user.id);
+    list.appendChild(card);
+  });
+  show('screenUserSelect');
+}
+
+function selectAndEnterApp(userId) {
+  currentUserId = userId;
+  hide('screenUserSelect');
+  hide('screenRegister');
+  enterApp();
+}
+
+function showUserSwitcher() {
+  showUserSelectScreen();
+  hide('app');
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════
+// REGISTRATION / EDIT
+// ═══════════════════════════════════════════
+let editingUserId = null;
+let selectedSpecialty = '';
+let editReturnToSwitcher = false;
+
+function editUserFromSwitcher(userId) {
+  editReturnToSwitcher = true;
+  showRegistration(userId);
+}
+
+async function deleteUser(userId) {
+  const user = getUser(userId);
+  if (!user) return;
+  if (!confirm(`Person "${user.name}" wirklich löschen?\n\nAlle erfassten Kompetenzdaten dieser Person gehen verloren.`)) return;
+  try {
+    await fetch(`${API_URL}/users/${userId}`, { method: 'DELETE' });
+  } catch(e) {
+    alert('Fehler beim Löschen: ' + e.message);
+    return;
+  }
+  users = users.filter(u => u.id !== userId);
+  if (currentUserId === userId) currentUserId = null;
+  showUserSelectScreen();
+}
+
+function showRegistration(userId) {
+  editingUserId = userId;
+  const user = userId ? getUser(userId) : null;
+  document.getElementById('registerTitle').textContent = user ? 'Profil bearbeiten' : 'Neue Person';
+  document.getElementById('inputName').value = user ? user.name : '';
+  document.getElementById('inputStartDate').value = user ? (user.startDate || '') : '';
+  selectedSpecialty = user ? user.specialty : '';
+  document.querySelectorAll('.specialty-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.value === selectedSpecialty);
+  });
+  hide('screenUserSelect');
+  validateRegForm();
+  show('screenRegister');
+}
+
+function showEditCurrentUser() {
+  showRegistration(currentUserId);
+}
+
+function cancelRegistration() {
+  const returnToSwitcher = editReturnToSwitcher;
+  editReturnToSwitcher = false;
+  hide('screenRegister');
+  showUserSelectScreen();
+}
+
+function selectSpecialty(card) {
+  document.querySelectorAll('.specialty-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedSpecialty = card.dataset.value;
+  validateRegForm();
+}
+
+function validateRegForm() {
+  const name = document.getElementById('inputName').value.trim();
+  const date = document.getElementById('inputStartDate').value;
+  document.getElementById('btnSaveUser').disabled = !(name && selectedSpecialty && date);
+}
+
+document.getElementById('inputName').addEventListener('input', validateRegForm);
+document.getElementById('inputStartDate').addEventListener('input', validateRegForm);
+
+async function saveUser() {
+  const name = document.getElementById('inputName').value.trim();
+  const startDate = document.getElementById('inputStartDate').value;
+  const body = JSON.stringify({ name, specialty: selectedSpecialty, start_date: startDate });
+
+  if (editingUserId) {
+    try {
+      const res = await fetch(`${API_URL}/users/${editingUserId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body
+      });
+      const updated = await res.json();
+      const u = getUser(editingUserId);
+      u.name = updated.name;
+      u.specialty = updated.specialty;
+      u.startDate = updated.start_date;
+    } catch(e) {
+      alert('Fehler beim Speichern: ' + e.message);
+      return;
+    }
+  } else {
+    try {
+      const res = await fetch(`${API_URL}/users`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body
+      });
+      const created = await res.json();
+      const newUser = normalizeUser(created);
+      users.push(newUser);
+      editingUserId = newUser.id;
+    } catch(e) {
+      alert('Fehler beim Speichern: ' + e.message);
+      return;
+    }
+  }
+  hide('screenRegister');
+  if (editReturnToSwitcher) {
+    editReturnToSwitcher = false;
+    showUserSelectScreen();
+  } else if (editingUserId === currentUserId) {
+    enterApp();
+  } else {
+    currentUserId = editingUserId;
+    enterApp();
+  }
+}
+
+// ═══════════════════════════════════════════
+// APP ENTRY
+// ═══════════════════════════════════════════
+function enterApp() {
+  setApiStatus('saved', 'Verbunden mit Backend');
+  document.getElementById('app').classList.add('visible');
+  renderHeader();
+  renderSidebar();
+  showOverview(document.querySelector('#sidebar .sidebar-item'));
+}
+
+// ═══════════════════════════════════════════
+// PROGRESS HELPERS
+// ═══════════════════════════════════════════
+function getAreas(user) {
+  const u = user || currentUser();
+  return (u && u.specialty === 'ict-fachmann') ? AREAS_ICT : AREAS_INFORMATIKER;
+}
+
+function getSpecialtyLabel(specialty) {
+  if (specialty === 'platform') return 'Plattformentwicklung';
+  if (specialty === 'app') return 'Applikationsentwicklung';
+  if (specialty === 'ict-fachmann') return 'ICT-Fachmann/-frau EFZ';
+  return specialty || '–';
+}
+
+function getVisibleAreas(user) {
+  const u = user || currentUser();
+  const sp = u ? u.specialty : 'both';
+  const areas = getAreas(u);
+  if (sp === 'ict-fachmann') return areas;
+  return areas.filter(a => a.specialty === 'both' || a.specialty === sp);
+}
+
+function getAllGoalsForArea(area) {
+  return area.subComps.flatMap(sc => sc.goals);
+}
+
+function getAreaProgress(area) {
+  const goals = getAllGoalsForArea(area);
+  const achieved = goals.filter(g => getGoalState(g.id).level >= g.max).length;
+  return { achieved, total: goals.length, pct: goals.length ? Math.round(achieved/goals.length*100) : 0 };
+}
+
+function getUserProgress(user) {
+  const areas = getVisibleAreas(user);
+  const allGoals = areas.flatMap(a => getAllGoalsForArea(a));
+  const achieved = allGoals.filter(g => {
+    const gs = (user.goals && user.goals[g.id]) || {};
+    return (gs.level || 0) >= g.max;
+  }).length;
+  return { achieved, total: allGoals.length, pct: allGoals.length ? Math.round(achieved/allGoals.length*100) : 0 };
+}
+
+function getOverallProgress() {
+  return getUserProgress(currentUser());
+}
+
+function getLehrjahrInfo() {
+  const u = currentUser();
+  const lehrDauer = (u && u.specialty === 'ict-fachmann') ? 3 : 4;
+  if (!u || !u.startDate) return { current:1, pct:0, yearPcts: Array(lehrDauer).fill(0), lehrDauer };
+  const start = new Date(u.startDate);
+  const now = new Date();
+  const totalDays = lehrDauer * 365.25;
+  const elapsed = Math.max(0, Math.min((now-start)/86400000, totalDays));
+  const current = Math.min(lehrDauer, Math.floor(elapsed/365.25)+1);
+  const yearPcts = Array.from({length: lehrDauer}, (_, i) => {
+    const ys=i*365.25, ye=(i+1)*365.25;
+    if (elapsed<=ys) return 0;
+    if (elapsed>=ye) return 100;
+    return Math.round((elapsed-ys)/365.25*100);
+  });
+  return { current, pct:Math.round(elapsed/totalDays*100), yearPcts, lehrDauer };
+}
+
+// ═══════════════════════════════════════════
+// RENDER: HEADER
+// ═══════════════════════════════════════════
+function renderHeader() {
+  const u = currentUser();
+  if (!u) return;
+  const initials = u.name.split(' ').map(p=>p[0]||'').join('').substring(0,2).toUpperCase();
+  document.getElementById('headerAvatar').textContent = initials || '?';
+  document.getElementById('headerName').textContent = u.name;
+  document.getElementById('headerDetail').textContent = getSpecialtyLabel(u.specialty);
+  document.getElementById('sidebarLehrberuf').textContent =
+    u.specialty === 'ict-fachmann' ? 'ICT-Fachmann/-frau EFZ' : 'Informatiker/in EFZ';
+  const lj = getLehrjahrInfo();
+  document.getElementById('lehrjahrBadge').textContent = `${lj.current}. Lehrjahr`;
+  const overall = getOverallProgress();
+  const circumference = 2*Math.PI*14;
+  document.getElementById('progressCircle').style.strokeDashoffset = circumference*(1-overall.pct/100);
+  document.getElementById('progressPct').textContent = overall.pct + '%';
+}
+
+// ═══════════════════════════════════════════
+// RENDER: SIDEBAR
+// ═══════════════════════════════════════════
+function renderSidebar() {
+  const container = document.getElementById('sidebarItems');
+  container.innerHTML = '';
+  getVisibleAreas().forEach(area => {
+    const prog = getAreaProgress(area);
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    btn.dataset.areaId = area.id;
+    btn.onclick = function() { showArea(area.id, this); closeSidebar(); };
+    btn.innerHTML = `
+      <span class="item-id">${area.id.toUpperCase()}</span>
+      <span class="item-name">${area.name}</span>
+      <span class="item-badge">${prog.pct}%</span>
+    `;
+    container.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════
+// RENDER: OVERVIEW
+// ═══════════════════════════════════════════
+function showOverview(btn) {
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const lj = getLehrjahrInfo();
+  let html = `
+    <div class="lehrjahr-section">
+      <h3>Lehrzeit-Fortschritt (${lj.pct}% absolviert)</h3>
+      <div class="lehrjahr-bars">
+  `;
+  lj.yearPcts.forEach((pct,i) => {
+    const cls = pct>=100 ? 'lj-done' : (i===lj.current-1 ? 'lj-current' : 'lj-future');
+    html += `
+      <div class="lj-bar-wrap">
+        <div class="lj-label">${i+1}. LJ</div>
+        <div class="lj-bar"><div class="lj-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="lj-pct">${pct}%</div>
+      </div>`;
+  });
+  html += `</div></div><div class="overview-grid">`;
+  getVisibleAreas().forEach(area => {
+    const prog = getAreaProgress(area);
+    html += `
+      <div class="overview-card" onclick="showArea('${area.id}')">
+        <div class="ov-id">Bereich ${area.id.toUpperCase()}</div>
+        <div class="ov-name">${area.name}</div>
+        <div class="ov-progress-bar"><div class="ov-progress-fill" style="width:${prog.pct}%"></div></div>
+        <div class="ov-pct">${prog.achieved}/${prog.total} Leistungsziele (${prog.pct}%)</div>
+      </div>`;
+  });
+  html += `</div>`;
+  html += buildPieChart();
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function buildPieChart() {
+  const AREA_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#ec4899'];
+  const visibleAreas = getVisibleAreas();
+
+  let totalAll = 0, totalAchieved = 0;
+  const areaData = visibleAreas.map((area, i) => {
+    const prog = getAreaProgress(area);
+    totalAll += prog.total;
+    totalAchieved += prog.achieved;
+    return { area, prog, color: AREA_COLORS[i % AREA_COLORS.length] };
+  });
+
+  const globalPct = totalAll ? Math.round(totalAchieved / totalAll * 100) : 0;
+
+  const cx = 140, cy = 140, r = 105, holeR = 58, labelR = 120;
+  let currentAngle = -90;
+
+  function polarXY(angleDeg, radius) {
+    const rad = angleDeg * Math.PI / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  }
+
+  function slicePath(startAngle, endAngle) {
+    const s = polarXY(startAngle, r);
+    const e = polarXY(endAngle, r);
+    const si = polarXY(startAngle, holeR);
+    const ei = polarXY(endAngle, holeR);
+    const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+    return [
+      `M${si.x.toFixed(2)},${si.y.toFixed(2)}`,
+      `L${s.x.toFixed(2)},${s.y.toFixed(2)}`,
+      `A${r},${r} 0 ${largeArc} 1 ${e.x.toFixed(2)},${e.y.toFixed(2)}`,
+      `L${ei.x.toFixed(2)},${ei.y.toFixed(2)}`,
+      `A${holeR},${holeR} 0 ${largeArc} 0 ${si.x.toFixed(2)},${si.y.toFixed(2)}`,
+      'Z'
+    ].join(' ');
+  }
+
+  let pathsHtml = '';
+  let labelsHtml = '';
+  let legendHtml = '';
+
+  areaData.forEach(({ area, prog, color }) => {
+    const sliceDeg = totalAll > 0 ? (prog.achieved / totalAll) * 360 : 0;
+    if (sliceDeg < 0.1) {
+      currentAngle += sliceDeg;
+      return;
+    }
+    const endAngle = currentAngle + sliceDeg;
+    const midAngle = currentAngle + sliceDeg / 2;
+
+    pathsHtml += `<path d="${slicePath(currentAngle, endAngle)}" fill="${color}" stroke="white" stroke-width="1.5"/>`;
+
+    if (sliceDeg > 12) {
+      const lp = polarXY(midAngle, labelR + 14);
+      const anchor = lp.x > cx ? 'start' : 'end';
+      labelsHtml += `<text x="${lp.x.toFixed(1)}" y="${lp.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}">${area.id.toUpperCase()} ${prog.pct}%</text>`;
+    }
+
+    currentAngle = endAngle;
+  });
+
+  // Unachieved slice (use two half-arcs if full circle to avoid SVG 360° bug)
+  const unachievedDeg = totalAll > 0 ? ((totalAll - totalAchieved) / totalAll) * 360 : 360;
+  if (unachievedDeg > 0.1) {
+    if (unachievedDeg >= 359.9) {
+      // Full circle: draw as two 180° arcs
+      const mid = currentAngle + 180;
+      const end = currentAngle + 360;
+      pathsHtml += `<path d="${slicePath(currentAngle, mid)}" fill="#e2e8f0" stroke="white" stroke-width="0"/>`;
+      pathsHtml += `<path d="${slicePath(mid, end)}" fill="#e2e8f0" stroke="white" stroke-width="0"/>`;
+    } else {
+      const endAngle = currentAngle + unachievedDeg;
+      pathsHtml += `<path d="${slicePath(currentAngle, endAngle)}" fill="#e2e8f0" stroke="white" stroke-width="1.5"/>`;
+    }
+  }
+
+  const svgW = 280, svgH = 290;
+  const svg = `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="overflow:visible">
+    ${pathsHtml}
+    <circle cx="${cx}" cy="${cy}" r="${holeR - 2}" fill="white"/>
+    <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-size="24" font-weight="800" fill="#1e293b">${globalPct}%</text>
+    <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="9" fill="#64748b">Gesamt-</text>
+    <text x="${cx}" y="${cy + 26}" text-anchor="middle" font-size="9" fill="#64748b">fortschritt</text>
+    ${labelsHtml}
+  </svg>`;
+
+  // Legend
+  areaData.forEach(({ area, prog, color }) => {
+    const inactive = prog.achieved === 0 ? ' pie-legend-inactive' : '';
+    legendHtml += `
+      <div class="pie-legend-item${inactive}" onclick="showArea('${area.id}')">
+        <div class="pie-legend-dot" style="background:${color}"></div>
+        <div class="pie-legend-text">
+          <span class="pie-legend-label">Bereich ${area.id.toUpperCase()}: ${area.name}</span>
+          <span class="pie-legend-sub">${prog.achieved}/${prog.total} Leistungsziele (${prog.pct}%)</span>
+        </div>
+      </div>`;
+  });
+  // Legend: unachieved
+  legendHtml += `
+    <div class="pie-legend-item" style="cursor:default">
+      <div class="pie-legend-dot" style="background:#e2e8f0;border:1px solid #cbd5e1"></div>
+      <div class="pie-legend-text">
+        <span class="pie-legend-label">Noch nicht erreicht</span>
+        <span class="pie-legend-sub">${totalAll - totalAchieved}/${totalAll} (${100 - globalPct}%)</span>
+      </div>
+    </div>`;
+
+  return `
+    <div class="pie-section">
+      <h3 class="pie-title">Gesamtfortschritt / Leistungszielerreichung</h3>
+      <div class="pie-layout">
+        <div class="pie-chart-wrap">${svg}</div>
+        <div class="pie-legend">${legendHtml}</div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// RENDER: AREA
+// ═══════════════════════════════════════════
+function showArea(areaId, sidebarBtn) {
+  const area = getAreas().find(a => a.id === areaId);
+  if (!area) return;
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  if (sidebarBtn) sidebarBtn.classList.add('active');
+  else document.querySelectorAll(`.sidebar-item[data-area-id="${areaId}"]`).forEach(b => b.classList.add('active'));
+
+  const prog = getAreaProgress(area);
+  const userSp = currentUser() ? currentUser().specialty : '';
+  const specialtyTag = userSp === 'ict-fachmann'
+    ? '<span class="tag-specialty tag-both">ICT-Fachmann/-frau EFZ</span>'
+    : ({
+        both:     '<span class="tag-specialty tag-both">Beide Fachrichtungen</span>',
+        platform: '<span class="tag-specialty tag-platform">Plattformentwicklung</span>',
+        app:      '<span class="tag-specialty tag-app">Applikationsentwicklung</span>',
+      }[area.specialty] || '');
+
+  let html = `
+    <div class="area-header">
+      <div class="area-id">Bereich ${area.id.toUpperCase()}</div>${specialtyTag}
+      <h2>${area.name}</h2>
+      <div class="area-meta">${prog.achieved} von ${prog.total} Leistungszielen bewertet</div>
+      <div class="area-progress-bar-wrap">
+        <div class="area-progress-label"><span>Fortschritt</span><span>${prog.pct}%</span></div>
+        <div class="progress-bar"><div class="progress-bar-fill" style="width:${prog.pct}%"></div></div>
+      </div>
+    </div>
+    <div class="bloom-legend">
+      ${[0,1,2,3,4,5,6].map(k=>`
+        <div class="bloom-item">
+          <div class="bloom-dot" style="background:var(--k${k}-bg)"></div>
+          <span>K${k}: ${BLOOM_SHORT[k]}</span>
+        </div>`).join('')}
+    </div><br>
+  `;
+
+  area.subComps.forEach((sc, i) => {
+    const scAchieved = sc.goals.filter(g => getGoalState(g.id).level >= g.max).length;
+    html += `
+      <div class="sub-comp" id="sc-${sc.id}">
+        <button class="sub-comp-header" onclick="toggleSubComp('sc-${sc.id}')">
+          <span class="sub-comp-id">${sc.id}</span>
+          <span class="sub-comp-name">${sc.name}</span>
+          <span class="sub-comp-stats">${scAchieved}/${sc.goals.length}</span>
+          <span class="accordion-icon"></span>
+        </button>
+        <div class="sub-comp-body">
+          ${sc.goals.map(g => renderGoalRow(g)).join('')}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('mainContent').innerHTML = html;
+  attachGoalListeners();
+}
+
+function renderGoalRow(goal) {
+  const gs = getGoalState(goal.id);
+  const dateStr = gs.date
+    ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : '–';
+  let kBtns = '';
+  for (let k=0; k<=6; k++) {
+    const isOver = k>0 && k>goal.max;
+    kBtns += `<button class="k-btn${gs.level===k?' selected':''}${isOver?' over-max':''}"
+      data-goal="${goal.id}" data-level="${k}"
+      title="${BLOOM_FULL[k]}${isOver?' (über Max-Level)':''}"
+      ${isOver?'disabled':''}>${k===0?'–':'K'+k}</button>`;
+  }
+  return `
+    <div class="goal-row" id="row-${goal.id}">
+      <div class="goal-id">${goal.id}</div>
+      <div class="goal-content">
+        <div class="goal-text">${goal.text}</div>
+        <div class="goal-controls">
+          <div class="k-buttons">${kBtns}</div>
+          <span class="goal-max-badge">max: K${goal.max}</span>
+        </div>
+        <div class="goal-date" id="date-${goal.id}">Letzte Änderung: ${dateStr}</div>
+        <textarea class="goal-comment" data-goal="${goal.id}"
+          placeholder="Kommentar, Erfahrungen, Belege …"
+          rows="2">${escHtml(gs.comment)}</textarea>
+      </div>
+    </div>`;
+}
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+// GOAL INTERACTIONS
+// ═══════════════════════════════════════════
+const debounceTimers = {};
+
+function attachGoalListeners() {
+  document.querySelectorAll('.k-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (this.disabled) return;
+      const goalId = this.dataset.goal;
+      const level = parseInt(this.dataset.level);
+      setGoalLevel(goalId, level);
+      document.querySelectorAll(`.k-btn[data-goal="${goalId}"]`).forEach(b => {
+        b.classList.toggle('selected', parseInt(b.dataset.level) === level);
+      });
+      const gs = getGoalState(goalId);
+      const dateStr = gs.date ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+      const dateEl = document.getElementById(`date-${goalId}`);
+      if (dateEl) dateEl.textContent = `Letzte Änderung: ${dateStr}`;
+      renderHeader();
+      renderSidebar();
+    });
+  });
+
+  document.querySelectorAll('.goal-comment').forEach(ta => {
+    ta.addEventListener('input', function() {
+      const goalId = this.dataset.goal;
+      this.classList.add('saving');
+      clearTimeout(debounceTimers[goalId]);
+      debounceTimers[goalId] = setTimeout(() => {
+        setGoalComment(goalId, this.value);
+        this.classList.remove('saving');
+        const gs = getGoalState(goalId);
+        const dateStr = gs.date ? new Date(gs.date).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '–';
+        const dateEl = document.getElementById(`date-${goalId}`);
+        if (dateEl) dateEl.textContent = `Letzte Änderung: ${dateStr}`;
+      }, 600);
+    });
+  });
+}
+
+function toggleSubComp(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ═══════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════
+function generatePDF() {
+  if (typeof window.jspdf === 'undefined') {
+    alert('PDF-Bibliothek noch nicht geladen. Bitte kurz warten und nochmals versuchen.');
+    return;
+  }
+  const user = currentUser();
+  if (!user) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // ── Farben ──
+  const C_PRI   = [26, 58, 92];
+  const C_PRILT = [45, 90, 142];
+  const C_BG    = [240, 244, 248];
+  const C_BDR   = [209, 219, 230];
+  const C_TEXT  = [30, 41, 59];
+  const C_MUTED = [100, 116, 139];
+  const K_COL   = [
+    [148,163,184], [96,165,250], [52,211,153],
+    [163,230,53],  [251,191,36], [249,115,22], [168,85,247],
+  ];
+  const K_DARK = [false, false, false, true, true, false, false];
+
+  // Fortschrittsfarbe: rot → gelb → grün je nach Erreichungsgrad
+  function goalProgressColor(lv, max) {
+    if (lv >= max) return { bg: [22, 163, 74],  dark: false }; // grün
+    if (lv === 0)  return { bg: [220, 38, 38],  dark: false }; // rot
+    const t = lv / max;
+    let bg;
+    if (t < 0.5) {
+      const s = t * 2;
+      bg = [Math.round(220+s*(234-220)), Math.round(38+s*(179-38)), Math.round(38+s*(8-38))];
+    } else {
+      const s = (t - 0.5) * 2;
+      bg = [Math.round(234+s*(22-234)), Math.round(179+s*(163-179)), Math.round(8+s*(74-8))];
+    }
+    const dark = bg[0] > 160 && bg[1] > 100 && bg[2] < 80;
+    return { bg, dark };
+  }
+
+  const PW = 210, M = 15, CW = PW - 2 * M;
+
+  // ── KOPFZEILE ──────────────────────────────────────────────────
+  doc.setFillColor(...C_PRI);
+  doc.rect(0, 0, PW, 30, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text('Handlungskompetenz-Bericht', M, 12);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  const pdfLehrberuf = user.specialty === 'ict-fachmann'
+    ? 'ICT-Fachmann/-frau EFZ – Bildungsplan 88616'
+    : 'Informatiker/in EFZ – Bildungsplan 88611';
+  doc.text(pdfLehrberuf, M, 19);
+  const heute = new Date().toLocaleDateString('de-CH', { day:'2-digit', month:'2-digit', year:'numeric' });
+  doc.text(`Erstellt: ${heute}`, PW - M, 19, { align: 'right' });
+
+  let y = 36;
+
+  // ── ÜBERSICHTS-KARTE (Person + Pie Chart) ────────────────────
+  const lj       = getLehrjahrInfo();
+  const spLabel   = getSpecialtyLabel(user.specialty);
+  const startStr  = user.startDate ? new Date(user.startDate).toLocaleDateString('de-CH') : '–';
+  const overall   = getOverallProgress();
+  const initials  = user.name.split(' ').map(p => p[0]||'').join('').substring(0,2).toUpperCase();
+
+  // Pre-compute pie data so we can size the box correctly
+  const AREA_COLORS_PDF = [
+    [59,130,246],[16,185,129],[245,158,11],[239,68,68],
+    [139,92,246],[6,182,212],[249,115,22],[236,72,153]
+  ];
+  const pieAreas = getVisibleAreas(user);
+  let pieTotal = 0, pieAchieved = 0;
+  const pieData = pieAreas.map((area, i) => {
+    const prog = getAreaProgress(area);
+    pieTotal += prog.total; pieAchieved += prog.achieved;
+    return { area, prog, color: AREA_COLORS_PDF[i % AREA_COLORS_PDF.length] };
+  });
+  const piePct = pieTotal ? Math.round(pieAchieved / pieTotal * 100) : 0;
+  const CHART_MM = 48;
+  const LEG_ROW_H = 5.8;
+  const PIE_SECTION_H = Math.max(CHART_MM, (pieData.length + 1) * LEG_ROW_H) + 8;
+  const BOX_H = 40 + PIE_SECTION_H; // person info (40) + pie section
+
+  // Draw the unified card
+  doc.setFillColor(...C_BG);
+  doc.setDrawColor(...C_BDR);
+  doc.roundedRect(M, y, CW, BOX_H, 2, 2, 'FD');
+
+  // Avatar
+  doc.setFillColor(...C_PRILT);
+  doc.circle(M + 10, y + 14, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(initials, M + 10, y + 15.5, { align: 'center' });
+
+  // Name & Details
+  doc.setTextColor(...C_TEXT);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text(user.name, M + 22, y + 10);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...C_MUTED);
+  doc.text(spLabel, M + 22, y + 17);
+  doc.text(`Lehrbeginn: ${startStr}  ·  ${lj.current}. Lehrjahr`, M + 22, y + 23);
+
+  // Gesamtfortschritt rechts
+  doc.setTextColor(...C_PRI);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text(`${overall.pct}%`, PW - M - 4, y + 12, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...C_MUTED);
+  doc.text('Gesamtfortschritt', PW - M - 4, y + 18, { align: 'right' });
+  doc.text(`${overall.achieved} / ${overall.total} Leistungsziele`, PW - M - 4, y + 23, { align: 'right' });
+
+  // Progress bar inside card
+  const barY = y + 28;
+  doc.setFillColor(...C_BDR);
+  doc.roundedRect(M + 5, barY, CW - 10, 3.5, 1, 1, 'F');
+  if (overall.pct > 0) {
+    doc.setFillColor(...C_PRILT);
+    doc.roundedRect(M + 5, barY, (CW - 10) * overall.pct / 100, 3.5, 1, 1, 'F');
+  }
+
+  // Divider within card
+  const divY = barY + 7;
+  doc.setDrawColor(...C_BDR);
+  doc.setLineWidth(0.3);
+  doc.line(M + 5, divY, M + CW - 5, divY);
+
+  // Pie section label
+  const pieStartY = divY + 5;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
+  doc.setTextColor(...C_PRI);
+  doc.text('Fortschritt je Bereich', M + 5, pieStartY + 3);
+
+  // Build canvas pie chart
+  const CHART_PX = CHART_MM * 4;
+  const cv = document.createElement('canvas');
+  cv.width = CHART_PX; cv.height = CHART_PX;
+  const ctx2 = cv.getContext('2d');
+  const ccx = CHART_PX / 2, ccy = CHART_PX / 2;
+  const cr = CHART_PX * 0.44, ch = CHART_PX * 0.22;
+
+  let ang = -Math.PI / 2;
+  pieData.forEach(({ prog, color }) => {
+    const a = pieTotal > 0 ? (prog.achieved / pieTotal) * 2 * Math.PI : 0;
+    if (a < 0.002) { ang += a; return; }
+    ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+    ctx2.arc(ccx, ccy, cr, ang, ang + a);
+    ctx2.closePath();
+    ctx2.fillStyle = `rgb(${color.join(',')})`;
+    ctx2.fill();
+    ctx2.strokeStyle = '#fff'; ctx2.lineWidth = 3; ctx2.stroke();
+    ang += a;
+  });
+
+  const uA = pieTotal > 0 ? ((pieTotal - pieAchieved) / pieTotal) * 2 * Math.PI : 2 * Math.PI;
+  if (uA > 0.002) {
+    if (uA >= 2 * Math.PI - 0.01) {
+      [0, Math.PI].forEach(start => {
+        ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+        ctx2.arc(ccx, ccy, cr, start, start + Math.PI);
+        ctx2.closePath(); ctx2.fillStyle = '#e2e8f0'; ctx2.fill();
+      });
+    } else {
+      ctx2.beginPath(); ctx2.moveTo(ccx, ccy);
+      ctx2.arc(ccx, ccy, cr, ang, ang + uA);
+      ctx2.closePath(); ctx2.fillStyle = '#e2e8f0'; ctx2.fill();
+      ctx2.strokeStyle = '#fff'; ctx2.lineWidth = 3; ctx2.stroke();
+    }
+  }
+
+  ctx2.beginPath(); ctx2.arc(ccx, ccy, ch, 0, 2 * Math.PI);
+  ctx2.fillStyle = 'white'; ctx2.fill();
+
+  ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+  ctx2.fillStyle = '#1e293b';
+  ctx2.font = `bold ${Math.round(CHART_PX * 0.16)}px Arial`;
+  ctx2.fillText(`${piePct}%`, ccx, ccy - CHART_PX * 0.04);
+  ctx2.font = `${Math.round(CHART_PX * 0.075)}px Arial`;
+  ctx2.fillStyle = '#64748b';
+  ctx2.fillText('Gesamt-', ccx, ccy + CHART_PX * 0.14);
+  ctx2.fillText('fortschritt', ccx, ccy + CHART_PX * 0.22);
+
+  const chartDrawY = pieStartY + 6;
+  doc.addImage(cv.toDataURL('image/png'), 'PNG', M + 4, chartDrawY, CHART_MM, CHART_MM);
+
+  // Area legend beside pie (compact single-column)
+  const legX = M + 4 + CHART_MM + 5;
+  let ly = chartDrawY + 2;
+  pieData.forEach(({ area, prog, color }) => {
+    doc.setFillColor(...color);
+    doc.roundedRect(legX, ly + 0.8, 3, 3, 0.4, 0.4, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C_TEXT);
+    doc.text(`${area.id.toUpperCase()}: ${area.name}`, legX + 4.5, ly + 2.8);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_MUTED);
+    doc.text(`${prog.achieved}/${prog.total} (${prog.pct}%)`, legX + 4.5, ly + 6);
+    ly += LEG_ROW_H + 1.5;
+  });
+  doc.setFillColor(226, 232, 240);
+  doc.roundedRect(legX, ly + 0.8, 3, 3, 0.4, 0.4, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C_TEXT);
+  doc.text('Noch nicht erreicht', legX + 4.5, ly + 2.8);
+  doc.setFont('helvetica', 'normal'); doc.setTextColor(...C_MUTED);
+  doc.text(`${pieTotal - pieAchieved}/${pieTotal} (${100 - piePct}%)`, legX + 4.5, ly + 6);
+
+  y += BOX_H + 10;
+
+  // ── LEISTUNGSSTAND-LEGENDE ─────────────────────────────────────
+  doc.setFillColor(...C_PRI);
+  doc.roundedRect(M, y, CW, 7, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.text('Leistungsstand je Leistungsziel', M + 4, y + 5);
+  y += 10;
+
+  const LEGEND = [
+    { col: [220,38,38],  label: 'Nicht bewertet (K0)' },
+    { col: [234,109,8],  label: 'Begonnen (< 50% des Ziels)' },
+    { col: [234,179,8],  label: 'Auf Kurs (>= 50% des Ziels)' },
+    { col: [22,163,74],  label: 'Ziel erreicht' },
+  ];
+  doc.setFontSize(7);
+  const legW = CW / LEGEND.length;
+  LEGEND.forEach(({ col, label }, i) => {
+    const lx = M + i * legW;
+    doc.setFillColor(...col);
+    doc.roundedRect(lx, y, 4, 3, 0.5, 0.5, 'F');
+    doc.setTextColor(...C_TEXT);
+    doc.text(label, lx + 5.5, y + 2.3);
+  });
+  y += 10;
+
+  // ── BEREICHE ───────────────────────────────────────────────────
+  const areas = getVisibleAreas(user);
+
+  for (const area of areas) {
+    const ap = getAreaProgress(area);
+
+    if (y > 252) { doc.addPage(); y = 15; }
+
+    // Bereich-Header
+    doc.setFillColor(...C_PRI);
+    doc.roundedRect(M, y, CW, 9, 1, 1, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.text(`${area.id.toUpperCase()}  ${area.name}`, M + 3, y + 6.3);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text(`${ap.achieved} / ${ap.total}  (${ap.pct}%)`, PW - M - 3, y + 6.3, { align: 'right' });
+
+    y += 10;
+
+    // Kleiner Fortschrittsbalken
+    doc.setFillColor(...C_BDR);
+    doc.rect(M, y, CW, 2, 'F');
+    if (ap.pct > 0) {
+      doc.setFillColor(...C_PRILT);
+      doc.rect(M, y, CW * ap.pct / 100, 2, 'F');
+    }
+    y += 3;
+
+    // Tabelle aufbauen
+    const rows = [];
+    for (const sc of area.subComps) {
+      rows.push([{
+        content: sc.name, colSpan: 5,
+        styles: { fillColor: [248, 250, 252], textColor: C_PRI, fontStyle: 'bold', fontSize: 7.5, cellPadding: [2, 3, 2, 0] },
+      }]);
+      for (const goal of sc.goals) {
+        const gs  = getGoalState(goal.id);
+        const lv  = gs.level || 0;
+        const max = goal.max || 6;
+        const dt  = gs.date ? new Date(gs.date).toLocaleDateString('de-CH') : '–';
+        const { bg, dark } = goalProgressColor(lv, max);
+        rows.push([
+          goal.id,
+          goal.text,
+          {
+            content: `K${lv} / K${max}`,
+            styles: {
+              fillColor: bg,
+              textColor: dark ? C_TEXT : [255, 255, 255],
+              halign: 'center', fontStyle: 'bold',
+            },
+          },
+          dt,
+          gs.comment || '',
+        ]);
+      }
+    }
+
+    doc.autoTable({
+      startY: y,
+      margin: { left: M, right: M },
+      tableWidth: CW,
+      head: [['Nr.', 'Leistungsziel', 'Ist / Ziel', 'Datum', 'Kommentar']],
+      body: rows,
+      theme: 'grid',
+      styles: { fontSize: 7.5, cellPadding: [1.8, 2.5, 1.8, 2.5], textColor: C_TEXT, lineColor: C_BDR, lineWidth: 0.15 },
+      headStyles: { fillColor: C_PRILT, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 13, halign: 'center', valign: 'middle' },
+        1: { cellWidth: 69 },
+        2: { cellWidth: 17, halign: 'center', valign: 'middle' },
+        3: { cellWidth: 24, halign: 'center', valign: 'middle' },
+        4: { cellWidth: 57 },
+      },
+      didDrawPage: () => {},
+    });
+
+    y = doc.lastAutoTable.finalY + 7;
+  }
+
+  // ── SEITENZAHLEN ───────────────────────────────────────────────
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(...C_MUTED);
+    doc.text(`Seite ${i} von ${total}`, PW / 2, 291, { align: 'center' });
+    doc.setTextColor(...C_BDR);
+    doc.line(M, 288, PW - M, 288);
+  }
+
+  const safeName = user.name.replace(/[^a-zA-Z0-9äöüÄÖÜ]/g, '_');
+  const isoDate  = new Date().toISOString().slice(0, 10);
+  doc.save(`HK-Bericht_${safeName}_${isoDate}.pdf`);
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+initApp();
+</script>
+</body>
+</html>
