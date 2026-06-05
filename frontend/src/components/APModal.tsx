@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 
 interface APModalProps {
@@ -27,7 +28,7 @@ export default function APModal({ onClose }: APModalProps) {
     }
   }
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
@@ -65,6 +66,7 @@ export default function APModal({ onClose }: APModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

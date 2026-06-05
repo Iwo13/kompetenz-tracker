@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
 import type { User, Specialty } from '../types';
 
@@ -45,7 +46,7 @@ export default function UserModal({ user, onClose }: UserModalProps) {
     onClose();
   }
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal">
         <h2>{isEdit ? 'Lernende/n bearbeiten' : 'Lernende/n erfassen'}</h2>
@@ -99,6 +100,7 @@ export default function UserModal({ user, onClose }: UserModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

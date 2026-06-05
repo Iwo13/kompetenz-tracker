@@ -23,6 +23,9 @@ interface AppContextValue {
   currentAP:          Ausbildungsplatz | null;
   currentAPCode:      string | null;
   selectAP:           (code: string) => void;
+  activeAP:           Ausbildungsplatz | null;
+  rotationGanttView:    'lernende' | 'ausbildungsplaetze';
+  setRotationGanttView: (v: 'lernende' | 'ausbildungsplaetze') => void;
   updateApHk:         (apCode: string, bildungsplan: string, hkId: string, coverage: string) => Promise<void>;
   addAusbildungsplatz:(body: Partial<Ausbildungsplatz>) => Promise<Ausbildungsplatz>;
   selectUser:         (id: string) => void;
@@ -54,6 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [areasIct,           setAreasIct]           = useState<Area[]>([]);
   const [ausbildungsplaetze, setAusbildungsplaetze] = useState<Ausbildungsplatz[]>([]);
   const [currentAPCode,      setCurrentAPCode]      = useState<string | null>(null);
+  const [rotationGanttView,  setRotationGanttView]  = useState<'lernende' | 'ausbildungsplaetze'>('lernende');
 
   useEffect(() => {
     async function init() {
@@ -110,6 +114,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [currentUserId, areasInformatiker, areasIct, currentUser]);
 
   const currentAP = ausbildungsplaetze.find(ap => ap.code === currentAPCode) ?? null;
+
+  const activeAP = (() => {
+    if (!currentUser?.rotations?.length) return null;
+    const today = new Date().toISOString().split('T')[0];
+    const rot = currentUser.rotations.find(r =>
+      r.von <= today && (!r.bis || r.bis >= today)
+    );
+    return rot ? (ausbildungsplaetze.find(ap => ap.code === rot.ap_code) ?? null) : null;
+  })();
 
   const selectAP = useCallback((code: string) => setCurrentAPCode(code), []);
 
@@ -199,6 +212,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       users, currentUser, areas, areasInformatiker, areasIct, loading, error, role, setRole,
       ausbildungsplaetze, currentAP, currentAPCode, selectAP, updateApHk, addAusbildungsplatz,
+      activeAP,
+      rotationGanttView, setRotationGanttView,
       selectUser, updateGoal, addUser, editUser, removeUser,
       addRotation, updateRotation, deleteRotation,
     }}>

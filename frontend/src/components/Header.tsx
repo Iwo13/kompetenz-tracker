@@ -22,11 +22,12 @@ interface HeaderProps {
 export default function Header({ onToggleSidebar }: HeaderProps) {
   const {
     users, currentUser, areas, selectUser, role, setRole,
-    ausbildungsplaetze, currentAP, selectAP,
+    ausbildungsplaetze, currentAP, selectAP, rotationGanttView,
   } = useApp();
   const location  = useLocation();
   const navigate  = useNavigate();
-  const isAPView  = location.pathname.startsWith('/ap-abdeckung');
+  const isAPView  = location.pathname.startsWith('/ap-abdeckung') ||
+    (location.pathname === '/rotationsplanung' && rotationGanttView === 'ausbildungsplaetze');
 
   const [showLearnerPanel, setShowLearnerPanel] = useState(false);
   const [showAPPanel,      setShowAPPanel]      = useState(false);

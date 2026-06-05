@@ -1,4 +1,4 @@
-import type { Area, User, BloomLevel, ProgressInfo, LehrjahrInfo } from './types';
+import type { Area, User, ProgressInfo, LehrjahrInfo } from './types';
 
 export const BLOOM = ['–', 'Wissen', 'Verstehen', 'Anwenden', 'Analysieren', 'Synthese', 'Beurteilen'];
 
@@ -45,6 +45,23 @@ export function getAreaProgress(area: Area, userGoals: User['goals'] = {}): Prog
     achieved,
     total: goals.length,
     pct:   goals.length ? Math.round(achieved / goals.length * 100) : 0,
+  };
+}
+
+export function getAPLernProgress(
+  apCoverage: Record<string, string>,
+  areas: Area[],
+  userGoals: User['goals'] = {}
+): ProgressInfo {
+  const relevantGoals = areas
+    .flatMap(a => a.subComps)
+    .filter(sc => apCoverage[sc.id] === 'primary' || apCoverage[sc.id] === 'secondary')
+    .flatMap(sc => sc.goals);
+  const achieved = relevantGoals.filter(g => (userGoals[g.id]?.level ?? 0) >= g.max).length;
+  return {
+    achieved,
+    total:   relevantGoals.length,
+    pct:     relevantGoals.length > 0 ? Math.round(achieved / relevantGoals.length * 100) : 0,
   };
 }
 

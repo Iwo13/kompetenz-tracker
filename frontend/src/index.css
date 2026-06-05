@@ -576,7 +576,7 @@ input, select, textarea { font: inherit; }
   text-align: center;
 }
 .sub-comp-body { display: none; }
-.sub-comp.open .sub-comp-body { display: block; }
+.sub-comp.open > .sub-comp-body { display: block; }
 
 /* â”€â”€ Goal Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .goal-row {
@@ -1012,6 +1012,95 @@ input, select, textarea { font: inherit; }
   .user-panel { right: 0; left: auto; width: 230px; }
 }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 0; }
+
+/* ── APLernView: verschachteltes Accordion (Bereich → HK) ───── */
+.sub-comp-nested {
+  border: none;
+  border-bottom: 1px solid #f0f0ee;
+  margin: 0;
+}
+.sub-comp-nested:last-child { border-bottom: none; }
+.sub-comp-nested.open { border-bottom: 1px solid var(--border); }
+
+.sub-comp-header-nested {
+  background: #fafaf8 !important;
+  padding-left: 32px !important;
+  font-size: 0.82rem !important;
+}
+.sub-comp-nested.open > .sub-comp-header-nested {
+  background: #f5f0cc !important;
+}
+.sub-comp-header-nested:hover {
+  background: #f5f5f2 !important;
+}
+
+/* ── Lernenden-Ansicht: AP-Banner ───────────────────────────── */
+.ap-lernend-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--fhnw-yellow);
+  border: 1.5px solid var(--fhnw-yellow-hover);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+}
+.ap-lb-info { display: flex; align-items: center; gap: 10px; }
+.ap-lb-code {
+  background: var(--fhnw-dark);
+  color: var(--fhnw-yellow);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.ap-lb-name { font-size: 0.88rem; font-weight: 600; color: var(--fhnw-dark); }
+
+.ap-filter-toggle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: 1.5px solid var(--fhnw-dark);
+  background: transparent;
+  color: var(--fhnw-dark);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.ap-filter-toggle:hover { background: rgba(0,0,0,.08); }
+.ap-filter-toggle.active { background: var(--fhnw-dark); color: var(--fhnw-yellow); }
+
+/* ── AP-Badge auf Bereichs-Kacheln ──────────────────────────── */
+.ap-relevant-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  background: var(--fhnw-dark);
+  color: var(--fhnw-yellow);
+  letter-spacing: .05em;
+  vertical-align: middle;
+}
+
+/* ── AP-Toggle in AreaView ──────────────────────────────────── */
+.area-ap-toggle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color .12s, color .12s, background .12s;
+}
+.area-ap-toggle:hover { border-color: var(--fhnw-dark); color: var(--fhnw-dark); }
+.area-ap-toggle.active {
+  border-color: var(--fhnw-dark);
+  background: var(--fhnw-dark);
+  color: var(--fhnw-yellow);
+}
 
 /* ── Sidebar AP-Sektion ─────────────────────────────────────── */
 .sidebar-bp-group { padding: 2px 0 4px; }

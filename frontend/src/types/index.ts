@@ -68,9 +68,9 @@ export interface Ausbildungsplatz {
 // ── Hilfstypen ──────────────────────────────────────────────────────────────
 
 export interface ProgressInfo {
-  reached: number;
-  max:     number;
-  pct:     number;
+  achieved: number;
+  total:    number;
+  pct:      number;
 }
 
 export interface LehrjahrInfo {

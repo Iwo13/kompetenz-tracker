@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { getAreaProgress, SPECIALTY_LABEL } from '../utils';
+import { getAreaProgress, getAPLernProgress, SPECIALTY_LABEL } from '../utils';
 import type { Area, Ausbildungsplatz } from '../types';
 
 function calcApCoverage(
@@ -21,7 +21,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct } = useApp();
+  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct, ausbildungsplaetze } = useApp();
   const navigate  = useNavigate();
   const location  = useLocation();
   const isOverview      = location.pathname === '/overview' || location.pathname === '/';
@@ -133,6 +133,38 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             })()}
           </div>
         )}
+
+        {/* Ausbildungsplätze des aktuellen Lernenden */}
+        {!isAPView && currentUser && currentUser.rotations?.length > 0 && (() => {
+          const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann' : 'informatiker';
+          const uniqueApCodes = [...new Set(currentUser.rotations.map(r => r.ap_code))];
+          const learnerAPs = uniqueApCodes
+            .map(code => ausbildungsplaetze.find(ap => ap.code === code))
+            .filter((ap): ap is Ausbildungsplatz => !!ap);
+          if (learnerAPs.length === 0) return null;
+          return (
+            <div className="sidebar-section">
+              <div className="sidebar-section-title">Ausbildungsplätze</div>
+              {learnerAPs.map(ap => {
+                const apCov = (ap.hk_coverage?.[bildungsplan] ?? {}) as Record<string, string>;
+                const prog  = getAPLernProgress(apCov, areas, currentUser.goals);
+                const path  = `/ap-view/${ap.code}`;
+                const isActive = location.pathname === path;
+                return (
+                  <button key={ap.code}
+                    className={`sidebar-item${isActive ? ' active' : ''}`}
+                    onClick={() => go(path)}>
+                    <span className="item-name" style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.8rem' }}>{ap.code}</span>
+                      <span style={{ fontSize: '0.72rem', opacity: 0.65 }}>{ap.name}</span>
+                    </span>
+                    <span className={`item-badge${prog.pct === 100 ? ' done' : ''}`}>{prog.pct}%</span>
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Administration (nur Berufsbildner) */}
         {isBB && (
