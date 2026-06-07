@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { getLehrjahrInfo, getAreaProgress, getOverallProgress } from '../utils';
+import { getLehrjahrInfo, getAreaProgress, getOverallProgress, getAPLernProgress } from '../utils';
 import DonutChart from '../components/DonutChart';
+import type { Ausbildungsplatz } from '../types';
 
 const AREA_COLORS = [
   '#1d4ed8', '#0d9488', '#d97706', '#dc2626',
@@ -9,7 +10,7 @@ const AREA_COLORS = [
 ];
 
 export default function Overview() {
-  const { currentUser, areas } = useApp();
+  const { currentUser, areas, ausbildungsplaetze, documents } = useApp();
   const navigate = useNavigate();
 
   if (!currentUser) {
@@ -23,6 +24,12 @@ export default function Overview() {
 
   const { yearPcts } = getLehrjahrInfo(currentUser);
   const overall = getOverallProgress(areas, currentUser.goals);
+
+  const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann' : 'informatiker';
+  const uniqueApCodes = [...new Set(currentUser.rotations.map(r => r.ap_code))];
+  const learnerAPs = uniqueApCodes
+    .map(code => ausbildungsplaetze.find(ap => ap.code === code))
+    .filter((ap): ap is Ausbildungsplatz => !!ap && (ap.abLehrjahr ?? 2) > 1);
 
   const areaProgs = areas.map((area, i) => ({
     ...getAreaProgress(area, currentUser.goals),
@@ -95,6 +102,28 @@ export default function Overview() {
           </button>
         ))}
       </div>
+
+      {/* Ausbildungsplatz-Kacheln */}
+      {learnerAPs.length > 0 && (
+        <div className="area-cards-row">
+          {learnerAPs.map(ap => {
+            const apCoverage = (ap.hk_coverage?.[bildungsplan] ?? {}) as Record<string, string>;
+            const prog     = getAPLernProgress(apCoverage, areas, currentUser.goals);
+            const docCount = documents.filter(d => d.ap_code === ap.code).length;
+            return (
+              <button key={ap.code} className="overview-card" onClick={() => navigate('/dokumente')}>
+                <div className="ov-id">Ausbildungsplatz: {ap.code}</div>
+                <div className="ov-name">{ap.name}</div>
+                <div className="ov-progress-bar">
+                  <div className="ov-progress-fill" style={{ width: `${prog.pct}%` }} />
+                </div>
+                <div className="ov-pct">{prog.achieved}/{prog.total} Leistungsziele ({prog.pct}%)</div>
+                <div className="ov-doc-count">Hochgeladene Dokumente: {docCount}</div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Pie-Chart / Gesamtfortschritt */}
       <div className="pie-section">

@@ -19,6 +19,26 @@ export interface Rotation {
   ap_code: string;
 }
 
+export interface DocumentGoalLink {
+  id:            string;
+  goal_id:       string;
+  einschaetzung: string | null;
+  bloom_level:   number | null;
+}
+
+export interface UserDocument {
+  id:           string;
+  user_id:      string;
+  ap_code:      string;
+  title:        string;
+  description:  string | null;
+  file_name:    string;
+  content_type: string;
+  file_size:    number;
+  uploaded_at:  string;
+  goal_links:   DocumentGoalLink[];
+}
+
 export interface User {
   id:           string;   // UUID
   name:         string;

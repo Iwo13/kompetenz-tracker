@@ -4,7 +4,7 @@ import {
 } from 'react';
 import { api } from '../api/client';
 import type {
-  User, Area, Ausbildungsplatz, Rotation, Specialty, Role, BloomLevel,
+  User, Area, Ausbildungsplatz, Rotation, Specialty, Role, BloomLevel, UserDocument, DocumentGoalLink,
 } from '../types';
 
 // ── Typen ─────────────────────────────────────────────────────────────────────
@@ -36,6 +36,11 @@ interface AppContextValue {
   addRotation:        (userId: string, body: Partial<Rotation>) => Promise<Rotation>;
   updateRotation:     (userId: string, rotId: string, body: Partial<Rotation>) => Promise<Rotation>;
   deleteRotation:     (userId: string, rotId: string) => Promise<void>;
+  documents:          UserDocument[];
+  uploadDocument:     (userId: string, formData: FormData) => Promise<UserDocument>;
+  updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) => Promise<void>;
+  deleteDocument:     (userId: string, docId: string) => Promise<void>;
+  updateDocumentGoal: (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => Promise<DocumentGoalLink>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -58,6 +63,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ausbildungsplaetze, setAusbildungsplaetze] = useState<Ausbildungsplatz[]>([]);
   const [currentAPCode,      setCurrentAPCode]      = useState<string | null>(null);
   const [rotationGanttView,  setRotationGanttView]  = useState<'lernende' | 'ausbildungsplaetze'>('lernende');
+  const [documents,          setDocuments]          = useState<UserDocument[]>([]);
 
   useEffect(() => {
     async function init() {
@@ -208,6 +214,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (currentUserId === id) setCurrentUserId(null);
   }, [currentUserId]);
 
+  useEffect(() => {
+    if (!currentUserId) { setDocuments([]); return; }
+    api.getDocuments(currentUserId).then(setDocuments).catch(() => setDocuments([]));
+  }, [currentUserId]);
+
+  const uploadDocument = useCallback(async (userId: string, formData: FormData) => {
+    const created = await api.uploadDocument(userId, formData);
+    setDocuments(prev => [created, ...prev]);
+    return created;
+  }, []);
+
+  const updateDocument = useCallback(async (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) => {
+    const updated = await api.updateDocument(userId, docId, body);
+    setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
+  }, []);
+
+  const deleteDocument = useCallback(async (userId: string, docId: string) => {
+    await api.deleteDocument(userId, docId);
+    setDocuments(prev => prev.filter(d => d.id !== docId));
+  }, []);
+
+  const updateDocumentGoal = useCallback(async (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => {
+    const updated = await api.updateDocumentGoal(userId, docId, goalId, { einschaetzung, bloom_level: bloomLevel });
+    setDocuments(prev => prev.map(d => d.id === docId
+      ? { ...d, goal_links: d.goal_links.map(l => l.goal_id === goalId ? { ...l, einschaetzung: updated.einschaetzung, bloom_level: updated.bloom_level } : l) }
+      : d
+    ));
+    if (bloomLevel !== null) {
+      setUsers(prev => prev.map(u => {
+        if (u.id !== userId) return u;
+        const cur = u.goals[goalId]?.level ?? 0;
+        if (bloomLevel <= cur) return u;
+        return { ...u, goals: { ...u.goals, [goalId]: { level: bloomLevel as BloomLevel, comment: u.goals[goalId]?.comment ?? '', date: new Date().toISOString() } } };
+      }));
+    }
+    return updated;
+  }, []);
+
   return (
     <AppContext.Provider value={{
       users, currentUser, areas, areasInformatiker, areasIct, loading, error, role, setRole,
@@ -216,6 +260,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rotationGanttView, setRotationGanttView,
       selectUser, updateGoal, addUser, editUser, removeUser,
       addRotation, updateRotation, deleteRotation,
+      documents, uploadDocument, updateDocument, deleteDocument, updateDocumentGoal,
     }}>
       {children}
     </AppContext.Provider>

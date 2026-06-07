@@ -31,9 +31,45 @@ builder.Services.AddCors(opts => opts.AddDefaultPolicy(p =>
 
 var app = builder.Build();
 
-// ── DB-Schema sicherstellen (EnsureCreated legt fehlende Tabellen an) ─────────
+// ── DB-Schema sicherstellen ────────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+
+    // Neue Tabellen nachrüsten falls DB bereits existiert (EnsureCreated ignoriert das)
+    db.Database.ExecuteSqlRaw("""
+        IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Documents')
+        BEGIN
+            CREATE TABLE Documents (
+                Id          UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+                UserId      UNIQUEIDENTIFIER NOT NULL,
+                ApCode      NVARCHAR(20)     NOT NULL,
+                Title       NVARCHAR(200)    NOT NULL,
+                Description NVARCHAR(MAX)    NULL,
+                FileName    NVARCHAR(260)    NOT NULL,
+                ContentType NVARCHAR(100)    NOT NULL,
+                FileData    VARBINARY(MAX)   NOT NULL,
+                FileSize    BIGINT           NOT NULL DEFAULT 0,
+                UploadedAt  DATETIME2        NOT NULL DEFAULT GETUTCDATE(),
+                CONSTRAINT FK_Documents_Users FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+            );
+        END
+
+        IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'DocumentGoalLinks')
+        BEGIN
+            CREATE TABLE DocumentGoalLinks (
+                Id            UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+                DocumentId    UNIQUEIDENTIFIER NOT NULL,
+                GoalId        NVARCHAR(20)     NOT NULL,
+                Einschaetzung NVARCHAR(MAX)    NULL,
+                BloomLevel    TINYINT          NULL,
+                CONSTRAINT FK_DocGoalLinks_Documents FOREIGN KEY (DocumentId) REFERENCES Documents(Id) ON DELETE CASCADE,
+                CONSTRAINT UQ_Doc_Goal UNIQUE (DocumentId, GoalId)
+            );
+        END
+        """);
+}
 
 app.UseCors();
 app.UseSwagger();

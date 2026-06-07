@@ -1,4 +1,4 @@
-import type { User, Area, Rotation, Ausbildungsplatz, GoalEntry } from '../types';
+import type { User, Area, Rotation, Ausbildungsplatz, GoalEntry, UserDocument, DocumentGoalLink } from '../types';
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000';
 
@@ -7,6 +7,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+async function upload<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, { method: 'POST', body: formData });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -69,4 +75,18 @@ export const api = {
     }),
   createAusbildungsplatz: (body: Partial<Ausbildungsplatz>) =>
     request<Ausbildungsplatz>('/ausbildungsplaetze', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Dokumente
+  getDocuments: (userId: string) =>
+    request<UserDocument[]>(`/users/${userId}/documents`),
+  uploadDocument: (userId: string, formData: FormData) =>
+    upload<UserDocument>(`/users/${userId}/documents`, formData),
+  updateDocument: (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) =>
+    request<UserDocument>(`/users/${userId}/documents/${docId}`, { method: 'PUT', body: JSON.stringify(body) }),
+  deleteDocument: (userId: string, docId: string) =>
+    request<void>(`/users/${userId}/documents/${docId}`, { method: 'DELETE' }),
+  getDocumentFileUrl: (userId: string, docId: string) =>
+    `${BASE}/users/${userId}/documents/${docId}/file`,
+  updateDocumentGoal: (userId: string, docId: string, goalId: string, body: { einschaetzung?: string | null; bloom_level?: number | null }) =>
+    request<DocumentGoalLink>(`/users/${userId}/documents/${docId}/goals/${goalId}`, { method: 'PUT', body: JSON.stringify(body) }),
 };

@@ -10,6 +10,7 @@ import APAbdeckungOverview from './pages/APAbdeckungOverview';
 import APAbdeckungDetail from './pages/APAbdeckungDetail';
 import RotationsplanungView from './pages/RotationsplanungView';
 import APLernView from './pages/APLernView';
+import DokumenteView from './pages/DokumenteView';
 
 function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,6 +33,7 @@ function AppShell() {
             <Route path="/admin/ausbildungsplaetze"            element={<AusbildungsplaetzeAdmin />} />
             <Route path="/rotationsplanung"                    element={<RotationsplanungView />} />
             <Route path="/ap-view/:apCode"                     element={<APLernView />} />
+            <Route path="/dokumente"                           element={<DokumenteView />} />
           </Routes>
         </main>
       </div>

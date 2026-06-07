@@ -21,7 +21,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct, ausbildungsplaetze } = useApp();
+  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct, ausbildungsplaetze, documents } = useApp();
   const navigate  = useNavigate();
   const location  = useLocation();
   const isOverview      = location.pathname === '/overview' || location.pathname === '/';
@@ -165,6 +165,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           );
         })()}
+
+        {/* Dokumentation */}
+        {!isAPView && currentUser && (
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Dokumentation</div>
+            <button
+              className={`sidebar-item${location.pathname === '/dokumente' ? ' active' : ''}`}
+              onClick={() => go('/dokumente')}>
+              <span className="item-id sidebar-admin-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/>
+                </svg>
+              </span>
+              <span className="item-name">Dokumente</span>
+              {documents.length > 0 && (
+                <span className="item-badge">{documents.length}</span>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Administration (nur Berufsbildner) */}
         {isBB && (

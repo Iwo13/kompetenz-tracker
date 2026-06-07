@@ -10,4 +10,5 @@ public class User
 
     public ICollection<GoalEntry> GoalEntries { get; set; } = [];
     public ICollection<UserRotation> Rotations { get; set; } = [];
+    public ICollection<Document> Documents { get; set; } = [];
 }

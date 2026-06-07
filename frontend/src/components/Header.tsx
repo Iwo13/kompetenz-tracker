@@ -22,7 +22,7 @@ interface HeaderProps {
 export default function Header({ onToggleSidebar }: HeaderProps) {
   const {
     users, currentUser, areas, selectUser, role, setRole,
-    ausbildungsplaetze, currentAP, selectAP, rotationGanttView,
+    ausbildungsplaetze, currentAP, activeAP, selectAP, rotationGanttView,
   } = useApp();
   const location  = useLocation();
   const navigate  = useNavigate();
@@ -110,17 +110,25 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         <img src="/FHNW_Logo.webp" alt="FHNW Nordwestschweiz" />
       </div>
 
-      <span className="header-title">Handlungskompetenz-Tracker</span>
+      {/* Fallback-Titel (nur wenn kein User/AP) */}
+      {!currentUser && !isAPView && (
+        <div className="header-title">
+          <span className="header-title-name">Handlungskompetenz-Tracker</span>
+        </div>
+      )}
 
-      {/* Lernenden-Dropdown */}
+      {/* Lernenden-Dropdown (Desktop + Mobile) */}
       {!isAPView && (
-        <div className="header-name-area hide-mobile">
+        <div className="header-name-area">
           <div className="learner-anchor">
             {currentUser ? (
               <button className="learner-btn"
                 onClick={() => isBB && setShowLearnerPanel(p => !p)}
                 style={{ cursor: isBB ? 'pointer' : 'default' }}>
-                <span className="learner-name">{currentUser.name}</span>
+                <div className="learner-btn-info">
+                  <span className="learner-name">{currentUser.name}</span>
+                  {activeAP && <span className="learner-btn-ap">{activeAP.code} – {activeAP.name}</span>}
+                </div>
                 {isBB && <span className="learner-caret">▾</span>}
               </button>
             ) : isBB ? (
@@ -142,12 +150,15 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
         </div>
       )}
 
-      {/* AP-Dropdown */}
+      {/* AP-Dropdown (Desktop + Mobile) */}
       {isAPView && (
-        <div className="header-name-area hide-mobile">
+        <div className="header-name-area">
           <div className="learner-anchor">
             <button className="learner-btn" onClick={() => setShowAPPanel(p => !p)}>
-              <span className="learner-name">{currentAP?.code ?? 'AP wählen'}</span>
+              <div className="learner-btn-info">
+                <span className="learner-name">{currentAP?.code ?? 'AP wählen'}</span>
+                {currentAP && <span className="learner-btn-ap">{currentAP.name}</span>}
+              </div>
               <span className="learner-caret">▾</span>
             </button>
             {showAPPanel && (
@@ -166,9 +177,14 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
       {/* Specialty / AP-Name zentriert */}
       <div className="header-center hide-mobile">
         {!isAPView && currentUser && (
-          <span className="header-specialty">
-            {SPECIALTY_LABEL[currentUser.specialty] ?? currentUser.specialty}
-          </span>
+          <div className="header-center-stack">
+            <span className="header-specialty">
+              {SPECIALTY_LABEL[currentUser.specialty] ?? currentUser.specialty}
+            </span>
+            {activeAP && (
+              <span className="header-ap-label">{activeAP.code} – {activeAP.name}</span>
+            )}
+          </div>
         )}
         {isAPView && currentAP && (
           <span className="header-specialty">{currentAP.name}</span>
@@ -218,14 +234,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
                       if (isAPView) navigate('/overview');
                     }}>Lernende/r</button>
                 </div>
-                {isBB && (
-                  <div className="profile-learner-section">
-                    <div className="user-panel-header" style={{ borderTop: '1px solid var(--border)' }}>
-                      Lernende
-                    </div>
-                    {learnerList}
-                  </div>
-                )}
               </div>
             </>
           )}

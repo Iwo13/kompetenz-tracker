@@ -40,7 +40,7 @@ export default function GoalRow({ goal }: GoalRowProps) {
 
   return (
     <div className="goal-row">
-      <div className="goal-id">{goal.id}</div>
+      <div className="goal-id">{goal.id.toUpperCase()}</div>
       <div className="goal-content">
         <div className="goal-text">{goal.text ?? goal.description}</div>
         <div className="goal-controls">
