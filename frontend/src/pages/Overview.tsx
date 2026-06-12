@@ -9,6 +9,24 @@ const AREA_COLORS = [
   '#7c3aed', '#db2777', '#059669', '#0891b2',
 ];
 
+function MiniDonut({ pct, color }: { pct: number; color: string }) {
+  const size = 34;
+  const cx = size / 2, cy = size / 2;
+  const r = size * 0.36;
+  const strokeW = size * 0.20;
+  const circ = 2 * Math.PI * r;
+  const filled = (pct / 100) * circ;
+  return (
+    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e4e8" strokeWidth={strokeW} />
+      {pct > 0 && (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={strokeW}
+          strokeDasharray={`${filled} ${circ - filled}`} strokeLinecap="butt" />
+      )}
+    </svg>
+  );
+}
+
 export default function Overview() {
   const { currentUser, areas, ausbildungsplaetze, documents } = useApp();
   const navigate = useNavigate();
@@ -43,11 +61,12 @@ export default function Overview() {
 
   const pieSegments = [
     ...areaProgs.map((p, i) => ({
-      label:  `Bereich ${p.area.id.toUpperCase()}: ${p.area.name}`,
+      label:  `Handlungskompetenz ${p.area.id.toUpperCase()}: ${p.area.name}`,
       sub:    `${p.achieved}/${p.total} Leistungsziele (${p.pct}%)`,
       value:  p.achieved,
       color:  AREA_COLORS[i % AREA_COLORS.length],
       areaId: p.area.id as string | null,
+      pct:    p.pct,
     })),
     {
       label:  'Noch nicht erreicht',
@@ -55,6 +74,7 @@ export default function Overview() {
       value:  notAchieved,
       color:  '#e2e4e8',
       areaId: null,
+      pct:    0,
     },
   ];
 
@@ -90,7 +110,7 @@ export default function Overview() {
             className="overview-card"
             onClick={() => navigate(`/area/${p.area.id}`)}
           >
-            <div className="ov-id">Bereich {p.area.id.toUpperCase()}</div>
+            <div className="ov-id">Handlungskompetenz {p.area.id.toUpperCase()}</div>
             <div className="ov-name">{p.area.name}</div>
             <div className="ov-progress-bar">
               <div
@@ -127,7 +147,7 @@ export default function Overview() {
 
       {/* Pie-Chart / Gesamtfortschritt */}
       <div className="pie-section">
-        <div className="pie-title">Gesamtfortschritt / Leistungszielerreichung</div>
+        <div className="pie-title">Gesamtfortschritt der Leistungszielerreichung</div>
         <div className="pie-layout">
           <div className="pie-chart-wrap">
             <DonutChart segments={pieSegments} centerPct={overall.pct} />
@@ -139,9 +159,9 @@ export default function Overview() {
                   key={i}
                   className="pie-legend-item pie-legend-link"
                   onClick={() => navigate(`/area/${seg.areaId}`)}
-                  title={`Zu Bereich ${seg.areaId.toUpperCase()} wechseln`}
+                  title={`Zu Handlungskompetenz ${seg.areaId.toUpperCase()} wechseln`}
                 >
-                  <div className="pie-legend-dot" style={{ background: seg.color }} />
+                  <MiniDonut pct={seg.pct} color={seg.color} />
                   <div className="pie-legend-text">
                     <div className="pie-legend-label">{seg.label}</div>
                     <div className="pie-legend-sub">{seg.sub}</div>
