@@ -85,6 +85,7 @@ export const api = {
   updateDocument: (userId: string, docId: string, body: {
     title: string; description?: string; ap_code: string; goal_ids: string[];
     kurzbeschreibung?: string; umsetzung?: string; luecken?: string;
+    feedback_berufsbildner?: string;
   }) =>
     request<UserDocument>(`/users/${userId}/documents/${docId}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteDocument: (userId: string, docId: string) =>
@@ -93,4 +94,6 @@ export const api = {
     `${BASE}/users/${userId}/documents/${docId}/file`,
   updateDocumentGoal: (userId: string, docId: string, goalId: string, body: { einschaetzung?: string | null; bloom_level?: number | null }) =>
     request<DocumentGoalLink>(`/users/${userId}/documents/${docId}/goals/${goalId}`, { method: 'PUT', body: JSON.stringify(body) }),
+  aiEvaluateDocument: (userId: string, docId: string) =>
+    request<UserDocument>(`/users/${userId}/documents/${docId}/ai-evaluate`, { method: 'POST' }),
 };

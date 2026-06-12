@@ -1,4 +1,5 @@
 using System.Text.Json;
+using HK.API.Services;
 using HK.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,9 @@ if (!string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
     builder.Services.AddAuthorization();
 }
 
+// ── AI Evaluation Service ─────────────────────────────────────────────────────
+builder.Services.AddHttpClient<AiEvaluationService>();
+
 // ── CORS: Frontend-Dev erlauben ───────────────────────────────────────────────
 builder.Services.AddCors(opts => opts.AddDefaultPolicy(p =>
     p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
@@ -77,6 +81,11 @@ using (var scope = app.Services.CreateScope())
                 Umsetzung        NVARCHAR(MAX) NULL,
                 Luecken          NVARCHAR(MAX) NULL,
                 Bewertungsart    NVARCHAR(20)  NOT NULL DEFAULT 'manuell';
+        END
+
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Documents') AND name = 'FeedbackBerufsbildner')
+        BEGIN
+            ALTER TABLE Documents ADD FeedbackBerufsbildner NVARCHAR(MAX) NULL;
         END
 
         IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'DocumentGoalLinks')

@@ -36,7 +36,8 @@ export default function GoalRow({ goal }: GoalRowProps) {
     ? new Date(userGoal.date).toLocaleDateString('de-CH')
     : null;
 
-  const levels = ([0, 1, 2, 3, 4, 5, 6] as BloomLevel[]).slice(0, goal.max + 1);
+  const allLevels = [0, 1, 2, 3, 4, 5, 6] as BloomLevel[];
+  const maxReached = level >= goal.max;
 
   return (
     <div className="goal-row">
@@ -45,20 +46,21 @@ export default function GoalRow({ goal }: GoalRowProps) {
         <div className="goal-text">{goal.text ?? goal.description}</div>
         <div className="goal-controls">
           <div className="k-buttons">
-            {levels.map(l => (
+            {allLevels.map(l => (
               <button
                 key={l}
                 data-level={l}
-                className={`k-btn${level === l ? ' selected' : ''}${l > goal.max ? ' over-max' : ''}`}
+                className={`k-btn${level === l ? ' selected' : ''}`}
                 onClick={() => handleLevel(l)}
-                disabled={l > goal.max}
                 title={`K${l}`}
               >
                 K{l}
               </button>
             ))}
           </div>
-          <span className="goal-max-badge">Max: K{goal.max}</span>
+          <span className={`goal-max-badge${maxReached ? ' goal-max-badge--reached' : ''}`}>
+            Max: K{goal.max}
+          </span>
         </div>
         {date && <div className="goal-date">Zuletzt gespeichert: {date}</div>}
         <textarea

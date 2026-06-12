@@ -637,7 +637,6 @@ input, select, textarea { font: inherit; }
 .k-btn[data-level="6"] { background: #a855f7; color: #fff; }
 .k-btn.selected { border-color: #1e293b; box-shadow: 0 0 0 2px rgba(30,41,59,.3); transform: scale(1.1); }
 .k-btn:hover:not(.selected) { opacity: .85; transform: scale(1.05); }
-.k-btn.over-max { opacity: .3; cursor: not-allowed; }
 .goal-max-badge {
   font-size: 0.7rem;
   color: var(--text-muted);
@@ -646,6 +645,11 @@ input, select, textarea { font: inherit; }
   border-radius: 0;
   white-space: nowrap;
   align-self: center;
+  transition: background .2s, color .2s;
+}
+.goal-max-badge--reached {
+  background: #16a34a;
+  color: #fff;
 }
 .goal-date { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
 .goal-comment {

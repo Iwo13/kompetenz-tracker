@@ -1,3 +1,4 @@
+using HK.API.Services;
 using HK.Application.DTOs;
 using HK.Domain.Entities;
 using HK.Infrastructure.Persistence;
@@ -69,12 +70,13 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
             .FirstOrDefaultAsync(d => d.Id == docId && d.UserId == userId);
         if (doc is null) return NotFound();
 
-        doc.Title            = req.Title.Trim();
-        doc.Description      = req.Description?.Trim();
-        doc.ApCode           = req.ApCode;
-        doc.Kurzbeschreibung = req.Kurzbeschreibung?.Trim();
-        doc.Umsetzung        = req.Umsetzung?.Trim();
-        doc.Luecken          = req.Luecken?.Trim();
+        doc.Title                  = req.Title.Trim();
+        doc.Description            = req.Description?.Trim();
+        doc.ApCode                 = req.ApCode;
+        doc.Kurzbeschreibung       = req.Kurzbeschreibung?.Trim();
+        doc.Umsetzung              = req.Umsetzung?.Trim();
+        doc.Luecken                = req.Luecken?.Trim();
+        doc.FeedbackBerufsbildner  = req.FeedbackBerufsbildner?.Trim();
 
         var existing  = doc.GoalLinks.Select(l => l.GoalId).ToHashSet();
         var requested = req.GoalIds.ToHashSet();
@@ -148,9 +150,50 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         return new DocumentGoalLinkDto(link.Id, link.GoalId, link.Einschaetzung, link.BloomLevel);
     }
 
+    [HttpPost("{docId:guid}/ai-evaluate")]
+    public async Task<ActionResult<DocumentResponse>> AiEvaluate(
+        Guid userId, Guid docId, [FromServices] AiEvaluationService aiService)
+    {
+        if (!aiService.IsConfigured)
+            return BadRequest(new { error = "AI-Bewertung ist nicht konfiguriert. Endpoint und ApiKey in appsettings setzen." });
+
+        var doc = await db.Documents
+            .Include(d => d.GoalLinks)
+            .FirstOrDefaultAsync(d => d.Id == docId && d.UserId == userId);
+        if (doc is null) return NotFound();
+
+        var user = await db.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        var result = await aiService.EvaluateAsync(doc, user.Specialty);
+        if (result is null)
+            return StatusCode(503, new { error = "AI-Analyse fehlgeschlagen. Bitte Logs prüfen." });
+
+        doc.Kurzbeschreibung = result.Kurzbeschreibung.Trim();
+        doc.Umsetzung        = result.Umsetzung.Trim();
+        doc.Luecken          = result.Luecken.Trim();
+
+        db.DocumentGoalLinks.RemoveRange(doc.GoalLinks);
+        doc.GoalLinks.Clear();
+
+        foreach (var b in result.Bewertungen.Take(10))
+        {
+            doc.GoalLinks.Add(new DocumentGoalLink
+            {
+                GoalId        = b.GoalId,
+                DocumentId    = docId,
+                BloomLevel    = (byte)Math.Clamp(b.BloomLevel, 1, 6),
+                Einschaetzung = b.Kommentar,
+            });
+        }
+
+        await db.SaveChangesAsync();
+        return ToResponse(doc);
+    }
+
     private static DocumentResponse ToResponse(Document d) =>
         new(d.Id, d.UserId, d.ApCode, d.Title, d.Description,
-            d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart,
+            d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart, d.FeedbackBerufsbildner,
             d.FileName, d.ContentType, d.FileSize, d.UploadedAt,
             d.GoalLinks.Select(l => new DocumentGoalLinkDto(l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel)));
 }

@@ -38,9 +38,10 @@ interface AppContextValue {
   deleteRotation:     (userId: string, rotId: string) => Promise<void>;
   documents:          UserDocument[];
   uploadDocument:     (userId: string, formData: FormData) => Promise<UserDocument>;
-  updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; }) => Promise<void>;
+  updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; feedback_berufsbildner?: string; }) => Promise<void>;
   deleteDocument:     (userId: string, docId: string) => Promise<void>;
-  updateDocumentGoal: (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => Promise<DocumentGoalLink>;
+  updateDocumentGoal:  (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => Promise<DocumentGoalLink>;
+  aiEvaluateDocument: (userId: string, docId: string) => Promise<UserDocument>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -225,7 +226,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return created;
   }, []);
 
-  const updateDocument = useCallback(async (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; }) => {
+  const updateDocument = useCallback(async (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; feedback_berufsbildner?: string; }) => {
     const updated = await api.updateDocument(userId, docId, body);
     setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
   }, []);
@@ -233,6 +234,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteDocument = useCallback(async (userId: string, docId: string) => {
     await api.deleteDocument(userId, docId);
     setDocuments(prev => prev.filter(d => d.id !== docId));
+  }, []);
+
+  const aiEvaluateDocument = useCallback(async (userId: string, docId: string) => {
+    const updated = await api.aiEvaluateDocument(userId, docId);
+    setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
+    return updated;
   }, []);
 
   const updateDocumentGoal = useCallback(async (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => {
@@ -260,7 +267,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rotationGanttView, setRotationGanttView,
       selectUser, updateGoal, addUser, editUser, removeUser,
       addRotation, updateRotation, deleteRotation,
-      documents, uploadDocument, updateDocument, deleteDocument, updateDocumentGoal,
+      documents, uploadDocument, updateDocument, deleteDocument, updateDocumentGoal, aiEvaluateDocument,
     }}>
       {children}
     </AppContext.Provider>

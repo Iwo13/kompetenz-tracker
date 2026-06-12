@@ -132,9 +132,10 @@ interface LeistungszieleModalProps {
   kurzbeschreibung: string;
   umsetzung: string;
   luecken: string;
+  feedbackBerufsbildner: string;
 }
 
-function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschreibung, umsetzung, luecken }: LeistungszieleModalProps) {
+function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschreibung, umsetzung, luecken, feedbackBerufsbildner }: LeistungszieleModalProps) {
   const { updateDocument, ausbildungsplaetze, currentUser } = useApp();
   const [title,         setTitle]         = useState(doc.title);
   const [untertitel,    setUntertitel]    = useState(doc.description ?? '');
@@ -163,9 +164,10 @@ function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschre
         description: untertitel.trim() || undefined,
         ap_code: apCode,
         goal_ids: [...selectedGoals],
-        kurzbeschreibung: kurzbeschreibung || undefined,
-        umsetzung:        umsetzung        || undefined,
-        luecken:          luecken          || undefined,
+        kurzbeschreibung:       kurzbeschreibung       || undefined,
+        umsetzung:              umsetzung              || undefined,
+        luecken:                luecken                || undefined,
+        feedback_berufsbildner: feedbackBerufsbildner  || undefined,
       });
       onSaved([...selectedGoals], { title: title.trim(), description: untertitel.trim() || null, ap_code: apCode });
       onClose();
@@ -263,19 +265,22 @@ interface DocRowProps {
 }
 
 function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRowProps) {
-  const { updateDocumentGoal, updateGoal, updateDocument, currentUser } = useApp();
+  const { updateDocumentGoal, updateGoal, updateDocument, aiEvaluateDocument, currentUser, role } = useApp();
   const [showEdit,        setShowEdit]        = useState(false);
   const [saving,          setSaving]          = useState<string | null>(null);
   const [savingBewertung, setSavingBewertung] = useState(false);
   const [savedOk,         setSavedOk]         = useState(false);
+  const [aiLoading,       setAiLoading]       = useState(false);
+  const [aiError,         setAiError]         = useState<string | null>(null);
   const [localLinks, setLocalLinks] = useState(
     [...doc.goal_links].sort((a, b) => a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }))
   );
 
   // Textfelder mit Autosave
-  const [kurzbeschreibung, setKurzbeschreibung] = useState(doc.kurzbeschreibung ?? '');
-  const [umsetzung,        setUmsetzung]        = useState(doc.umsetzung ?? '');
-  const [luecken,          setLuecken]          = useState(doc.luecken ?? '');
+  const [kurzbeschreibung,       setKurzbeschreibung]       = useState(doc.kurzbeschreibung ?? '');
+  const [umsetzung,              setUmsetzung]              = useState(doc.umsetzung ?? '');
+  const [luecken,                setLuecken]                = useState(doc.luecken ?? '');
+  const [feedbackBerufsbildner,  setFeedbackBerufsbildner]  = useState(doc.feedback_berufsbildner ?? '');
   const savingTextRef = useRef(false);
 
   const areaBadges = [...new Set(localLinks.map(l => l.goal_id[0].toUpperCase()))].sort();
@@ -284,18 +289,19 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     sc.goals.map(g => [g.id, { text: g.text ?? g.id, max: g.max }])
   )));
 
-  async function saveTextFields(overrides?: { kurzbeschreibung?: string; umsetzung?: string; luecken?: string }) {
+  async function saveTextFields(overrides?: { kurzbeschreibung?: string; umsetzung?: string; luecken?: string; feedbackBerufsbildner?: string }) {
     if (savingTextRef.current) return;
     savingTextRef.current = true;
     try {
       await updateDocument(userId, doc.id, {
-        title: doc.title,
+        title:       doc.title,
         description: doc.description ?? undefined,
-        ap_code: doc.ap_code,
-        goal_ids: localLinks.map(l => l.goal_id),
-        kurzbeschreibung: overrides?.kurzbeschreibung !== undefined ? overrides.kurzbeschreibung || undefined : kurzbeschreibung || undefined,
-        umsetzung:        overrides?.umsetzung        !== undefined ? overrides.umsetzung        || undefined : umsetzung        || undefined,
-        luecken:          overrides?.luecken          !== undefined ? overrides.luecken          || undefined : luecken          || undefined,
+        ap_code:     doc.ap_code,
+        goal_ids:    localLinks.map(l => l.goal_id),
+        kurzbeschreibung:      overrides?.kurzbeschreibung      !== undefined ? overrides.kurzbeschreibung      || undefined : kurzbeschreibung      || undefined,
+        umsetzung:             overrides?.umsetzung             !== undefined ? overrides.umsetzung             || undefined : umsetzung             || undefined,
+        luecken:               overrides?.luecken               !== undefined ? overrides.luecken               || undefined : luecken               || undefined,
+        feedback_berufsbildner: overrides?.feedbackBerufsbildner !== undefined ? overrides.feedbackBerufsbildner || undefined : feedbackBerufsbildner || undefined,
       });
     } finally {
       savingTextRef.current = false;
@@ -334,6 +340,26 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     // Reflect title/untertitel changes immediately in the header via context (updateDocument already updated context)
     void updatedDoc;
     setShowEdit(false);
+  }
+
+  async function handleAiEvaluate() {
+    if (!currentUser) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const updated = await aiEvaluateDocument(currentUser.id, doc.id);
+      setKurzbeschreibung(updated.kurzbeschreibung ?? '');
+      setUmsetzung(updated.umsetzung ?? '');
+      setLuecken(updated.luecken ?? '');
+      setLocalLinks(
+        [...updated.goal_links].sort((a, b) =>
+          a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }))
+      );
+    } catch {
+      setAiError('AI-Analyse fehlgeschlagen. Bitte Konfiguration prüfen.');
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function handleSaveBewertung() {
@@ -396,6 +422,10 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
               {areaBadges.map(a => <span key={a} className="doc-area-badge">{a}</span>)}
             </div>
           )}
+          {feedbackBerufsbildner && (
+            <img src="/IconKommentiert.png" alt="Feedback vorhanden"
+              style={{ width: 24, height: 24, objectFit: 'contain' }} />
+          )}
           <span className="doc-ap-badge">{doc.ap_code}</span>
           <span className="doc-date">{formatDate(doc.uploaded_at)}</span>
           <span className="accordion-icon">{open ? '×' : '+'}</span>
@@ -414,6 +444,13 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
                 onClick={() => setShowEdit(true)}>
                 ✎ Leistungsziele zur Bewertung ändern
               </button>
+              {doc.bewertungsart === 'ai' && (
+                <button className="btn btn-secondary" style={{ fontSize: 13, borderColor: '#7c3aed', color: '#7c3aed' }}
+                  onClick={handleAiEvaluate}
+                  disabled={aiLoading}>
+                  {aiLoading ? '⏳ AI analysiert…' : '✦ AI-Analyse starten'}
+                </button>
+              )}
               <button className="btn btn-primary" style={{ fontSize: 13 }}
                 onClick={handleSaveBewertung}
                 disabled={savingBewertung || localLinks.length === 0}>
@@ -425,6 +462,28 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
                 🗑 Löschen
               </button>
             </div>
+            {aiError && (
+              <p style={{ color: '#dc2626', fontSize: 13, margin: '6px 0 0' }}>{aiError}</p>
+            )}
+
+            {/* Feedback Berufsbildner/in */}
+            {role === 'berufsbildner' ? (
+              <div style={{ margin: '12px 0 4px' }}>
+                <label className="doc-text-label">Feedback Berufsbildner/in</label>
+                <textarea className="doc-text-area"
+                  rows={3}
+                  style={{ background: '#eff6ff', borderColor: '#93c5fd' }}
+                  value={feedbackBerufsbildner}
+                  onChange={e => setFeedbackBerufsbildner(e.target.value)}
+                  onBlur={() => saveTextFields({ feedbackBerufsbildner })}
+                  placeholder="Feedback, Lob oder Hinweise für den Lernenden…" />
+              </div>
+            ) : feedbackBerufsbildner ? (
+              <div style={{ margin: '12px 0 4px', padding: '10px 14px', background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: 6 }}>
+                <div className="doc-text-label" style={{ marginBottom: 4 }}>Feedback Berufsbildner/in</div>
+                <p style={{ margin: 0, fontSize: 14, whiteSpace: 'pre-wrap' }}>{feedbackBerufsbildner}</p>
+              </div>
+            ) : null}
 
             {/* Textfelder */}
             <div className="doc-text-fields">
@@ -512,7 +571,8 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
       {showEdit && (
         <LeistungszieleModal doc={doc} userId={userId} areas={areas}
           onClose={() => setShowEdit(false)} onSaved={handleLeistungszieleModalSaved}
-          kurzbeschreibung={kurzbeschreibung} umsetzung={umsetzung} luecken={luecken} />
+          kurzbeschreibung={kurzbeschreibung} umsetzung={umsetzung} luecken={luecken}
+          feedbackBerufsbildner={feedbackBerufsbildner} />
       )}
     </>
   );

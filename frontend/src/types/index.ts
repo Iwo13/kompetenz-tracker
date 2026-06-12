@@ -35,8 +35,9 @@ export interface UserDocument {
   kurzbeschreibung: string | null;
   umsetzung:        string | null;
   luecken:          string | null;
-  bewertungsart:    string;
-  file_name:        string;
+  bewertungsart:             string;
+  feedback_berufsbildner:    string | null;
+  file_name:                 string;
   content_type:     string;
   file_size:        number;
   uploaded_at:      string;

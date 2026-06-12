@@ -17,6 +17,7 @@ public record DocumentResponse(
     string? Umsetzung,
     string? Luecken,
     string Bewertungsart,
+    string? FeedbackBerufsbildner,
     string FileName,
     string ContentType,
     long FileSize,
@@ -31,7 +32,8 @@ public record UpdateDocumentRequest(
     IEnumerable<string> GoalIds,
     string? Kurzbeschreibung,
     string? Umsetzung,
-    string? Luecken
+    string? Luecken,
+    string? FeedbackBerufsbildner
 );
 
 public record UpdateGoalLinkRequest(
