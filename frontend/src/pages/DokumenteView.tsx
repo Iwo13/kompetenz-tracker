@@ -292,7 +292,8 @@ interface DocRowProps {
 }
 
 function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRowProps) {
-  const { updateDocumentGoal, updateDocument, reloadGoals, aiEvaluateDocument, currentUser, role } = useApp();
+  const { updateDocumentGoal, updateDocument, reloadGoals, aiEvaluateDocument, currentUser, role, ausbildungsplaetze } = useApp();
+  const apFullName = ausbildungsplaetze.find(ap => ap.code === doc.ap_code)?.name;
   const [showEdit,        setShowEdit]        = useState(false);
   const [saving,          setSaving]          = useState<string | null>(null);
   const [savingBewertung, setSavingBewertung] = useState(false);
@@ -439,10 +440,10 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
             </div>
           )}
           {feedbackBerufsbildner && (
-            <img src="/IconKommentiert.png" alt="Feedback vorhanden"
-              style={{ width: 24, height: 24, objectFit: 'contain' }} />
+            <img src="/IconKommentiert.png" alt="Feedback vorhanden" title="Feedback vorhanden"
+              style={{ width: 22, height: 22, objectFit: 'contain', alignSelf: 'center', flexShrink: 0 }} />
           )}
-          <span className="doc-ap-badge">{doc.ap_code}</span>
+          <span className="doc-ap-badge" title={apFullName}>{doc.ap_code}</span>
           <span className="doc-date">{isoToDisplay(doc.document_date) ?? formatDate(doc.uploaded_at)}</span>
           <span className="accordion-icon">{open ? '×' : '+'}</span>
         </button>
