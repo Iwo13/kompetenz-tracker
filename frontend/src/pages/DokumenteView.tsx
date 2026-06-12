@@ -7,6 +7,18 @@ import type { UserDocument, BloomLevel, DocumentGoalLink } from '../types';
 
 const BLOOM_LABELS = ['K0 – Keine', 'K1 – Wissen', 'K2 – Verstehen', 'K3 – Anwenden', 'K4 – Analysieren', 'K5 – Synthese', 'K6 – Beurteilen'];
 
+function todayIso() {
+  return new Date().toISOString().split('T')[0];
+}
+function isoToDisplay(iso: string | null | undefined) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+function isoToDateInput(iso: string | null | undefined) {
+  if (!iso) return '';
+  return iso.split('T')[0];
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
@@ -34,6 +46,7 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
   const [untertitel,    setUntertitel]    = useState('');
   const [apCode,        setApCode]        = useState(activeApCode ?? '');
   const [bewertungsart, setBewertungsart] = useState('manuell');
+  const [docDate,       setDocDate]       = useState(todayIso());
   const [file,          setFile]          = useState<File | null>(null);
   const [saving,        setSaving]        = useState(false);
   const [error,         setError]         = useState<string | null>(null);
@@ -58,6 +71,7 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
       fd.append('title', title.trim() || file.name);
       fd.append('apCode', apCode);
       fd.append('bewertungsart', bewertungsart);
+      fd.append('documentDate', docDate);
       if (untertitel.trim()) fd.append('description', untertitel.trim());
       const doc = await uploadDocument(userId, fd);
       onUploaded(doc);
@@ -107,6 +121,11 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
               <option value="ai" disabled>Initialbewertung durch AI (demnächst)</option>
             </select>
           </div>
+          <div className="upload-field">
+            <label className="upload-label">Datum des Dokuments</label>
+            <input type="date" className="upload-input upload-date-input"
+              value={docDate} onChange={e => setDocDate(e.target.value)} />
+          </div>
           {error && <p className="upload-error">{error}</p>}
           <div className="upload-modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Abbrechen</button>
@@ -141,6 +160,7 @@ function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschre
   const [title,         setTitle]         = useState(doc.title);
   const [untertitel,    setUntertitel]    = useState(doc.description ?? '');
   const [apCode,        setApCode]        = useState(doc.ap_code);
+  const [docDate,       setDocDate]       = useState(isoToDateInput(doc.document_date) || todayIso());
   const [selectedGoals, setSelectedGoals] = useState<Set<string>>(new Set(doc.goal_links.map(l => l.goal_id)));
   const [openAreas,     setOpenAreas]     = useState<Set<string>>(new Set());
   const [saving,        setSaving]        = useState(false);
@@ -169,6 +189,7 @@ function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschre
         umsetzung:              umsetzung              || undefined,
         luecken:                luecken                || undefined,
         feedback_berufsbildner: feedbackBerufsbildner  || undefined,
+        document_date:          docDate                || undefined,
       });
       onSaved([...selectedGoals], { title: title.trim(), description: untertitel.trim() || null, ap_code: apCode });
       onClose();
@@ -203,6 +224,11 @@ function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschre
                 <option key={ap.code} value={ap.code}>{ap.code} – {ap.name}</option>
               ))}
             </select>
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">Datum des Dokuments</label>
+            <input type="date" className="upload-input upload-date-input"
+              value={docDate} onChange={e => setDocDate(e.target.value)} />
           </div>
           <div className="upload-field">
             <label className="upload-label">
@@ -299,6 +325,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
         description: doc.description ?? undefined,
         ap_code:     doc.ap_code,
         goal_ids:    localLinks.map(l => l.goal_id),
+        document_date: isoToDateInput(doc.document_date) || undefined,
         kurzbeschreibung:      overrides?.kurzbeschreibung      !== undefined ? overrides.kurzbeschreibung      || undefined : kurzbeschreibung      || undefined,
         umsetzung:             overrides?.umsetzung             !== undefined ? overrides.umsetzung             || undefined : umsetzung             || undefined,
         luecken:               overrides?.luecken               !== undefined ? overrides.luecken               || undefined : luecken               || undefined,
@@ -416,7 +443,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
               style={{ width: 24, height: 24, objectFit: 'contain' }} />
           )}
           <span className="doc-ap-badge">{doc.ap_code}</span>
-          <span className="doc-date">{formatDate(doc.uploaded_at)}</span>
+          <span className="doc-date">{isoToDisplay(doc.document_date) ?? formatDate(doc.uploaded_at)}</span>
           <span className="accordion-icon">{open ? '×' : '+'}</span>
         </button>
 

@@ -22,6 +22,7 @@ public record DocumentResponse(
     string ContentType,
     long FileSize,
     DateTime UploadedAt,
+    DateTime? DocumentDate,
     IEnumerable<DocumentGoalLinkDto> GoalLinks
 );
 
@@ -33,7 +34,8 @@ public record UpdateDocumentRequest(
     string? Kurzbeschreibung,
     string? Umsetzung,
     string? Luecken,
-    string? FeedbackBerufsbildner
+    string? FeedbackBerufsbildner,
+    string? DocumentDate
 );
 
 public record UpdateGoalLinkRequest(

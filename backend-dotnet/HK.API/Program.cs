@@ -88,6 +88,11 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE Documents ADD FeedbackBerufsbildner NVARCHAR(MAX) NULL;
         END
 
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Documents') AND name = 'DocumentDate')
+        BEGIN
+            ALTER TABLE Documents ADD DocumentDate DATETIME2 NULL;
+        END
+
         IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'DocumentGoalLinks')
         BEGIN
             CREATE TABLE DocumentGoalLinks (

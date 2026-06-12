@@ -17,6 +17,7 @@ public class Document
     public byte[] FileData { get; set; } = [];
     public long FileSize { get; set; }
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? DocumentDate { get; set; }
 
     public User User { get; set; } = null!;
     public ICollection<DocumentGoalLink> GoalLinks { get; set; } = [];

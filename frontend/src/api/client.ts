@@ -92,7 +92,7 @@ export const api = {
   updateDocument: (userId: string, docId: string, body: {
     title: string; description?: string; ap_code: string; goal_ids: string[];
     kurzbeschreibung?: string; umsetzung?: string; luecken?: string;
-    feedback_berufsbildner?: string;
+    feedback_berufsbildner?: string; document_date?: string;
   }) =>
     request<UserDocument>(`/users/${userId}/documents/${docId}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteDocument: (userId: string, docId: string) =>

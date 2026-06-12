@@ -29,6 +29,7 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         [FromForm] string? description,
         [FromForm] string? goalIds,
         [FromForm] string? bewertungsart,
+        [FromForm] string? documentDate,
         IFormFile file)
     {
         if (file is null || file.Length == 0)
@@ -39,15 +40,16 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
 
         var doc = new Document
         {
-            UserId       = userId,
-            ApCode       = apCode,
-            Title        = title.Trim(),
-            Description  = description?.Trim(),
+            UserId        = userId,
+            ApCode        = apCode,
+            Title         = title.Trim(),
+            Description   = description?.Trim(),
             Bewertungsart = bewertungsart?.Trim() ?? "manuell",
-            FileName     = file.FileName,
-            ContentType  = file.ContentType,
-            FileData     = ms.ToArray(),
-            FileSize     = file.Length,
+            FileName      = file.FileName,
+            ContentType   = file.ContentType,
+            FileData      = ms.ToArray(),
+            FileSize      = file.Length,
+            DocumentDate  = ParseDate(documentDate),
         };
 
         if (!string.IsNullOrWhiteSpace(goalIds))
@@ -77,6 +79,7 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         doc.Umsetzung              = req.Umsetzung?.Trim();
         doc.Luecken                = req.Luecken?.Trim();
         doc.FeedbackBerufsbildner  = req.FeedbackBerufsbildner?.Trim();
+        doc.DocumentDate           = ParseDate(req.DocumentDate);
 
         var existing  = doc.GoalLinks.Select(l => l.GoalId).ToHashSet();
         var requested = req.GoalIds.ToHashSet();
@@ -194,6 +197,9 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
     private static DocumentResponse ToResponse(Document d) =>
         new(d.Id, d.UserId, d.ApCode, d.Title, d.Description,
             d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart, d.FeedbackBerufsbildner,
-            d.FileName, d.ContentType, d.FileSize, d.UploadedAt,
+            d.FileName, d.ContentType, d.FileSize, d.UploadedAt, d.DocumentDate,
             d.GoalLinks.Select(l => new DocumentGoalLinkDto(l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel)));
+
+    private static DateTime? ParseDate(string? s) =>
+        DateTime.TryParse(s, out var dt) ? DateTime.SpecifyKind(dt.Date, DateTimeKind.Utc) : null;
 }
