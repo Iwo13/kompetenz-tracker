@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import type { Goal, BloomLevel } from '../types';
 
@@ -8,6 +9,7 @@ interface GoalRowProps {
 
 export default function GoalRow({ goal }: GoalRowProps) {
   const { currentUser, updateGoal } = useApp();
+  const navigate = useNavigate();
   const userGoal = currentUser?.goals?.[goal.id];
 
   const manualLvl    = (userGoal?.manual_level ?? userGoal?.level ?? 0) as BloomLevel;
@@ -75,7 +77,8 @@ export default function GoalRow({ goal }: GoalRowProps) {
                 key={c.doc_id}
                 className="goal-contrib-label"
                 data-level={c.bloom_level}
-                title={`${c.doc_title}: K${c.bloom_level}`}
+                title={`${c.doc_title}: K${c.bloom_level} – Dokument öffnen`}
+                onClick={() => navigate(`/dokumente?open=${c.doc_id}`)}
               >
                 {c.doc_title}
               </span>

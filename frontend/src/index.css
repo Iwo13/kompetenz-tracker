@@ -667,8 +667,9 @@ input, select, textarea { font: inherit; }
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: default;
+  cursor: pointer;
 }
+.goal-contrib-label:hover { opacity: .82; }
 .goal-contrib-label[data-level="0"] { background: #94a3b8; color: #fff; }
 .goal-contrib-label[data-level="1"] { background: #60a5fa; color: #fff; }
 .goal-contrib-label[data-level="2"] { background: #34d399; color: #fff; }

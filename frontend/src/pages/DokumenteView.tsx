@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { api } from '../api/client';
 import type { UserDocument, BloomLevel, DocumentGoalLink } from '../types';
@@ -569,8 +570,14 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
 // ── Haupt-View ─────────────────────────────────────────────────────────────────
 export default function DokumenteView() {
   const { currentUser, documents, deleteDocument, areas, activeAP } = useApp();
+  const [searchParams] = useSearchParams();
   const [showUpload, setShowUpload] = useState(false);
   const [openDocId,  setOpenDocId]  = useState<string | null>(null);
+
+  useEffect(() => {
+    const openId = searchParams.get('open');
+    if (openId) setOpenDocId(openId);
+  }, [searchParams]);
 
   if (!currentUser) {
     return (
