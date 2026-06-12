@@ -1254,7 +1254,7 @@ input, select, textarea { font: inherit; }
 /* ── Upload Modal ────────────────────────────────────────────────────────────── */
 .upload-modal {
   background: #fff;
-  width: min(640px, 96vw);
+  width: min(832px, 96vw);
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -1330,6 +1330,11 @@ input, select, textarea { font: inherit; }
   padding: 3px 0; cursor: pointer; font-size: 0.82rem; line-height: 1.4;
 }
 .upload-hk-goal input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; }
+.upload-hk-subcomp {
+  font-weight: 700; font-size: 0.82rem; color: var(--fhnw-dark);
+  padding: 8px 0 3px; margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
 
 .upload-error { color: #dc2626; font-size: 0.82rem; }
 .upload-modal-footer {
@@ -1383,6 +1388,22 @@ input, select, textarea { font: inherit; }
 .doc-date { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
 
 .doc-row-body { padding: 14px 16px; border-top: 1px solid var(--border); background: #fff; }
+
+.doc-toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+
+.doc-text-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.doc-text-field { display: flex; flex-direction: column; gap: 4px; }
+.doc-text-label {
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted);
+}
+.doc-text-area {
+  width: 100%; padding: 8px 10px; font-size: 13px; line-height: 1.5;
+  border: 1px solid var(--border); border-radius: 4px;
+  resize: vertical; font-family: inherit; color: var(--text);
+  background: var(--surface);
+}
+.doc-text-area:focus { outline: none; border-color: var(--primary); }
 
 /* Goal-Tabelle */
 .doc-goal-table { width: 100%; border-collapse: collapse; font-size: 13px; }

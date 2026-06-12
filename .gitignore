@@ -20,6 +20,16 @@ backend-dotnet/**/*.user
 # Temp-Dateien (Word/Excel)
 doku/~$*
 
+# Lokale CAS-Modulunterlagen (nur für lokale Auswertung, nicht im Repo)
+Alle Modulunterlagen CAS/
+
+# Zertifikate
+*.cer
+*.pfx
+*.pem
+
 # Diverses
 test.txt
 *.DS_Store
+desktop.ini
+/Icon_Lernende.png

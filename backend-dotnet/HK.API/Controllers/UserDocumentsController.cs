@@ -20,13 +20,14 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
             .ToListAsync();
 
     [HttpPost]
-    [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB
+    [RequestSizeLimit(50 * 1024 * 1024)]
     public async Task<ActionResult<DocumentResponse>> Create(
         Guid userId,
         [FromForm] string title,
         [FromForm] string apCode,
         [FromForm] string? description,
         [FromForm] string? goalIds,
+        [FromForm] string? bewertungsart,
         IFormFile file)
     {
         if (file is null || file.Length == 0)
@@ -37,22 +38,21 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
 
         var doc = new Document
         {
-            UserId      = userId,
-            ApCode      = apCode,
-            Title       = title.Trim(),
-            Description = description?.Trim(),
-            FileName    = file.FileName,
-            ContentType = file.ContentType,
-            FileData    = ms.ToArray(),
-            FileSize    = file.Length,
+            UserId       = userId,
+            ApCode       = apCode,
+            Title        = title.Trim(),
+            Description  = description?.Trim(),
+            Bewertungsart = bewertungsart?.Trim() ?? "manuell",
+            FileName     = file.FileName,
+            ContentType  = file.ContentType,
+            FileData     = ms.ToArray(),
+            FileSize     = file.Length,
         };
 
         if (!string.IsNullOrWhiteSpace(goalIds))
         {
             foreach (var gid in goalIds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                doc.GoalLinks.Add(new DocumentGoalLink { GoalId = gid });
-            }
+                doc.GoalLinks.Add(new DocumentGoalLink { GoalId = gid, BloomLevel = 1 });
         }
 
         db.Documents.Add(doc);
@@ -69,15 +69,18 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
             .FirstOrDefaultAsync(d => d.Id == docId && d.UserId == userId);
         if (doc is null) return NotFound();
 
-        doc.Title       = req.Title.Trim();
-        doc.Description = req.Description?.Trim();
-        doc.ApCode      = req.ApCode;
+        doc.Title            = req.Title.Trim();
+        doc.Description      = req.Description?.Trim();
+        doc.ApCode           = req.ApCode;
+        doc.Kurzbeschreibung = req.Kurzbeschreibung?.Trim();
+        doc.Umsetzung        = req.Umsetzung?.Trim();
+        doc.Luecken          = req.Luecken?.Trim();
 
         var existing  = doc.GoalLinks.Select(l => l.GoalId).ToHashSet();
         var requested = req.GoalIds.ToHashSet();
 
         foreach (var gid in requested.Except(existing))
-            doc.GoalLinks.Add(new DocumentGoalLink { GoalId = gid, DocumentId = docId });
+            doc.GoalLinks.Add(new DocumentGoalLink { GoalId = gid, DocumentId = docId, BloomLevel = 1 });
 
         var toRemove = doc.GoalLinks.Where(l => !requested.Contains(l.GoalId)).ToList();
         db.DocumentGoalLinks.RemoveRange(toRemove);
@@ -121,7 +124,6 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         {
             link.BloomLevel = req.BloomLevel;
 
-            // Nur erhöhen: GoalEntry aktualisieren wenn neues Level > aktuelles
             var entry = await db.GoalEntries
                 .FirstOrDefaultAsync(g => g.UserId == userId && g.GoalId == goalId);
 
@@ -129,9 +131,9 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
             {
                 db.GoalEntries.Add(new GoalEntry
                 {
-                    UserId  = userId,
-                    GoalId  = goalId,
-                    Level   = req.BloomLevel.Value,
+                    UserId    = userId,
+                    GoalId    = goalId,
+                    Level     = req.BloomLevel.Value,
                     UpdatedAt = DateTime.UtcNow,
                 });
             }
@@ -148,6 +150,7 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
 
     private static DocumentResponse ToResponse(Document d) =>
         new(d.Id, d.UserId, d.ApCode, d.Title, d.Description,
+            d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart,
             d.FileName, d.ContentType, d.FileSize, d.UploadedAt,
             d.GoalLinks.Select(l => new DocumentGoalLinkDto(l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel)));
 }

@@ -8,7 +8,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...options,
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json() as Promise<T>;
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 async function upload<T>(path: string, formData: FormData): Promise<T> {
@@ -81,7 +82,10 @@ export const api = {
     request<UserDocument[]>(`/users/${userId}/documents`),
   uploadDocument: (userId: string, formData: FormData) =>
     upload<UserDocument>(`/users/${userId}/documents`, formData),
-  updateDocument: (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) =>
+  updateDocument: (userId: string, docId: string, body: {
+    title: string; description?: string; ap_code: string; goal_ids: string[];
+    kurzbeschreibung?: string; umsetzung?: string; luecken?: string;
+  }) =>
     request<UserDocument>(`/users/${userId}/documents/${docId}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteDocument: (userId: string, docId: string) =>
     request<void>(`/users/${userId}/documents/${docId}`, { method: 'DELETE' }),

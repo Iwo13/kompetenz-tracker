@@ -1,6 +1,8 @@
 using System.Text.Json;
 using HK.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,18 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "HK-Tracker API", Version = "v1" }));
+
+// ── Entra ID / Zertifikat-Auth ────────────────────────────────────────────────
+// Nur aktiv wenn TenantId + ClientId in appsettings gesetzt sind
+var azureAdSection = builder.Configuration.GetSection("AzureAd");
+if (!string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
+    !string.IsNullOrEmpty(azureAdSection["ClientId"]))
+{
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(azureAdSection);
+    builder.Services.AddAuthorization();
+}
 
 // ── CORS: Frontend-Dev erlauben ───────────────────────────────────────────────
 builder.Services.AddCors(opts => opts.AddDefaultPolicy(p =>
@@ -56,6 +70,15 @@ using (var scope = app.Services.CreateScope())
             );
         END
 
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Documents') AND name = 'Kurzbeschreibung')
+        BEGIN
+            ALTER TABLE Documents ADD
+                Kurzbeschreibung NVARCHAR(MAX) NULL,
+                Umsetzung        NVARCHAR(MAX) NULL,
+                Luecken          NVARCHAR(MAX) NULL,
+                Bewertungsart    NVARCHAR(20)  NOT NULL DEFAULT 'manuell';
+        END
+
         IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'DocumentGoalLinks')
         BEGIN
             CREATE TABLE DocumentGoalLinks (
@@ -72,6 +95,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();

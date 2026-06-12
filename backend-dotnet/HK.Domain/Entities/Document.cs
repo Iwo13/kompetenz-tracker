@@ -7,6 +7,10 @@ public class Document
     public string ApCode { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? Kurzbeschreibung { get; set; }
+    public string? Umsetzung { get; set; }
+    public string? Luecken { get; set; }
+    public string Bewertungsart { get; set; } = "manuell";
     public string FileName { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
     public byte[] FileData { get; set; } = [];

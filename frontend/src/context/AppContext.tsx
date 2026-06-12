@@ -38,7 +38,7 @@ interface AppContextValue {
   deleteRotation:     (userId: string, rotId: string) => Promise<void>;
   documents:          UserDocument[];
   uploadDocument:     (userId: string, formData: FormData) => Promise<UserDocument>;
-  updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) => Promise<void>;
+  updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; }) => Promise<void>;
   deleteDocument:     (userId: string, docId: string) => Promise<void>;
   updateDocumentGoal: (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => Promise<DocumentGoalLink>;
 }
@@ -225,7 +225,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return created;
   }, []);
 
-  const updateDocument = useCallback(async (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[] }) => {
+  const updateDocument = useCallback(async (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; }) => {
     const updated = await api.updateDocument(userId, docId, body);
     setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
   }, []);

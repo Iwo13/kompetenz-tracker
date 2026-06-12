@@ -13,6 +13,10 @@ public record DocumentResponse(
     string ApCode,
     string Title,
     string? Description,
+    string? Kurzbeschreibung,
+    string? Umsetzung,
+    string? Luecken,
+    string Bewertungsart,
     string FileName,
     string ContentType,
     long FileSize,
@@ -24,7 +28,10 @@ public record UpdateDocumentRequest(
     string Title,
     string? Description,
     string ApCode,
-    IEnumerable<string> GoalIds
+    IEnumerable<string> GoalIds,
+    string? Kurzbeschreibung,
+    string? Umsetzung,
+    string? Luecken
 );
 
 public record UpdateGoalLinkRequest(

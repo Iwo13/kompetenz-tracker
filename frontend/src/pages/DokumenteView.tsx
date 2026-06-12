@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext';
-import type { UserDocument, BloomLevel } from '../types';
+import { api } from '../api/client';
+import type { UserDocument, BloomLevel, DocumentGoalLink } from '../types';
 
 const BLOOM_LABELS = ['K0 – Keine', 'K1 – Wissen', 'K2 – Verstehen', 'K3 – Anwenden', 'K4 – Analysieren', 'K5 – Synthese', 'K6 – Beurteilen'];
 
@@ -21,19 +22,17 @@ function fileIcon(contentType: string) {
 interface UploadModalProps {
   userId: string;
   activeApCode: string | null;
-  areas: import('../types').Area[];
   onClose: () => void;
   onUploaded: (doc: UserDocument) => void;
 }
 
-function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: UploadModalProps) {
+function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalProps) {
   const { uploadDocument, ausbildungsplaetze, currentUser } = useApp();
   const fileRef = useRef<HTMLInputElement>(null);
   const [title,         setTitle]         = useState('');
-  const [description,   setDescription]   = useState('');
+  const [untertitel,    setUntertitel]    = useState('');
   const [apCode,        setApCode]        = useState(activeApCode ?? '');
-  const [selectedGoals, setSelectedGoals] = useState<Set<string>>(new Set());
-  const [openAreas,     setOpenAreas]     = useState<Set<string>>(new Set());
+  const [bewertungsart, setBewertungsart] = useState('manuell');
   const [file,          setFile]          = useState<File | null>(null);
   const [saving,        setSaving]        = useState(false);
   const [error,         setError]         = useState<string | null>(null);
@@ -47,15 +46,7 @@ function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: Uploa
     if (f && !title) setTitle(f.name.replace(/\.[^.]+$/, ''));
   }
 
-  function toggleGoal(id: string) {
-    setSelectedGoals(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  }
-
-  function toggleArea(areaId: string) {
-    setOpenAreas(prev => { const n = new Set(prev); n.has(areaId) ? n.delete(areaId) : n.add(areaId); return n; });
-  }
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!file)   { setError('Bitte eine Datei wählen.'); return; }
     if (!apCode) { setError('Bitte einen Ausbildungsplatz wählen.'); return; }
@@ -65,8 +56,8 @@ function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: Uploa
       fd.append('file', file);
       fd.append('title', title.trim() || file.name);
       fd.append('apCode', apCode);
-      if (description.trim()) fd.append('description', description.trim());
-      if (selectedGoals.size > 0) fd.append('goalIds', [...selectedGoals].join(','));
+      fd.append('bewertungsart', bewertungsart);
+      if (untertitel.trim()) fd.append('description', untertitel.trim());
       const doc = await uploadDocument(userId, fd);
       onUploaded(doc);
       onClose();
@@ -80,36 +71,25 @@ function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: Uploa
   const modal = (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="upload-modal" onClick={e => e.stopPropagation()}>
-
-        {/* Header */}
         <div className="upload-modal-header">
           <h2 className="upload-modal-title">Neues Dokument</h2>
           <button className="upload-modal-close" onClick={onClose} type="button">✕</button>
         </div>
-
         <form onSubmit={handleSubmit} className="upload-modal-form">
-          {/* Datei */}
           <div className="upload-field">
             <label className="upload-label">Datei *</label>
             <input ref={fileRef} type="file" onChange={handleFileChange} className="upload-file-input" />
           </div>
-
-          {/* Titel */}
           <div className="upload-field">
             <label className="upload-label">Titel *</label>
             <input className="upload-input" value={title} onChange={e => setTitle(e.target.value)}
               placeholder="Titel des Dokuments" required />
           </div>
-
-          {/* Beschreibung */}
           <div className="upload-field">
-            <label className="upload-label">Beschreibung</label>
-            <textarea className="upload-input" rows={2} value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Kurze Beschreibung (optional)" />
+            <label className="upload-label">Untertitel</label>
+            <input className="upload-input" value={untertitel} onChange={e => setUntertitel(e.target.value)}
+              placeholder="Zusatztext für zweite Zeile (optional)" />
           </div>
-
-          {/* Ausbildungsplatz */}
           <div className="upload-field">
             <label className="upload-label">Ausbildungsplatz *</label>
             <select className="upload-input" value={apCode} onChange={e => setApCode(e.target.value)} required>
@@ -119,47 +99,14 @@ function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: Uploa
               ))}
             </select>
           </div>
-
-          {/* HK-Auswahl gruppiert nach Bereichen */}
           <div className="upload-field">
-            <label className="upload-label">
-              Verknüpfte Handlungskompetenzen
-              {selectedGoals.size > 0 && <span className="upload-hk-count"> ({selectedGoals.size} gewählt)</span>}
-            </label>
-            <div className="upload-hk-container">
-              {areas.map(area => {
-                const areaGoals = area.subComps.flatMap(sc => sc.goals);
-                const selectedInArea = areaGoals.filter(g => selectedGoals.has(g.id)).length;
-                const isOpen = openAreas.has(area.id);
-                return (
-                  <div key={area.id} className="upload-hk-area">
-                    <button type="button" className="upload-hk-area-header"
-                      onClick={() => toggleArea(area.id)}>
-                      <span className="upload-hk-area-toggle">{isOpen ? '▼' : '▶'}</span>
-                      <span className="upload-hk-area-name">{area.id.toUpperCase()} – {area.name}</span>
-                      {selectedInArea > 0 && (
-                        <span className="upload-hk-badge">{selectedInArea}</span>
-                      )}
-                    </button>
-                    {isOpen && (
-                      <div className="upload-hk-goals">
-                        {areaGoals.map(g => (
-                          <label key={g.id} className="upload-hk-goal">
-                            <input type="checkbox" checked={selectedGoals.has(g.id)}
-                              onChange={() => toggleGoal(g.id)} />
-                            <span><strong>{g.id}</strong> – {g.text ?? g.id}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <label className="upload-label">Art der ersten Bewertung</label>
+            <select className="upload-input" value={bewertungsart} onChange={e => setBewertungsart(e.target.value)}>
+              <option value="manuell">Manuelle Bewertung</option>
+              <option value="ai" disabled>Initialbewertung durch AI (demnächst)</option>
+            </select>
           </div>
-
           {error && <p className="upload-error">{error}</p>}
-
           <div className="upload-modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>Abbrechen</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
@@ -174,18 +121,23 @@ function UploadModal({ userId, activeApCode, areas, onClose, onUploaded }: Uploa
   return createPortal(modal, document.body);
 }
 
-// ── Edit Document Modal ────────────────────────────────────────────────────────
-interface EditDocModalProps {
+// ── Leistungsziele-Modal ───────────────────────────────────────────────────────
+interface LeistungszieleModalProps {
   doc: UserDocument;
   userId: string;
   areas: import('../types').Area[];
   onClose: () => void;
+  onSaved: (newGoalIds: string[], updatedDoc: Partial<UserDocument>) => void;
+  // current text field values from DocRow to avoid overwriting them
+  kurzbeschreibung: string;
+  umsetzung: string;
+  luecken: string;
 }
 
-function EditDocModal({ doc, userId, areas, onClose }: EditDocModalProps) {
+function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschreibung, umsetzung, luecken }: LeistungszieleModalProps) {
   const { updateDocument, ausbildungsplaetze, currentUser } = useApp();
   const [title,         setTitle]         = useState(doc.title);
-  const [description,   setDescription]   = useState(doc.description ?? '');
+  const [untertitel,    setUntertitel]    = useState(doc.description ?? '');
   const [apCode,        setApCode]        = useState(doc.ap_code);
   const [selectedGoals, setSelectedGoals] = useState<Set<string>>(new Set(doc.goal_links.map(l => l.goal_id)));
   const [openAreas,     setOpenAreas]     = useState<Set<string>>(new Set());
@@ -202,16 +154,20 @@ function EditDocModal({ doc, userId, areas, onClose }: EditDocModalProps) {
     setOpenAreas(prev => { const n = new Set(prev); n.has(areaId) ? n.delete(areaId) : n.add(areaId); return n; });
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
     try {
       await updateDocument(userId, doc.id, {
         title: title.trim(),
-        description: description.trim() || undefined,
+        description: untertitel.trim() || undefined,
         ap_code: apCode,
         goal_ids: [...selectedGoals],
+        kurzbeschreibung: kurzbeschreibung || undefined,
+        umsetzung:        umsetzung        || undefined,
+        luecken:          luecken          || undefined,
       });
+      onSaved([...selectedGoals], { title: title.trim(), description: untertitel.trim() || null, ap_code: apCode });
       onClose();
     } catch {
       setError('Fehler beim Speichern.');
@@ -224,24 +180,18 @@ function EditDocModal({ doc, userId, areas, onClose }: EditDocModalProps) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="upload-modal" onClick={e => e.stopPropagation()}>
         <div className="upload-modal-header">
-          <h2 className="upload-modal-title">Dokumentinformationen anpassen</h2>
+          <h2 className="upload-modal-title">Leistungsziele zur Bewertung auswählen</h2>
           <button className="upload-modal-close" onClick={onClose} type="button">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="upload-modal-form">
-          <div className="upload-field">
-            <label className="upload-label">Datei</label>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              {doc.file_name} · {(doc.file_size / 1024).toFixed(0)} KB
-            </span>
-          </div>
           <div className="upload-field">
             <label className="upload-label">Titel *</label>
             <input className="upload-input" value={title} onChange={e => setTitle(e.target.value)} required />
           </div>
           <div className="upload-field">
-            <label className="upload-label">Beschreibung</label>
-            <textarea className="upload-input" rows={2} value={description}
-              onChange={e => setDescription(e.target.value)} placeholder="Kurze Beschreibung (optional)" />
+            <label className="upload-label">Untertitel</label>
+            <input className="upload-input" value={untertitel} onChange={e => setUntertitel(e.target.value)}
+              placeholder="Zusatztext (optional)" />
           </div>
           <div className="upload-field">
             <label className="upload-label">Ausbildungsplatz *</label>
@@ -270,11 +220,16 @@ function EditDocModal({ doc, userId, areas, onClose }: EditDocModalProps) {
                     </button>
                     {isOpen && (
                       <div className="upload-hk-goals">
-                        {areaGoals.map(g => (
-                          <label key={g.id} className="upload-hk-goal">
-                            <input type="checkbox" checked={selectedGoals.has(g.id)} onChange={() => toggleGoal(g.id)} />
-                            <span><strong>{g.id}</strong> – {g.text ?? g.id}</span>
-                          </label>
+                        {area.subComps.map(sc => (
+                          <div key={sc.id}>
+                            <div className="upload-hk-subcomp">{sc.name}</div>
+                            {sc.goals.map(g => (
+                              <label key={g.id} className="upload-hk-goal">
+                                <input type="checkbox" checked={selectedGoals.has(g.id)} onChange={() => toggleGoal(g.id)} />
+                                <span><strong>{g.id.toUpperCase()}</strong> – {g.text ?? g.id}</span>
+                              </label>
+                            ))}
+                          </div>
                         ))}
                       </div>
                     )}
@@ -308,18 +263,44 @@ interface DocRowProps {
 }
 
 function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRowProps) {
-  const { updateDocumentGoal, currentUser } = useApp();
-  const [showEdit, setShowEdit] = useState(false);
-  const [saving,   setSaving]   = useState<string | null>(null);
+  const { updateDocumentGoal, updateGoal, updateDocument, currentUser } = useApp();
+  const [showEdit,        setShowEdit]        = useState(false);
+  const [saving,          setSaving]          = useState<string | null>(null);
+  const [savingBewertung, setSavingBewertung] = useState(false);
+  const [savedOk,         setSavedOk]         = useState(false);
   const [localLinks, setLocalLinks] = useState(
     [...doc.goal_links].sort((a, b) => a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }))
   );
 
-  const areaBadges = [...new Set(doc.goal_links.map(l => l.goal_id[0].toUpperCase()))].sort();
+  // Textfelder mit Autosave
+  const [kurzbeschreibung, setKurzbeschreibung] = useState(doc.kurzbeschreibung ?? '');
+  const [umsetzung,        setUmsetzung]        = useState(doc.umsetzung ?? '');
+  const [luecken,          setLuecken]          = useState(doc.luecken ?? '');
+  const savingTextRef = useRef(false);
+
+  const areaBadges = [...new Set(localLinks.map(l => l.goal_id[0].toUpperCase()))].sort();
 
   const goalMap = new Map(areas.flatMap(a => a.subComps.flatMap(sc =>
     sc.goals.map(g => [g.id, { text: g.text ?? g.id, max: g.max }])
   )));
+
+  async function saveTextFields(overrides?: { kurzbeschreibung?: string; umsetzung?: string; luecken?: string }) {
+    if (savingTextRef.current) return;
+    savingTextRef.current = true;
+    try {
+      await updateDocument(userId, doc.id, {
+        title: doc.title,
+        description: doc.description ?? undefined,
+        ap_code: doc.ap_code,
+        goal_ids: localLinks.map(l => l.goal_id),
+        kurzbeschreibung: overrides?.kurzbeschreibung !== undefined ? overrides.kurzbeschreibung || undefined : kurzbeschreibung || undefined,
+        umsetzung:        overrides?.umsetzung        !== undefined ? overrides.umsetzung        || undefined : umsetzung        || undefined,
+        luecken:          overrides?.luecken          !== undefined ? overrides.luecken          || undefined : luecken          || undefined,
+      });
+    } finally {
+      savingTextRef.current = false;
+    }
+  }
 
   async function handleGoalUpdate(goalId: string, field: 'einschaetzung' | 'bloom_level', value: string | number | null) {
     const link = localLinks.find(l => l.goal_id === goalId);
@@ -328,7 +309,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     const newBloom = field === 'bloom_level' ? (value as number | null) : link.bloom_level;
     setLocalLinks(prev => prev.map(l => l.goal_id === goalId
       ? { ...l, einschaetzung: newEinschaetzung, bloom_level: newBloom } : l));
-    if (field === 'bloom_level') {
+    if (field === 'bloom_level' && newBloom !== -1) {
       setSaving(goalId);
       try { await updateDocumentGoal(userId, doc.id, goalId, newEinschaetzung, newBloom); }
       finally { setSaving(null); }
@@ -341,6 +322,63 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     setSaving(goalId);
     try { await updateDocumentGoal(userId, doc.id, goalId, link.einschaetzung, link.bloom_level); }
     finally { setSaving(null); }
+  }
+
+  function handleLeistungszieleModalSaved(newGoalIds: string[], updatedDoc: Partial<UserDocument>) {
+    setLocalLinks(prev => {
+      const prevMap = new Map(prev.map(l => [l.goal_id, l]));
+      return newGoalIds
+        .map(id => prevMap.get(id) ?? { id: '', goal_id: id, bloom_level: 1, einschaetzung: null } as DocumentGoalLink)
+        .sort((a, b) => a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }));
+    });
+    // Reflect title/untertitel changes immediately in the header via context (updateDocument already updated context)
+    void updatedDoc;
+    setShowEdit(false);
+  }
+
+  async function handleSaveBewertung() {
+    if (!currentUser) return;
+    setSavingBewertung(true);
+    setSavedOk(false);
+    try {
+      const toRemove = localLinks.filter(l => l.bloom_level === -1);
+      const toKeep   = localLinks.filter(l => l.bloom_level !== -1);
+
+      // Leistungsziele entfernen
+      if (toRemove.length > 0) {
+        const remainingIds = toKeep.map(l => l.goal_id);
+        await updateDocument(userId, doc.id, {
+          title: doc.title,
+          description: doc.description ?? undefined,
+          ap_code: doc.ap_code,
+          goal_ids: remainingIds,
+          kurzbeschreibung: kurzbeschreibung || undefined,
+          umsetzung:        umsetzung        || undefined,
+          luecken:          luecken          || undefined,
+        });
+        setLocalLinks(toKeep);
+      }
+
+      // Kompetenzstufen speichern (nur nicht-entfernte Links)
+      for (const link of toKeep) {
+        if (!link.bloom_level) continue;
+        const current  = currentUser.goals[link.goal_id];
+        const maxLevel = goalMap.get(link.goal_id)?.max ?? 6;
+        const newLevel = Math.min(Math.max(current?.level ?? 0, link.bloom_level), maxLevel) as BloomLevel;
+        const existing = current?.comment?.trim() ?? '';
+        const kommentar = link.einschaetzung?.trim() ?? '';
+        const newEntry  = kommentar
+          ? `${doc.ap_code} - ${kommentar} - ${doc.title}`
+          : `${doc.ap_code} - ${doc.title}`;
+        const merged = existing ? `${existing}\n${newEntry}` : newEntry;
+        await updateGoal(link.goal_id, newLevel, merged);
+      }
+
+      setSavedOk(true);
+      setTimeout(() => setSavedOk(false), 3000);
+    } finally {
+      setSavingBewertung(false);
+    }
   }
 
   return (
@@ -366,62 +404,97 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
         {/* Body */}
         {open && (
           <div className="doc-row-body">
-            <div style={{ display: 'flex', gap: 10, marginBottom: 14, alignItems: 'center' }}>
-              <a href={`http://localhost:5000/users/${userId}/documents/${doc.id}/file`}
+            {/* Toolbar */}
+            <div className="doc-toolbar">
+              <a href={api.getDocumentFileUrl(userId, doc.id)}
                 target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ fontSize: 13 }}>
                 ⬇ Datei öffnen
               </a>
               <button className="btn btn-secondary" style={{ fontSize: 13 }}
                 onClick={() => setShowEdit(true)}>
-                ✎ Anpassen
+                ✎ Leistungsziele zur Bewertung ändern
               </button>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', flex: 1 }}>
-                {doc.file_name} · {(doc.file_size / 1024).toFixed(0)} KB · AP: <strong>{doc.ap_code}</strong> · {formatDate(doc.uploaded_at)}
-              </span>
+              <button className="btn btn-primary" style={{ fontSize: 13 }}
+                onClick={handleSaveBewertung}
+                disabled={savingBewertung || localLinks.length === 0}>
+                {savingBewertung ? 'Wird gespeichert…' : savedOk ? '✓ Gespeichert' : 'Bewertung Speichern'}
+              </button>
+              <span style={{ flex: 1 }} />
               <button className="btn btn-secondary" style={{ fontSize: 12, color: '#dc2626', borderColor: '#dc2626' }}
                 onClick={() => onDelete(doc.id)}>
                 🗑 Löschen
               </button>
             </div>
 
+            {/* Textfelder */}
+            <div className="doc-text-fields">
+              <div className="doc-text-field">
+                <label className="doc-text-label">Kurzbeschreibung</label>
+                <textarea className="doc-text-area" rows={3}
+                  value={kurzbeschreibung}
+                  onChange={e => setKurzbeschreibung(e.target.value)}
+                  onBlur={() => saveTextFields({ kurzbeschreibung })}
+                  placeholder="Beschreibung des Inhalts in 4/5 Sätzen. Was deckt es ab (Problemstellung, Funktion, Ergebnis)" />
+              </div>
+              <div className="doc-text-field">
+                <label className="doc-text-label">Umsetzung der Arbeit</label>
+                <textarea className="doc-text-area" rows={3}
+                  value={umsetzung}
+                  onChange={e => setUmsetzung(e.target.value)}
+                  onBlur={() => saveTextFields({ umsetzung })}
+                  placeholder="Wie wurde die Problemstellung gelöst, wie ist das Vorgehen und die Dokumentation." />
+              </div>
+              <div className="doc-text-field">
+                <label className="doc-text-label">Lücken und Verbesserungsmöglichkeiten</label>
+                <textarea className="doc-text-area" rows={3}
+                  value={luecken}
+                  onChange={e => setLuecken(e.target.value)}
+                  onBlur={() => saveTextFields({ luecken })}
+                  placeholder="Was könnte bei der nächsten Arbeit dieser Art berücksichtigt werden." />
+              </div>
+            </div>
+
+            {/* Leistungsziel-Tabelle */}
             {localLinks.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Keine Handlungskompetenzen verknüpft.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 12 }}>
+                Keine Leistungsziele verknüpft. Bitte «Leistungsziele zur Bewertung ändern» verwenden.
+              </p>
             ) : (
               <table className="doc-goal-table">
                 <thead>
                   <tr>
-                    <th>Kompetenz</th>
+                    <th>Leistungsziel</th>
                     <th>Beschreibung</th>
-                    <th>Einschätzung</th>
-                    <th>Bloom-Stufe (aktuell)</th>
-                    <th>Anpassung</th>
+                    <th style={{ width: '35%' }}>Kommentar/Notiz...</th>
+                    <th>Kompetenzstufe</th>
                   </tr>
                 </thead>
                 <tbody>
                   {localLinks.map(link => {
-                    const gInfo = goalMap.get(link.goal_id);
+                    const gInfo    = goalMap.get(link.goal_id);
                     const currentLevel = currentUser?.goals[link.goal_id]?.level ?? 0;
                     const isSaving = saving === link.goal_id;
                     return (
                       <tr key={link.goal_id}>
-                        <td><strong>{link.goal_id}</strong></td>
+                        <td><strong>{link.goal_id.toUpperCase()}</strong></td>
                         <td style={{ fontSize: 12 }}>{gInfo?.text ?? link.goal_id}</td>
                         <td>
                           <textarea className="doc-einschaetzung" rows={2}
                             value={link.einschaetzung ?? ''}
                             onChange={e => handleGoalUpdate(link.goal_id, 'einschaetzung', e.target.value)}
                             onBlur={() => handleEinschaetzungBlur(link.goal_id)}
-                            placeholder="Einschätzung…" />
+                            placeholder="Kommentar/Notiz…" />
                         </td>
-                        <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>K{currentLevel}</td>
                         <td>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <select className="doc-bloom-select" disabled={isSaving}
                               value={link.bloom_level ?? currentLevel}
-                              onChange={e => handleGoalUpdate(link.goal_id, 'bloom_level', Number(e.target.value))}>
+                              onChange={e => handleGoalUpdate(link.goal_id, 'bloom_level', Number(e.target.value))}
+                              style={link.bloom_level === -1 ? { color: '#dc2626', fontStyle: 'italic' } : undefined}>
                               {([1,2,3,4,5,6] as BloomLevel[]).map(l => (
                                 <option key={l} value={l}>{BLOOM_LABELS[l]}</option>
                               ))}
+                              <option value={-1} style={{ color: '#dc2626' }}>— Leistungsziel entfernen</option>
                             </select>
                             {isSaving && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>…</span>}
                           </div>
@@ -437,7 +510,9 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
       </div>
 
       {showEdit && (
-        <EditDocModal doc={doc} userId={userId} areas={areas} onClose={() => setShowEdit(false)} />
+        <LeistungszieleModal doc={doc} userId={userId} areas={areas}
+          onClose={() => setShowEdit(false)} onSaved={handleLeistungszieleModalSaved}
+          kurzbeschreibung={kurzbeschreibung} umsetzung={umsetzung} luecken={luecken} />
       )}
     </>
   );
@@ -461,6 +536,7 @@ export default function DokumenteView() {
   async function handleDelete(docId: string) {
     if (!confirm('Dokument wirklich löschen?')) return;
     await deleteDocument(currentUser!.id, docId);
+    if (openDocId === docId) setOpenDocId(null);
   }
 
   return (
@@ -494,9 +570,8 @@ export default function DokumenteView() {
         <UploadModal
           userId={currentUser.id}
           activeApCode={activeAP?.code ?? currentUser.rotations[0]?.ap_code ?? null}
-          areas={areas}
           onClose={() => setShowUpload(false)}
-          onUploaded={() => {}}
+          onUploaded={doc => setOpenDocId(doc.id)}
         />
       )}
     </div>

@@ -27,16 +27,20 @@ export interface DocumentGoalLink {
 }
 
 export interface UserDocument {
-  id:           string;
-  user_id:      string;
-  ap_code:      string;
-  title:        string;
-  description:  string | null;
-  file_name:    string;
-  content_type: string;
-  file_size:    number;
-  uploaded_at:  string;
-  goal_links:   DocumentGoalLink[];
+  id:               string;
+  user_id:          string;
+  ap_code:          string;
+  title:            string;
+  description:      string | null;
+  kurzbeschreibung: string | null;
+  umsetzung:        string | null;
+  luecken:          string | null;
+  bewertungsart:    string;
+  file_name:        string;
+  content_type:     string;
+  file_size:        number;
+  uploaded_at:      string;
+  goal_links:       DocumentGoalLink[];
 }
 
 export interface User {
