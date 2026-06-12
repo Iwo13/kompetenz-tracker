@@ -5,6 +5,7 @@ import {
 import { api } from '../api/client';
 import type {
   User, Area, Ausbildungsplatz, Rotation, Specialty, Role, BloomLevel, UserDocument, DocumentGoalLink,
+  GoalContribution,
 } from '../types';
 
 // ── Typen ─────────────────────────────────────────────────────────────────────
@@ -30,6 +31,7 @@ interface AppContextValue {
   addAusbildungsplatz:(body: Partial<Ausbildungsplatz>) => Promise<Ausbildungsplatz>;
   selectUser:         (id: string) => void;
   updateGoal:         (goalId: string, level: BloomLevel, comment: string) => Promise<void>;
+  reloadGoals:        (userId: string) => Promise<void>;
   addUser:            (body: Partial<User>) => Promise<User>;
   editUser:           (id: string, body: Partial<User>) => Promise<void>;
   removeUser:         (id: string) => Promise<void>;
@@ -90,7 +92,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ]);
             const goals: User['goals'] = {};
             goalList.forEach(g => {
-              goals[g.goal_id] = { level: g.level as unknown as BloomLevel, comment: g.comment ?? '', date: g.updated_at };
+              goals[g.goal_id] = {
+                level:         g.effective_level as BloomLevel,
+                manual_level:  g.manual_level as BloomLevel,
+                comment:       g.comment ?? '',
+                date:          g.updated_at ?? undefined,
+                contributions: (g.document_contributions ?? []).map((c): GoalContribution => ({
+                  doc_id:      c.doc_id,
+                  doc_title:   c.doc_title,
+                  bloom_level: c.bloom_level,
+                })),
+              };
             });
             return { ...u, startDate: u.start_date, goals, rotations: rotList } as User;
           })
@@ -186,13 +198,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const selectUser = useCallback((id: string) => setCurrentUserId(id), []);
 
+  const reloadGoals = useCallback(async (userId: string) => {
+    const goalList = await api.getGoals(userId).catch(() => []);
+    setUsers(prev => prev.map(u => {
+      if (u.id !== userId) return u;
+      const goals: User['goals'] = {};
+      goalList.forEach(g => {
+        goals[g.goal_id] = {
+          level:         g.effective_level as BloomLevel,
+          manual_level:  g.manual_level as BloomLevel,
+          comment:       g.comment ?? '',
+          date:          g.updated_at ?? undefined,
+          contributions: (g.document_contributions ?? []).map((c): GoalContribution => ({
+            doc_id:      c.doc_id,
+            doc_title:   c.doc_title,
+            bloom_level: c.bloom_level,
+          })),
+        };
+      });
+      return { ...u, goals };
+    }));
+  }, []);
+
   const updateGoal = useCallback(async (goalId: string, level: BloomLevel, comment: string) => {
     if (!currentUser) return;
     await api.saveGoal(currentUser.id, goalId, { goal_id: goalId, level, comment });
     setUsers(prev => prev.map(u =>
-      u.id === currentUser.id
-        ? { ...u, goals: { ...u.goals, [goalId]: { level, comment, date: new Date().toISOString() } } }
-        : u
+      u.id !== currentUser.id ? u : {
+        ...u,
+        goals: {
+          ...u.goals,
+          [goalId]: {
+            ...u.goals[goalId],
+            level,
+            manual_level: level,
+            comment,
+            date: new Date().toISOString(),
+          },
+        },
+      }
     ));
   }, [currentUser]);
 
@@ -234,13 +278,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteDocument = useCallback(async (userId: string, docId: string) => {
     await api.deleteDocument(userId, docId);
     setDocuments(prev => prev.filter(d => d.id !== docId));
-  }, []);
+    await reloadGoals(userId);
+  }, [reloadGoals]);
 
   const aiEvaluateDocument = useCallback(async (userId: string, docId: string) => {
     const updated = await api.aiEvaluateDocument(userId, docId);
     setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
+    await reloadGoals(userId);
     return updated;
-  }, []);
+  }, [reloadGoals]);
 
   const updateDocumentGoal = useCallback(async (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => {
     const updated = await api.updateDocumentGoal(userId, docId, goalId, { einschaetzung, bloom_level: bloomLevel });
@@ -248,14 +294,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ? { ...d, goal_links: d.goal_links.map(l => l.goal_id === goalId ? { ...l, einschaetzung: updated.einschaetzung, bloom_level: updated.bloom_level } : l) }
       : d
     ));
-    if (bloomLevel !== null) {
-      setUsers(prev => prev.map(u => {
-        if (u.id !== userId) return u;
-        const cur = u.goals[goalId]?.level ?? 0;
-        if (bloomLevel <= cur) return u;
-        return { ...u, goals: { ...u.goals, [goalId]: { level: bloomLevel as BloomLevel, comment: u.goals[goalId]?.comment ?? '', date: new Date().toISOString() } } };
-      }));
-    }
     return updated;
   }, []);
 
@@ -265,7 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ausbildungsplaetze, currentAP, currentAPCode, selectAP, updateApHk, addAusbildungsplatz,
       activeAP,
       rotationGanttView, setRotationGanttView,
-      selectUser, updateGoal, addUser, editUser, removeUser,
+      selectUser, updateGoal, reloadGoals, addUser, editUser, removeUser,
       addRotation, updateRotation, deleteRotation,
       documents, uploadDocument, updateDocument, deleteDocument, updateDocumentGoal, aiEvaluateDocument,
     }}>

@@ -8,11 +8,17 @@ interface GoalRowProps {
 
 export default function GoalRow({ goal }: GoalRowProps) {
   const { currentUser, updateGoal } = useApp();
-  const userGoal = currentUser?.goals?.[goal.id] ?? { level: 0 as BloomLevel, comment: '' };
+  const userGoal = currentUser?.goals?.[goal.id];
 
-  const [level,   setLevel]   = useState<BloomLevel>(userGoal.level ?? 0);
-  const [comment, setComment] = useState(userGoal.comment ?? '');
+  const manualLvl    = (userGoal?.manual_level ?? userGoal?.level ?? 0) as BloomLevel;
+  const contributions = userGoal?.contributions ?? [];
+  const docMaxLevel  = contributions.reduce((max, c) => Math.max(max, c.bloom_level), 0);
+
+  const [level,   setLevel]   = useState<BloomLevel>(manualLvl);
+  const [comment, setComment] = useState(userGoal?.comment ?? '');
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const effectiveLevel = Math.max(level, docMaxLevel) as BloomLevel;
 
   function handleLevel(l: BloomLevel) {
     const next = l === level ? 0 as BloomLevel : l;
@@ -32,12 +38,12 @@ export default function GoalRow({ goal }: GoalRowProps) {
     );
   }
 
-  const date = userGoal.date
+  const date = userGoal?.date
     ? new Date(userGoal.date).toLocaleDateString('de-CH')
     : null;
 
   const allLevels = [0, 1, 2, 3, 4, 5, 6] as BloomLevel[];
-  const maxReached = level >= goal.max;
+  const maxReached = effectiveLevel >= goal.max;
 
   return (
     <div className="goal-row">
@@ -50,7 +56,7 @@ export default function GoalRow({ goal }: GoalRowProps) {
               <button
                 key={l}
                 data-level={l}
-                className={`k-btn${level === l ? ' selected' : ''}`}
+                className={`k-btn${effectiveLevel === l ? ' selected' : ''}`}
                 onClick={() => handleLevel(l)}
                 title={`K${l}`}
               >
@@ -62,6 +68,20 @@ export default function GoalRow({ goal }: GoalRowProps) {
             Max: K{goal.max}
           </span>
         </div>
+        {contributions.length > 0 && (
+          <div className="goal-contributions">
+            {contributions.map(c => (
+              <span
+                key={c.doc_id}
+                className="goal-contrib-label"
+                data-level={c.bloom_level}
+                title={`${c.doc_title}: K${c.bloom_level}`}
+              >
+                {c.doc_title}
+              </span>
+            ))}
+          </div>
+        )}
         {date && <div className="goal-date">Zuletzt gespeichert: {date}</div>}
         <textarea
           className="goal-comment"

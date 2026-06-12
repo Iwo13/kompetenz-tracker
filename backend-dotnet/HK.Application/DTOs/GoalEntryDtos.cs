@@ -1,12 +1,18 @@
 namespace HK.Application.DTOs;
 
 public record GoalEntryResponse(
-    Guid Id,
-    Guid UserId,
     string GoalId,
-    int Level,
+    int EffectiveLevel,
+    int ManualLevel,
     string? Comment,
-    DateTime UpdatedAt
+    DateTime? UpdatedAt,
+    IEnumerable<GoalContributionDto> DocumentContributions
+);
+
+public record GoalContributionDto(
+    Guid DocId,
+    string DocTitle,
+    int BloomLevel
 );
 
 public record UpsertGoalRequest(

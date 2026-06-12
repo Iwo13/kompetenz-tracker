@@ -39,7 +39,14 @@ export const api = {
 
   // Goals
   getGoals: (userId: string) =>
-    request<Array<{ goal_id: string; level: string; comment: string; updated_at: string }>>(
+    request<Array<{
+      goal_id: string;
+      effective_level: number;
+      manual_level: number;
+      comment: string | null;
+      updated_at: string | null;
+      document_contributions: Array<{ doc_id: string; doc_title: string; bloom_level: number }>;
+    }>>(
       `/users/${userId}/goals`
     ),
   saveGoal: (userId: string, goalId: string, body: Partial<GoalEntry> & { goal_id: string }) =>

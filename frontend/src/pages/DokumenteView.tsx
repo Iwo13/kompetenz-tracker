@@ -265,7 +265,7 @@ interface DocRowProps {
 }
 
 function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRowProps) {
-  const { updateDocumentGoal, updateGoal, updateDocument, aiEvaluateDocument, currentUser, role } = useApp();
+  const { updateDocumentGoal, updateDocument, reloadGoals, aiEvaluateDocument, currentUser, role } = useApp();
   const [showEdit,        setShowEdit]        = useState(false);
   const [saving,          setSaving]          = useState<string | null>(null);
   const [savingBewertung, setSavingBewertung] = useState(false);
@@ -370,7 +370,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
       const toRemove = localLinks.filter(l => l.bloom_level === -1);
       const toKeep   = localLinks.filter(l => l.bloom_level !== -1);
 
-      // Leistungsziele entfernen
+      // Leistungsziele entfernen (bloom = -1)
       if (toRemove.length > 0) {
         const remainingIds = toKeep.map(l => l.goal_id);
         await updateDocument(userId, doc.id, {
@@ -385,20 +385,8 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
         setLocalLinks(toKeep);
       }
 
-      // Kompetenzstufen speichern (nur nicht-entfernte Links)
-      for (const link of toKeep) {
-        if (!link.bloom_level) continue;
-        const current  = currentUser.goals[link.goal_id];
-        const maxLevel = goalMap.get(link.goal_id)?.max ?? 6;
-        const newLevel = Math.min(Math.max(current?.level ?? 0, link.bloom_level), maxLevel) as BloomLevel;
-        const existing = current?.comment?.trim() ?? '';
-        const kommentar = link.einschaetzung?.trim() ?? '';
-        const newEntry  = kommentar
-          ? `${doc.ap_code} - ${kommentar} - ${doc.title}`
-          : `${doc.ap_code} - ${doc.title}`;
-        const merged = existing ? `${existing}\n${newEntry}` : newEntry;
-        await updateGoal(link.goal_id, newLevel, merged);
-      }
+      // Effektive Kompetenzstufen aus DocumentGoalLinks neu berechnen
+      await reloadGoals(userId);
 
       setSavedOk(true);
       setTimeout(() => setSavedOk(false), 3000);

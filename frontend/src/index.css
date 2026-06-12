@@ -651,6 +651,32 @@ input, select, textarea { font: inherit; }
   background: #16a34a;
   color: #fff;
 }
+.goal-contributions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.goal-contrib-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
+}
+.goal-contrib-label[data-level="0"] { background: #94a3b8; color: #fff; }
+.goal-contrib-label[data-level="1"] { background: #60a5fa; color: #fff; }
+.goal-contrib-label[data-level="2"] { background: #34d399; color: #fff; }
+.goal-contrib-label[data-level="3"] { background: #a3e635; color: #1a1a1a; }
+.goal-contrib-label[data-level="4"] { background: #fbbf24; color: #1a1a1a; }
+.goal-contrib-label[data-level="5"] { background: #f97316; color: #fff; }
+.goal-contrib-label[data-level="6"] { background: #a855f7; color: #fff; }
+
 .goal-date { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
 .goal-comment {
   width: 100%;

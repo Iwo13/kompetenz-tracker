@@ -6,10 +6,18 @@ export type Role = 'berufsbildner' | 'lernender';
 
 export type BloomLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+export interface GoalContribution {
+  doc_id:      string;
+  doc_title:   string;
+  bloom_level: number;
+}
+
 export interface GoalEntry {
-  level:   BloomLevel;
-  comment: string;
-  date?:   string; // ISO 8601
+  level:          BloomLevel; // effective = max(manual, doc contributions)
+  manual_level?:  BloomLevel; // direct user assessment only
+  comment:        string;
+  date?:          string; // ISO 8601
+  contributions?: GoalContribution[];
 }
 
 export interface Rotation {
