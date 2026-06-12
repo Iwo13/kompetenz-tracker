@@ -106,6 +106,11 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
               placeholder="Zusatztext für zweite Zeile (optional)" />
           </div>
           <div className="upload-field">
+            <label className="upload-label">Datum des Dokuments</label>
+            <input type="date" className="upload-input upload-date-input"
+              value={docDate} onChange={e => setDocDate(e.target.value)} />
+          </div>
+          <div className="upload-field">
             <label className="upload-label">Ausbildungsplatz *</label>
             <select className="upload-input" value={apCode} onChange={e => setApCode(e.target.value)} required>
               <option value="">– Bitte wählen –</option>
@@ -120,11 +125,6 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
               <option value="manuell">Manuelle Bewertung</option>
               <option value="ai" disabled>Initialbewertung durch AI (demnächst)</option>
             </select>
-          </div>
-          <div className="upload-field">
-            <label className="upload-label">Datum des Dokuments</label>
-            <input type="date" className="upload-input upload-date-input"
-              value={docDate} onChange={e => setDocDate(e.target.value)} />
           </div>
           {error && <p className="upload-error">{error}</p>}
           <div className="upload-modal-footer">
@@ -218,17 +218,17 @@ function LeistungszieleModal({ doc, userId, areas, onClose, onSaved, kurzbeschre
               placeholder="Zusatztext (optional)" />
           </div>
           <div className="upload-field">
+            <label className="upload-label">Datum des Dokuments</label>
+            <input type="date" className="upload-input upload-date-input"
+              value={docDate} onChange={e => setDocDate(e.target.value)} />
+          </div>
+          <div className="upload-field">
             <label className="upload-label">Ausbildungsplatz *</label>
             <select className="upload-input" value={apCode} onChange={e => setApCode(e.target.value)} required>
               {availableAPs.map(ap => (
                 <option key={ap.code} value={ap.code}>{ap.code} – {ap.name}</option>
               ))}
             </select>
-          </div>
-          <div className="upload-field">
-            <label className="upload-label">Datum des Dokuments</label>
-            <input type="date" className="upload-input upload-date-input"
-              value={docDate} onChange={e => setDocDate(e.target.value)} />
           </div>
           <div className="upload-field">
             <label className="upload-label">
