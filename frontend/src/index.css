@@ -453,6 +453,7 @@ input, select, textarea { font: inherit; }
   background: var(--surface);
   border-radius: 0;
   padding: 16px;
+  position: relative;
   border: 1.5px solid var(--border);
   cursor: pointer;
   transition: all .2s;

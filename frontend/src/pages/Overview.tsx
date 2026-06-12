@@ -9,6 +9,14 @@ const AREA_COLORS = [
   '#7c3aed', '#db2777', '#059669', '#0891b2',
 ];
 
+function progressEmoji(pct: number): string {
+  if (pct >= 80) return '/IconEmoji_5.jpg';
+  if (pct >= 60) return '/IconEmoji_4.jpg';
+  if (pct >= 40) return '/IconEmoji_3.jpg';
+  if (pct >= 20) return '/IconEmoji_2.jpg';
+  return '/IconEmoji_1.png';
+}
+
 function MiniDonut({ pct, color }: { pct: number; color: string }) {
   const size = 34;
   const cx = size / 2, cy = size / 2;
@@ -72,9 +80,9 @@ export default function Overview() {
       label:  'Noch nicht erreicht',
       sub:    `${notAchieved}/${totalGoals} (${totalGoals > 0 ? Math.round(notAchieved / totalGoals * 100) : 0}%)`,
       value:  notAchieved,
-      color:  '#e2e4e8',
+      color:  '#9ca3af',
       areaId: null,
-      pct:    0,
+      pct:    totalGoals > 0 ? Math.round(notAchieved / totalGoals * 100) : 0,
     },
   ];
 
@@ -110,6 +118,7 @@ export default function Overview() {
             className="overview-card"
             onClick={() => navigate(`/area/${p.area.id}`)}
           >
+            <img src={progressEmoji(p.pct)} alt="" style={{ position: 'absolute', top: 6, right: 6, width: 36, height: 36, objectFit: 'contain' }} />
             <div className="ov-id">Handlungskompetenz {p.area.id.toUpperCase()}</div>
             <div className="ov-name">{p.area.name}</div>
             <div className="ov-progress-bar">
@@ -170,7 +179,7 @@ export default function Overview() {
                 </button>
               ) : (
                 <div key={i} className="pie-legend-item">
-                  <div className="pie-legend-dot" style={{ background: seg.color }} />
+                  <MiniDonut pct={seg.pct} color={seg.color} />
                   <div className="pie-legend-text">
                     <div className="pie-legend-label">{seg.label}</div>
                     <div className="pie-legend-sub">{seg.sub}</div>
