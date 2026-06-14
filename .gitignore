@@ -23,6 +23,9 @@ doku/~$*
 # Lokale CAS-Modulunterlagen (nur für lokale Auswertung, nicht im Repo)
 Alle Modulunterlagen CAS/
 
+# Anhang-Materialien und Abschlussarbeits-Unterlagen (lokal, nicht im Repo)
+CAS Abschlussarbeit HK-Tracker/
+
 # Zertifikate
 *.cer
 *.pfx
