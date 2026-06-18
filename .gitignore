@@ -13,9 +13,11 @@ backend-dotnet/**/bin/
 backend-dotnet/**/obj/
 backend-dotnet/**/*.user
 
-# Umgebungsvariablen (sensible Daten)
+# Umgebungsvariablen und Secrets (sensible Daten – nie committen!)
 .env.local
 .env*.local
+secrets.ps1
+backend-dotnet/**/appsettings.Development.json
 
 # Temp-Dateien (Word/Excel)
 doku/~$*
