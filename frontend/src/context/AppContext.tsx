@@ -43,7 +43,7 @@ interface AppContextValue {
   updateDocument:     (userId: string, docId: string, body: { title: string; description?: string; ap_code: string; goal_ids: string[]; kurzbeschreibung?: string; umsetzung?: string; luecken?: string; feedback_berufsbildner?: string; document_date?: string; }) => Promise<void>;
   deleteDocument:     (userId: string, docId: string) => Promise<void>;
   updateDocumentGoal:  (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => Promise<DocumentGoalLink>;
-  aiEvaluateDocument: (userId: string, docId: string) => Promise<UserDocument>;
+  aiEvaluateDocument: (userId: string, docId: string) => Promise<{ document: UserDocument; prompt_tokens: number; completion_tokens: number; total_tokens: number }>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -282,10 +282,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [reloadGoals]);
 
   const aiEvaluateDocument = useCallback(async (userId: string, docId: string) => {
-    const updated = await api.aiEvaluateDocument(userId, docId);
-    setDocuments(prev => prev.map(d => d.id === docId ? updated : d));
+    const res = await api.aiEvaluateDocument(userId, docId);
+    setDocuments(prev => prev.map(d => d.id === docId ? res.document : d));
     await reloadGoals(userId);
-    return updated;
+    return res;
   }, [reloadGoals]);
 
   const updateDocumentGoal = useCallback(async (userId: string, docId: string, goalId: string, einschaetzung: string | null, bloomLevel: number | null) => {

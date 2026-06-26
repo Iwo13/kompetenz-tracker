@@ -102,5 +102,6 @@ export const api = {
   updateDocumentGoal: (userId: string, docId: string, goalId: string, body: { einschaetzung?: string | null; bloom_level?: number | null }) =>
     request<DocumentGoalLink>(`/users/${userId}/documents/${docId}/goals/${goalId}`, { method: 'PUT', body: JSON.stringify(body) }),
   aiEvaluateDocument: (userId: string, docId: string) =>
-    request<UserDocument>(`/users/${userId}/documents/${docId}/ai-evaluate`, { method: 'POST' }),
+    request<{ document: UserDocument; prompt_tokens: number; completion_tokens: number; total_tokens: number }>(
+      `/users/${userId}/documents/${docId}/ai-evaluate`, { method: 'POST' }),
 };

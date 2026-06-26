@@ -154,8 +154,9 @@ export default function Overview() {
         </div>
       )}
 
-      {/* Pie-Chart / Gesamtfortschritt */}
-      <div className="pie-section">
+      {/* Pie-Chart / Gesamtfortschritt + Tech-Tags */}
+      <div className="pie-section" style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 480px' }}>
         <div className="pie-title">Gesamtfortschritt der Leistungszielerreichung</div>
         <div className="pie-layout">
           <div className="pie-chart-wrap">
@@ -189,6 +190,53 @@ export default function Overview() {
             )}
           </div>
         </div>
+        </div>
+
+        {/* Tech + System Chips */}
+        {(() => {
+          const techCount: Record<string, number> = {};
+          const envCount:  Record<string, number> = {};
+          for (const doc of documents) {
+            for (const t of doc.technologies ?? []) techCount[t] = (techCount[t] ?? 0) + 1;
+            for (const e of doc.environments  ?? []) envCount[e]  = (envCount[e]  ?? 0) + 1;
+          }
+          const techs = Object.entries(techCount).sort((a, b) => b[1] - a[1]);
+          const envs  = Object.entries(envCount).sort((a, b) => b[1] - a[1]);
+          if (techs.length === 0 && envs.length === 0) return null;
+          return (
+            <div style={{ flex: '0 0 260px', minWidth: 220 }}>
+              <div className="pie-title">Technologien &amp; Systeme</div>
+              {techs.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Technologie</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {techs.map(([tag, count]) => (
+                      <a key={tag} href={`/dokumente?tag=${encodeURIComponent(tag)}`}
+                        style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                        title={`Dokumente mit «${tag}» anzeigen`}>
+                        {tag}{count > 1 && <span style={{ opacity: 0.6, marginLeft: 4 }}>×{count}</span>}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {envs.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>System / Umgebung</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {envs.map(([tag, count]) => (
+                      <a key={tag} href={`/dokumente?tag=${encodeURIComponent(tag)}`}
+                        style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                        title={`Dokumente mit «${tag}» anzeigen`}>
+                        {tag}{count > 1 && <span style={{ opacity: 0.6, marginLeft: 4 }}>×{count}</span>}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
     </div>

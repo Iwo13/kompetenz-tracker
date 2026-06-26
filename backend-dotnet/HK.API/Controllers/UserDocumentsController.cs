@@ -154,7 +154,7 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
     }
 
     [HttpPost("{docId:guid}/ai-evaluate")]
-    public async Task<ActionResult<DocumentResponse>> AiEvaluate(
+    public async Task<ActionResult<AiEvaluateResponse>> AiEvaluate(
         Guid userId, Guid docId, [FromServices] AiEvaluationService aiService)
     {
         if (!aiService.IsConfigured)
@@ -172,15 +172,23 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         if (result is null)
             return StatusCode(503, new { error = "AI-Analyse fehlgeschlagen. Bitte Logs prüfen." });
 
-        doc.Kurzbeschreibung = result.Kurzbeschreibung.Trim();
-        doc.Umsetzung        = result.Umsetzung.Trim();
-        doc.Luecken          = result.Luecken.Trim();
+        // Nur leere Textfelder befüllen – manuelle Einträge bleiben erhalten
+        if (string.IsNullOrWhiteSpace(doc.Kurzbeschreibung))
+            doc.Kurzbeschreibung = result.Kurzbeschreibung.Trim();
+        if (string.IsNullOrWhiteSpace(doc.Umsetzung))
+            doc.Umsetzung = result.Umsetzung.Trim();
+        if (string.IsNullOrWhiteSpace(doc.Luecken))
+            doc.Luecken = result.Luecken.Trim();
 
-        db.DocumentGoalLinks.RemoveRange(doc.GoalLinks);
-        doc.GoalLinks.Clear();
+        // Technologien + Umgebungen: neue Tags ergänzen, bestehende behalten
+        doc.Technologies = MergeTags(doc.Technologies, result.Technologien);
+        doc.Environments = MergeTags(doc.Environments, result.Umgebungen);
 
+        // Nur Leistungsziele ergänzen, die noch nicht verknüpft sind
+        var existingGoalIds = doc.GoalLinks.Select(l => l.GoalId).ToHashSet();
         foreach (var b in result.Bewertungen.Take(10))
         {
+            if (existingGoalIds.Contains(b.GoalId)) continue;
             doc.GoalLinks.Add(new DocumentGoalLink
             {
                 GoalId        = b.GoalId,
@@ -191,14 +199,29 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
         }
 
         await db.SaveChangesAsync();
-        return ToResponse(doc);
+        return new AiEvaluateResponse(
+            ToResponse(doc),
+            result.PromptTokens,
+            result.CompletionTokens,
+            result.TotalTokens);
     }
 
     private static DocumentResponse ToResponse(Document d) =>
         new(d.Id, d.UserId, d.ApCode, d.Title, d.Description,
             d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart, d.FeedbackBerufsbildner,
+            SplitTags(d.Technologies), SplitTags(d.Environments),
             d.FileName, d.ContentType, d.FileSize, d.UploadedAt, d.DocumentDate,
             d.GoalLinks.Select(l => new DocumentGoalLinkDto(l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel)));
+
+    private static IEnumerable<string> SplitTags(string? value) =>
+        value?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+    private static string? MergeTags(string? existing, IEnumerable<string> incoming)
+    {
+        var current = SplitTags(existing).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var tag in incoming) current.Add(tag.Trim());
+        return current.Count == 0 ? null : string.Join(",", current);
+    }
 
     private static DateTime? ParseDate(string? s) =>
         DateTime.TryParse(s, out var dt) ? DateTime.SpecifyKind(dt.Date, DateTimeKind.Utc) : null;

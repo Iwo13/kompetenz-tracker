@@ -45,6 +45,8 @@ export interface UserDocument {
   luecken:          string | null;
   bewertungsart:             string;
   feedback_berufsbildner:    string | null;
+  technologies:              string[];
+  environments:              string[];
   document_date:             string | null;
   file_name:                 string;
   content_type:     string;

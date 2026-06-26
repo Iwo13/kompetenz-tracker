@@ -12,6 +12,8 @@ public class Document
     public string? Luecken { get; set; }
     public string Bewertungsart { get; set; } = "manuell";
     public string? FeedbackBerufsbildner { get; set; }
+    public string? Technologies { get; set; }   // kommasepariert, z.B. "Python,Django"
+    public string? Environments { get; set; }   // kommasepariert, z.B. "Azure,SQL Server"
     public string FileName { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
     public byte[] FileData { get; set; } = [];

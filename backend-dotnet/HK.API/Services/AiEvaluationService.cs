@@ -26,9 +26,9 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
     public async Task<AiEvaluationResult?> EvaluateAsync(DomDocument doc, string specialty)
     {
-        var docText  = ExtractText(doc.FileData, doc.ContentType, doc.FileName);
-        var goals    = LoadGoals(specialty);
-        var prompt   = BuildPrompt(doc.Title, doc.Description, docText, goals);
+        var docText = ExtractText(doc.FileData, doc.ContentType, doc.FileName);
+        var goals   = LoadGoals(specialty);
+        var prompt  = BuildPrompt(docText, goals);
         return await CallAiAsync(prompt);
     }
 
@@ -74,8 +74,16 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
         using var doc    = WordprocessingDocument.Open(stream, false);
         var paragraphs   = doc.MainDocumentPart?.Document?.Body?
             .Descendants<Paragraph>()
+            .Where(p => !IsHeadingParagraph(p))
             .Select(p => p.InnerText) ?? [];
         return string.Join("\n", paragraphs.Where(t => !string.IsNullOrWhiteSpace(t)));
+    }
+
+    private static bool IsHeadingParagraph(Paragraph p)
+    {
+        var styleId = p.ParagraphProperties?.ParagraphStyleId?.Val?.Value ?? "";
+        return styleId.StartsWith("Heading",    StringComparison.OrdinalIgnoreCase) ||
+               styleId.StartsWith("berschrift", StringComparison.OrdinalIgnoreCase);
     }
 
     // ── Leistungsziele laden ─────────────────────────────────────────────────────
@@ -99,14 +107,19 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
         var goals = new List<CompetencyGoal>();
 
         foreach (var area in root.GetProperty("areas").EnumerateArray())
-        foreach (var sc   in area.GetProperty("subComps").EnumerateArray())
-        foreach (var g    in sc.GetProperty("goals").EnumerateArray())
         {
-            goals.Add(new CompetencyGoal(
-                g.GetProperty("id").GetString()   ?? "",
-                g.GetProperty("text").GetString() ?? "",
-                g.GetProperty("max").GetInt32()
-            ));
+            var areaSpecialty = area.TryGetProperty("specialty", out var sp) ? sp.GetString() : "both";
+            if (areaSpecialty != "both" && areaSpecialty != specialty) continue;
+
+            foreach (var sc in area.GetProperty("subComps").EnumerateArray())
+            foreach (var g  in sc.GetProperty("goals").EnumerateArray())
+            {
+                goals.Add(new CompetencyGoal(
+                    g.GetProperty("id").GetString()   ?? "",
+                    g.GetProperty("text").GetString() ?? "",
+                    g.GetProperty("max").GetInt32()
+                ));
+            }
         }
 
         return goals;
@@ -114,19 +127,20 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
     // ── Prompt-Aufbau ────────────────────────────────────────────────────────────
 
-    private static string BuildPrompt(string title, string? description, string docText, List<CompetencyGoal> goals)
+    private static string BuildPrompt(string docText, List<CompetencyGoal> goals)
     {
         const int maxTextLength = 8000;
         if (docText.Length > maxTextLength)
             docText = docText[..maxTextLength] + "\n[... Text gekürzt ...]";
 
         var goalLines   = string.Join("\n", goals.Select(g => $"{g.Id} (max K{g.Max}): {g.Text}"));
-        var descLine    = string.IsNullOrEmpty(description) ? "" : $"Beschreibung: {description}\n";
         var jsonExample = """
             {
-              "kurzbeschreibung": "Kurze Beschreibung des Dokuments in 3–5 Sätzen",
+              "kurzbeschreibung": "Kurze Beschreibung der geleisteten Arbeit in 3–5 Sätzen – nicht das Dokument beschreiben, sondern die erstellte Lösung, Applikation oder Umsetzung. Beginne mit der Arbeit selbst, z.B. 'Die erstellte Anwendung...', 'Im Rahmen des Projekts wurde...' oder 'Ziel war es, ...'",
               "umsetzung": "Wie wurde die Arbeit umgesetzt – Vorgehen und Methodik",
               "luecken": "Was fehlt oder könnte bei der nächsten Arbeit verbessert werden",
+              "technologien": ["Python", "Django"],
+              "umgebungen": ["Azure", "SQL Server"],
               "bewertungen": [
                 { "goal_id": "a1.1", "bloom_level": 3, "kommentar": "Begründung in 1–2 Sätzen" }
               ]
@@ -134,10 +148,7 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
             """;
 
         return $"""
-            ## Dokument des Lernenden
-            Titel: {title}
-            {descLine}
-            ## Inhalt
+            ## Inhalt des Dokuments
             {docText}
 
             ## Bloom-Taxonomie
@@ -147,7 +158,14 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
             {goalLines}
 
             ## Aufgabe
-            Analysiere das Dokument und identifiziere die 10 am deutlichsten nachgewiesenen Leistungsziele.
+            Analysiere das Dokument und:
+            1. Identifiziere die 10 am deutlichsten nachgewiesenen Leistungsziele.
+            2. Extrahiere als "technologien" nur Programmiersprachen und Frameworks, die der Lernende nachweislich selbst aktiv eingesetzt hat (z.B. Code geschrieben, konfiguriert, debuggt). Nicht aufnehmen: Technologien, die nur im Hintergrund laufen, nur erwähnt werden oder vom System automatisch genutzt werden.
+            3. Extrahiere als "umgebungen" nur Systeme und Plattformen, mit denen der Lernende direkt gearbeitet hat (z.B. bewusst eingerichtet, deployed, administriert). Nicht aufnehmen: Systeme, die nur indirekt beteiligt sind oder die der Lernende nicht selbst bedient hat.
+            Bewertungsmassstab:
+            - Nur Leistungsziele bewerten, für die das Dokument konkrete eigene Leistung zeigt (Analyse, Entscheidung, Reflexion des Lernenden)
+            - Tools, Frameworks oder KI-Unterstützung, die der Lernende eingesetzt hat, erhöhen den Bloom-Level NICHT automatisch
+            - Bei unklarer Evidenz: niedrigeren Level wählen
             Antworte AUSSCHLIESSLICH mit folgendem JSON-Objekt (kein Markdown, kein Fliesstext):
             {jsonExample}
             Wichtig: bloom_level darf den max-Wert des jeweiligen Leistungsziels nicht überschreiten.
@@ -165,10 +183,9 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
         {
             messages = new[]
             {
-                new { role = "system", content = "Du bist ein Kompetenz-Bewerter für die Schweizer Berufsbildung (EFZ). Antworte ausschliesslich mit einem gültigen JSON-Objekt ohne weitere Erklärungen." },
+                new { role = "system", content = "Du bist ein kritischer Kompetenz-Bewerter für die Schweizer Berufsbildung (EFZ). Deine Aufgabe ist es, nur jene Kompetenzen zu bewerten, die der Lernende nachweislich SELBST erbracht hat. Wichtige Grundsätze: (1) Sei konservativ – weise einen Bloom-Level nur zu, wenn er im Dokument klar belegt ist. Im Zweifelsfall lieber eine Stufe tiefer. (2) Der Einsatz von Frameworks, Bibliotheken, KI-Tools oder Generatoren (z.B. Electron, React, GitHub Copilot, ChatGPT) ist KEIN eigenständiger Kompetenznachweis. Entscheidend ist, ob der Lernende das Warum und Wie selbst erklärt und reflektiert. (3) Verwende keine Personennamen. (4) Antworte ausschliesslich mit einem gültigen JSON-Objekt ohne weitere Erklärungen." },
                 new { role = "user", content = userPrompt }
             },
-            temperature     = 0.3,
             response_format = new { type = "json_object" }
         };
 
@@ -194,17 +211,25 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
             return null;
         }
 
-        var doc     = JsonDocument.Parse(body);
-        var content = doc.RootElement
+        var root    = JsonDocument.Parse(body).RootElement;
+        var content = root
             .GetProperty("choices")[0]
             .GetProperty("message")
             .GetProperty("content")
             .GetString() ?? "";
 
-        return ParseAiResponse(content);
+        int promptTokens     = 0, completionTokens = 0, totalTokens = 0;
+        if (root.TryGetProperty("usage", out var usage))
+        {
+            promptTokens     = usage.TryGetProperty("prompt_tokens",     out var p) ? p.GetInt32() : 0;
+            completionTokens = usage.TryGetProperty("completion_tokens", out var c) ? c.GetInt32() : 0;
+            totalTokens      = usage.TryGetProperty("total_tokens",      out var t) ? t.GetInt32() : 0;
+        }
+
+        return ParseAiResponse(content, promptTokens, completionTokens, totalTokens);
     }
 
-    private AiEvaluationResult? ParseAiResponse(string content)
+    private AiEvaluationResult? ParseAiResponse(string content, int promptTokens, int completionTokens, int totalTokens)
     {
         try
         {
@@ -223,11 +248,19 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
                 }
             }
 
+            var technologien = ParseStringArray(root, "technologien");
+            var umgebungen   = ParseStringArray(root, "umgebungen");
+
             return new AiEvaluationResult(
                 root.TryGetProperty("kurzbeschreibung", out var f1) ? f1.GetString() ?? "" : "",
                 root.TryGetProperty("umsetzung",        out var f2) ? f2.GetString() ?? "" : "",
                 root.TryGetProperty("luecken",          out var f3) ? f3.GetString() ?? "" : "",
-                bewertungen
+                technologien,
+                umgebungen,
+                bewertungen,
+                promptTokens,
+                completionTokens,
+                totalTokens
             );
         }
         catch (Exception ex)
@@ -237,6 +270,17 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
         }
     }
 
+    private static List<string> ParseStringArray(JsonElement root, string property)
+    {
+        if (!root.TryGetProperty(property, out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return [];
+        return arr.EnumerateArray()
+            .Select(e => e.GetString()?.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => s!)
+            .ToList();
+    }
+
     private record CompetencyGoal(string Id, string Text, int Max);
 }
 
@@ -244,7 +288,12 @@ public record AiEvaluationResult(
     string Kurzbeschreibung,
     string Umsetzung,
     string Luecken,
-    IEnumerable<AiGoalBewertung> Bewertungen
+    IEnumerable<string> Technologien,
+    IEnumerable<string> Umgebungen,
+    IEnumerable<AiGoalBewertung> Bewertungen,
+    int PromptTokens,
+    int CompletionTokens,
+    int TotalTokens
 );
 
 public record AiGoalBewertung(string GoalId, int BloomLevel, string Kommentar);

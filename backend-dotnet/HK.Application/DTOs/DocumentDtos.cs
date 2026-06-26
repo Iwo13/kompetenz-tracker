@@ -18,6 +18,8 @@ public record DocumentResponse(
     string? Luecken,
     string Bewertungsart,
     string? FeedbackBerufsbildner,
+    IEnumerable<string> Technologies,
+    IEnumerable<string> Environments,
     string FileName,
     string ContentType,
     long FileSize,
@@ -36,6 +38,13 @@ public record UpdateDocumentRequest(
     string? Luecken,
     string? FeedbackBerufsbildner,
     string? DocumentDate
+);
+
+public record AiEvaluateResponse(
+    DocumentResponse Document,
+    int PromptTokens,
+    int CompletionTokens,
+    int TotalTokens
 );
 
 public record UpdateGoalLinkRequest(

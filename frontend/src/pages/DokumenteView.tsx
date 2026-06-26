@@ -42,11 +42,10 @@ interface UploadModalProps {
 function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalProps) {
   const { uploadDocument, ausbildungsplaetze, currentUser } = useApp();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [title,         setTitle]         = useState('');
-  const [untertitel,    setUntertitel]    = useState('');
-  const [apCode,        setApCode]        = useState(activeApCode ?? '');
-  const [bewertungsart, setBewertungsart] = useState('manuell');
-  const [docDate,       setDocDate]       = useState(todayIso());
+  const [title,      setTitle]      = useState('');
+  const [untertitel, setUntertitel] = useState('');
+  const [apCode,     setApCode]     = useState(activeApCode ?? '');
+  const [docDate,    setDocDate]    = useState(todayIso());
   const [file,          setFile]          = useState<File | null>(null);
   const [saving,        setSaving]        = useState(false);
   const [error,         setError]         = useState<string | null>(null);
@@ -70,11 +69,10 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
       fd.append('file', file);
       fd.append('title', title.trim() || file.name);
       fd.append('apCode', apCode);
-      fd.append('bewertungsart', bewertungsart);
       fd.append('documentDate', docDate);
       if (untertitel.trim()) fd.append('description', untertitel.trim());
-      const doc = await uploadDocument(userId, fd);
-      onUploaded(doc);
+      const uploaded = await uploadDocument(userId, fd);
+      onUploaded(uploaded);
       onClose();
     } catch {
       setError('Fehler beim Hochladen. Bitte erneut versuchen.');
@@ -117,13 +115,6 @@ function UploadModal({ userId, activeApCode, onClose, onUploaded }: UploadModalP
               {availableAPs.map(ap => (
                 <option key={ap.code} value={ap.code}>{ap.code} – {ap.name}</option>
               ))}
-            </select>
-          </div>
-          <div className="upload-field">
-            <label className="upload-label">Art der ersten Bewertung</label>
-            <select className="upload-input" value={bewertungsart} onChange={e => setBewertungsart(e.target.value)}>
-              <option value="manuell">Manuelle Bewertung</option>
-              <option value="ai" disabled>Initialbewertung durch AI (demnächst)</option>
             </select>
           </div>
           {error && <p className="upload-error">{error}</p>}
@@ -300,6 +291,9 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
   const [savedOk,         setSavedOk]         = useState(false);
   const [aiLoading,       setAiLoading]       = useState(false);
   const [aiError,         setAiError]         = useState<string | null>(null);
+  const [aiTokens,        setAiTokens]        = useState<{ prompt: number; completion: number; total: number } | null>(null);
+  const [pendingDelete,   setPendingDelete]   = useState<Set<string>>(new Set());
+  const [deletingGoal,    setDeletingGoal]    = useState<string | null>(null);
   const [localLinks, setLocalLinks] = useState(
     [...doc.goal_links].sort((a, b) => a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }))
   );
@@ -310,6 +304,15 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
   const [luecken,                setLuecken]                = useState(doc.luecken ?? '');
   const [feedbackBerufsbildner,  setFeedbackBerufsbildner]  = useState(doc.feedback_berufsbildner ?? '');
   const savingTextRef = useRef(false);
+
+  // Sync local state when AI evaluation updates the doc prop
+  useEffect(() => { setKurzbeschreibung(doc.kurzbeschreibung ?? ''); }, [doc.kurzbeschreibung]);
+  useEffect(() => { setUmsetzung(doc.umsetzung ?? ''); },             [doc.umsetzung]);
+  useEffect(() => { setLuecken(doc.luecken ?? ''); },                 [doc.luecken]);
+  useEffect(() => { setFeedbackBerufsbildner(doc.feedback_berufsbildner ?? ''); }, [doc.feedback_berufsbildner]);
+  useEffect(() => {
+    setLocalLinks([...doc.goal_links].sort((a, b) => a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true })));
+  }, [doc.goal_links.length]);
 
   const areaBadges = [...new Set(localLinks.map(l => l.goal_id[0].toUpperCase()))].sort();
 
@@ -340,14 +343,35 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
   async function handleGoalUpdate(goalId: string, field: 'einschaetzung' | 'bloom_level', value: string | number | null) {
     const link = localLinks.find(l => l.goal_id === goalId);
     if (!link) return;
+    if (field === 'bloom_level' && value === -1) {
+      setPendingDelete(prev => new Set(prev).add(goalId));
+      return;
+    }
     const newEinschaetzung = field === 'einschaetzung' ? (value as string | null) : link.einschaetzung;
     const newBloom = field === 'bloom_level' ? (value as number | null) : link.bloom_level;
     setLocalLinks(prev => prev.map(l => l.goal_id === goalId
       ? { ...l, einschaetzung: newEinschaetzung, bloom_level: newBloom } : l));
-    if (field === 'bloom_level' && newBloom !== -1) {
+    if (field === 'bloom_level') {
       setSaving(goalId);
       try { await updateDocumentGoal(userId, doc.id, goalId, newEinschaetzung, newBloom); }
       finally { setSaving(null); }
+    }
+  }
+
+  async function handleConfirmDelete(goalId: string) {
+    setDeletingGoal(goalId);
+    try {
+      const remainingIds = localLinks.filter(l => l.goal_id !== goalId).map(l => l.goal_id);
+      await updateDocument(userId, doc.id, {
+        title: doc.title, description: doc.description ?? undefined, ap_code: doc.ap_code,
+        goal_ids: remainingIds, kurzbeschreibung: kurzbeschreibung || undefined,
+        umsetzung: umsetzung || undefined, luecken: luecken || undefined,
+      });
+      setLocalLinks(prev => prev.filter(l => l.goal_id !== goalId));
+      setPendingDelete(prev => { const s = new Set(prev); s.delete(goalId); return s; });
+      await reloadGoals(userId);
+    } finally {
+      setDeletingGoal(null);
     }
   }
 
@@ -375,8 +399,10 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     if (!currentUser) return;
     setAiLoading(true);
     setAiError(null);
+    setAiTokens(null);
     try {
-      const updated = await aiEvaluateDocument(currentUser.id, doc.id);
+      const res = await aiEvaluateDocument(currentUser.id, doc.id);
+      const updated = res.document;
       setKurzbeschreibung(updated.kurzbeschreibung ?? '');
       setUmsetzung(updated.umsetzung ?? '');
       setLuecken(updated.luecken ?? '');
@@ -384,6 +410,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
         [...updated.goal_links].sort((a, b) =>
           a.goal_id.localeCompare(b.goal_id, undefined, { numeric: true }))
       );
+      setAiTokens({ prompt: res.prompt_tokens, completion: res.completion_tokens, total: res.total_tokens });
     } catch {
       setAiError('AI-Analyse fehlgeschlagen. Bitte Konfiguration prüfen.');
     } finally {
@@ -396,27 +423,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
     setSavingBewertung(true);
     setSavedOk(false);
     try {
-      const toRemove = localLinks.filter(l => l.bloom_level === -1);
-      const toKeep   = localLinks.filter(l => l.bloom_level !== -1);
-
-      // Leistungsziele entfernen (bloom = -1)
-      if (toRemove.length > 0) {
-        const remainingIds = toKeep.map(l => l.goal_id);
-        await updateDocument(userId, doc.id, {
-          title: doc.title,
-          description: doc.description ?? undefined,
-          ap_code: doc.ap_code,
-          goal_ids: remainingIds,
-          kurzbeschreibung: kurzbeschreibung || undefined,
-          umsetzung:        umsetzung        || undefined,
-          luecken:          luecken          || undefined,
-        });
-        setLocalLinks(toKeep);
-      }
-
-      // Effektive Kompetenzstufen aus DocumentGoalLinks neu berechnen
       await reloadGoals(userId);
-
       setSavedOk(true);
       setTimeout(() => setSavedOk(false), 3000);
     } finally {
@@ -461,13 +468,12 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
                 onClick={() => setShowEdit(true)}>
                 ✎ Leistungsziele zur Bewertung ändern
               </button>
-              {doc.bewertungsart === 'ai' && (
-                <button className="btn btn-secondary" style={{ fontSize: 13, borderColor: '#7c3aed', color: '#7c3aed' }}
-                  onClick={handleAiEvaluate}
-                  disabled={aiLoading}>
-                  {aiLoading ? '⏳ AI analysiert…' : '✦ AI-Analyse starten'}
-                </button>
-              )}
+              <button className="btn btn-secondary" style={{ fontSize: 13, borderColor: '#7c3aed', color: '#7c3aed' }}
+                onClick={handleAiEvaluate}
+                disabled={aiLoading}
+                title="Die Bewertung erfolgt durch GPT-Modelle, betrieben im Azure-Tenant der FHNW. Es werden nur leere Felder automatisch gefüllt.">
+                {aiLoading ? <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span>{' '}AI analysiert…</> : '✦ Bewertung durch AI'}
+              </button>
               <button className="btn btn-primary" style={{ fontSize: 13 }}
                 onClick={handleSaveBewertung}
                 disabled={savingBewertung || localLinks.length === 0}>
@@ -481,6 +487,22 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
             </div>
             {aiError && (
               <p style={{ color: '#dc2626', fontSize: 13, margin: '6px 0 0' }}>{aiError}</p>
+            )}
+            {aiTokens && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6,
+                padding: '6px 12px', marginTop: 6, fontSize: 12, color: '#166534',
+              }}>
+                <span>✦ AI-Bewertung abgeschlossen</span>
+                <span>Prompt: <strong>{aiTokens.prompt.toLocaleString()}</strong></span>
+                <span>Antwort: <strong>{aiTokens.completion.toLocaleString()}</strong></span>
+                <span>Total: <strong>{aiTokens.total.toLocaleString()}</strong> Tokens</span>
+                <button onClick={() => setAiTokens(null)} style={{
+                  marginLeft: 'auto', background: 'none', border: 'none',
+                  cursor: 'pointer', color: '#166534', fontSize: 14, lineHeight: 1,
+                }}>✕</button>
+              </div>
             )}
 
             {/* Feedback Berufsbildner/in */}
@@ -502,11 +524,27 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
               </div>
             ) : null}
 
+            {/* Technologie + System Chips */}
+            {((doc.technologies?.length ?? 0) > 0 || (doc.environments?.length ?? 0) > 0) && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '10px 0 4px' }}>
+                {doc.technologies?.map(t => (
+                  <a key={t} href={`/dokumente?tag=${encodeURIComponent(t)}`}
+                    style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                    title={`Alle Dokumente mit «${t}» anzeigen`}>{t}</a>
+                ))}
+                {doc.environments?.map(e => (
+                  <a key={e} href={`/dokumente?tag=${encodeURIComponent(e)}`}
+                    style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                    title={`Alle Dokumente mit «${e}» anzeigen`}>{e}</a>
+                ))}
+              </div>
+            )}
+
             {/* Textfelder */}
             <div className="doc-text-fields">
               <div className="doc-text-field">
                 <label className="doc-text-label">Kurzbeschreibung</label>
-                <textarea className="doc-text-area" rows={3}
+                <textarea className="doc-text-area" rows={6}
                   value={kurzbeschreibung}
                   onChange={e => setKurzbeschreibung(e.target.value)}
                   onBlur={() => saveTextFields({ kurzbeschreibung })}
@@ -514,7 +552,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
               </div>
               <div className="doc-text-field">
                 <label className="doc-text-label">Umsetzung der Arbeit</label>
-                <textarea className="doc-text-area" rows={3}
+                <textarea className="doc-text-area" rows={6}
                   value={umsetzung}
                   onChange={e => setUmsetzung(e.target.value)}
                   onBlur={() => saveTextFields({ umsetzung })}
@@ -522,7 +560,7 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
               </div>
               <div className="doc-text-field">
                 <label className="doc-text-label">Lücken und Verbesserungsmöglichkeiten</label>
-                <textarea className="doc-text-area" rows={3}
+                <textarea className="doc-text-area" rows={6}
                   value={luecken}
                   onChange={e => setLuecken(e.target.value)}
                   onBlur={() => saveTextFields({ luecken })}
@@ -551,30 +589,50 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
                     const currentLevel = currentUser?.goals[link.goal_id]?.level ?? 0;
                     const isSaving = saving === link.goal_id;
                     return (
-                      <tr key={link.goal_id}>
+                      <tr key={link.goal_id}
+                        style={pendingDelete.has(link.goal_id) ? { background: '#fef2f2' } : undefined}>
                         <td><strong>{link.goal_id.toUpperCase()}</strong></td>
                         <td style={{ fontSize: 12 }}>{gInfo?.text ?? link.goal_id}</td>
-                        <td>
-                          <textarea className="doc-einschaetzung" rows={2}
-                            value={link.einschaetzung ?? ''}
-                            onChange={e => handleGoalUpdate(link.goal_id, 'einschaetzung', e.target.value)}
-                            onBlur={() => handleEinschaetzungBlur(link.goal_id)}
-                            placeholder="Kommentar/Notiz…" />
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <select className="doc-bloom-select" disabled={isSaving}
-                              value={link.bloom_level ?? currentLevel}
-                              onChange={e => handleGoalUpdate(link.goal_id, 'bloom_level', Number(e.target.value))}
-                              style={link.bloom_level === -1 ? { color: '#dc2626', fontStyle: 'italic' } : undefined}>
-                              {([1,2,3,4,5,6] as BloomLevel[]).map(l => (
-                                <option key={l} value={l}>{BLOOM_LABELS[l]}</option>
-                              ))}
-                              <option value={-1} style={{ color: '#dc2626' }}>— Leistungsziel entfernen</option>
-                            </select>
-                            {isSaving && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>…</span>}
-                          </div>
-                        </td>
+                        {pendingDelete.has(link.goal_id) ? (
+                          <td colSpan={2}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
+                              <span style={{ fontSize: 13, color: '#dc2626' }}>Leistungsziel wirklich löschen?</span>
+                              <button className="btn btn-primary"
+                                style={{ fontSize: 12, background: '#dc2626', borderColor: '#dc2626' }}
+                                disabled={deletingGoal === link.goal_id}
+                                onClick={() => handleConfirmDelete(link.goal_id)}>
+                                {deletingGoal === link.goal_id ? '…' : 'OK, löschen'}
+                              </button>
+                              <button className="btn btn-secondary" style={{ fontSize: 12 }}
+                                onClick={() => setPendingDelete(prev => { const s = new Set(prev); s.delete(link.goal_id); return s; })}>
+                                Abbrechen
+                              </button>
+                            </div>
+                          </td>
+                        ) : (
+                          <>
+                            <td>
+                              <textarea className="doc-einschaetzung" rows={2}
+                                value={link.einschaetzung ?? ''}
+                                onChange={e => handleGoalUpdate(link.goal_id, 'einschaetzung', e.target.value)}
+                                onBlur={() => handleEinschaetzungBlur(link.goal_id)}
+                                placeholder="Kommentar/Notiz…" />
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <select className="doc-bloom-select" disabled={isSaving}
+                                  value={link.bloom_level ?? currentLevel}
+                                  onChange={e => handleGoalUpdate(link.goal_id, 'bloom_level', Number(e.target.value))}>
+                                  {([1,2,3,4,5,6] as BloomLevel[]).map(l => (
+                                    <option key={l} value={l}>{BLOOM_LABELS[l]}</option>
+                                  ))}
+                                  <option value={-1} style={{ color: '#dc2626' }}>— Leistungsziel entfernen</option>
+                                </select>
+                                {isSaving && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>…</span>}
+                              </div>
+                            </td>
+                          </>
+                        )}
                       </tr>
                     );
                   })}
@@ -598,9 +656,11 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
 // ── Haupt-View ─────────────────────────────────────────────────────────────────
 export default function DokumenteView() {
   const { currentUser, documents, deleteDocument, areas, activeAP } = useApp();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showUpload, setShowUpload] = useState(false);
   const [openDocId,  setOpenDocId]  = useState<string | null>(null);
+
+  const tagFilter = searchParams.get('tag');
 
   useEffect(() => {
     const openId = searchParams.get('open');
@@ -622,6 +682,20 @@ export default function DokumenteView() {
     if (openDocId === docId) setOpenDocId(null);
   }
 
+  const allTechs = [...new Set(documents.filter(Boolean).flatMap(d => d.technologies ?? []))].sort();
+  const allEnvs  = [...new Set(documents.filter(Boolean).flatMap(d => d.environments  ?? []))].sort();
+  const hasChips = allTechs.length > 0 || allEnvs.length > 0;
+
+  const visibleDocs = tagFilter
+    ? documents.filter(d =>
+        d.technologies?.some(t => t.toLowerCase() === tagFilter.toLowerCase()) ||
+        d.environments?.some(e => e.toLowerCase() === tagFilter.toLowerCase()))
+    : documents;
+
+  function handleChipClick(tag: string) {
+    setSearchParams(tagFilter?.toLowerCase() === tag.toLowerCase() ? {} : { tag });
+  }
+
   return (
     <div className="dokumente-view">
       <div className="dokumente-header">
@@ -631,16 +705,55 @@ export default function DokumenteView() {
         </button>
       </div>
 
-      {documents.length === 0 ? (
-        <div className="no-user-state" style={{ marginTop: 60 }}>
-          <p>Noch keine Dokumente vorhanden.</p>
-          <button className="btn btn-primary" onClick={() => setShowUpload(true)}>
-            Erstes Dokument hochladen
+      {hasChips && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+          <button onClick={() => setSearchParams({})}
+            style={{ borderRadius: 12, padding: '3px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid',
+              background: !tagFilter ? '#1d4ed8' : 'transparent',
+              color:      !tagFilter ? '#fff'    : 'var(--text-muted)',
+              borderColor: !tagFilter ? '#1d4ed8' : '#d1d5db' }}>
+            Alle
           </button>
+          {allTechs.map(t => {
+            const active = tagFilter?.toLowerCase() === t.toLowerCase();
+            return (
+              <button key={t} onClick={() => handleChipClick(t)}
+                style={{ borderRadius: 12, padding: '3px 12px', fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1.5px solid',
+                  background: active ? '#1e40af' : '#dbeafe',
+                  color:      active ? '#fff'    : '#1e40af',
+                  borderColor: active ? '#1e40af' : '#bfdbfe' }}>
+                {t}
+              </button>
+            );
+          })}
+          {allEnvs.map(e => {
+            const active = tagFilter?.toLowerCase() === e.toLowerCase();
+            return (
+              <button key={e} onClick={() => handleChipClick(e)}
+                style={{ borderRadius: 12, padding: '3px 12px', fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1.5px solid',
+                  background: active ? '#166534' : '#dcfce7',
+                  color:      active ? '#fff'    : '#166534',
+                  borderColor: active ? '#166534' : '#bbf7d0' }}>
+                {e}
+              </button>
+            );
+          })}
+          {tagFilter && (
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 4 }}>
+              {visibleDocs.length} Dokument{visibleDocs.length !== 1 ? 'e' : ''}
+            </span>
+          )}
+        </div>
+      )}
+
+      {visibleDocs.length === 0 ? (
+        <div className="no-user-state" style={{ marginTop: 60 }}>
+          <p>{tagFilter ? `Keine Dokumente mit Tag «${tagFilter}».` : 'Noch keine Dokumente vorhanden.'}</p>
+          {!tagFilter && <button className="btn btn-primary" onClick={() => setShowUpload(true)}>Erstes Dokument hochladen</button>}
         </div>
       ) : (
         <div className="doc-list">
-          {documents.map(doc => (
+          {visibleDocs.map(doc => (
             <DocRow key={doc.id} doc={doc} userId={currentUser.id}
               areas={areas} onDelete={handleDelete}
               isOpen={openDocId === doc.id}

@@ -41,7 +41,8 @@ if (!string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
 }
 
 // ── AI Evaluation Service ─────────────────────────────────────────────────────
-builder.Services.AddHttpClient<AiEvaluationService>();
+builder.Services.AddHttpClient<AiEvaluationService>(client =>
+    client.Timeout = TimeSpan.FromMinutes(5));
 
 // ── CORS: Frontend-Dev erlauben ───────────────────────────────────────────────
 builder.Services.AddCors(opts => opts.AddDefaultPolicy(p =>
@@ -91,6 +92,13 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Documents') AND name = 'DocumentDate')
         BEGIN
             ALTER TABLE Documents ADD DocumentDate DATETIME2 NULL;
+        END
+
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Documents') AND name = 'Technologies')
+        BEGIN
+            ALTER TABLE Documents ADD
+                Technologies NVARCHAR(MAX) NULL,
+                Environments NVARCHAR(MAX) NULL;
         END
 
         IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'DocumentGoalLinks')
