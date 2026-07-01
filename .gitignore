@@ -19,8 +19,8 @@ backend-dotnet/**/*.user
 secrets.ps1
 backend-dotnet/**/appsettings.Development.json
 
-# Temp-Dateien (Word/Excel)
-doku/~$*
+# Doku
+doku/
 
 # Lokale CAS-Modulunterlagen (nur für lokale Auswertung, nicht im Repo)
 Alle Modulunterlagen CAS/
