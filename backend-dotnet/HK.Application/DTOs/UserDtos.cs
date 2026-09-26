@@ -3,6 +3,7 @@ namespace HK.Application.DTOs;
 public record UserResponse(
     Guid Id,
     string Name,
+    string? Email,
     string Specialty,
     DateOnly StartDate,
     DateTime CreatedAt
@@ -11,5 +12,6 @@ public record UserResponse(
 public record CreateUserRequest(
     string Name,
     string Specialty,
-    DateOnly StartDate
+    DateOnly StartDate,
+    string? Email = null
 );

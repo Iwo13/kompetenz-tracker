@@ -19,8 +19,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             b.HasKey(u => u.Id);
             b.Property(u => u.Id).ValueGeneratedNever();
             b.Property(u => u.Name).HasMaxLength(100).IsRequired();
-            b.Property(u => u.Specialty).HasMaxLength(20).IsRequired();
+            b.Property(u => u.Email).HasMaxLength(200);
+            b.Property(u => u.Specialty).HasMaxLength(25).IsRequired();
             b.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            b.HasIndex(u => u.Email).IsUnique().HasDatabaseName("UQ_Users_Email")
+             .HasFilter("[Email] IS NOT NULL");
         });
 
         modelBuilder.Entity<GoalEntry>(b =>

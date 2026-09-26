@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { api } from '../api/client';
+import { generateLerndokumentationPDF } from '../utils/generateLerndokumentationPDF';
 import type { UserDocument, BloomLevel, DocumentGoalLink } from '../types';
 
 const BLOOM_LABELS = ['K0 – Keine', 'K1 – Wissen', 'K2 – Verstehen', 'K3 – Anwenden', 'K4 – Analysieren', 'K5 – Synthese', 'K6 – Beurteilen'];
@@ -284,6 +285,7 @@ interface DocRowProps {
 
 function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRowProps) {
   const { updateDocumentGoal, updateDocument, reloadGoals, aiEvaluateDocument, currentUser, role, ausbildungsplaetze } = useApp();
+  const navigate = useNavigate();
   const apFullName = ausbildungsplaetze.find(ap => ap.code === doc.ap_code)?.name;
   const [showEdit,        setShowEdit]        = useState(false);
   const [saving,          setSaving]          = useState<string | null>(null);
@@ -528,14 +530,14 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
             {((doc.technologies?.length ?? 0) > 0 || (doc.environments?.length ?? 0) > 0) && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '10px 0 4px' }}>
                 {doc.technologies?.map(t => (
-                  <a key={t} href={`/dokumente?tag=${encodeURIComponent(t)}`}
-                    style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
-                    title={`Alle Dokumente mit «${t}» anzeigen`}>{t}</a>
+                  <button key={t} onClick={() => navigate(`/dokumente?tag=${encodeURIComponent(t)}`)}
+                    style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer', border: 'none' }}
+                    title={`Alle Dokumente mit «${t}» anzeigen`}>{t}</button>
                 ))}
                 {doc.environments?.map(e => (
-                  <a key={e} href={`/dokumente?tag=${encodeURIComponent(e)}`}
-                    style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
-                    title={`Alle Dokumente mit «${e}» anzeigen`}>{e}</a>
+                  <button key={e} onClick={() => navigate(`/dokumente?tag=${encodeURIComponent(e)}`)}
+                    style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '2px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer', border: 'none' }}
+                    title={`Alle Dokumente mit «${e}» anzeigen`}>{e}</button>
                 ))}
               </div>
             )}
@@ -571,7 +573,9 @@ function DocRow({ doc, userId, areas, isOpen: open, onToggle, onDelete }: DocRow
             {/* Leistungsziel-Tabelle */}
             {localLinks.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 12 }}>
-                Keine Leistungsziele verknüpft. Bitte «Leistungsziele zur Bewertung ändern» verwenden.
+                {aiTokens
+                  ? 'Die KI konnte in diesem Dokument keine passenden Leistungsziele erkennen. Bitte «Leistungsziele zur Bewertung ändern» verwenden, um Ziele manuell zu verknüpfen.'
+                  : 'Keine Leistungsziele verknüpft. Bitte «Leistungsziele zur Bewertung ändern» verwenden.'}
               </p>
             ) : (
               <table className="doc-goal-table">
@@ -700,9 +704,15 @@ export default function DokumenteView() {
     <div className="dokumente-view">
       <div className="dokumente-header">
         <h2 className="dokumente-title">Dokumente</h2>
-        <button className="btn btn-primary" onClick={() => setShowUpload(true)}>
-          + Neues Dokument
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button className="btn btn-primary" onClick={() => setShowUpload(true)}>
+            + Neues Dokument
+          </button>
+          <button className="header-icon-btn" title="Lerndokumentation"
+            onClick={() => generateLerndokumentationPDF(currentUser, documents)}>
+            <img src="/IconPDF.png" style={{ height: '22px', display: 'block' }} alt="Lerndokumentation" />
+          </button>
+        </div>
       </div>
 
       {hasChips && (

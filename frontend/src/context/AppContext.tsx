@@ -14,8 +14,9 @@ interface AppContextValue {
   users:              User[];
   currentUser:        User | null;
   areas:              Area[];
-  areasInformatiker:  Area[];
-  areasIct:           Area[];
+  areasInformatiker:       Area[];
+  areasIct:                Area[];
+  areasBetriebsinformatik: Area[];
   loading:            boolean;
   error:              string | null;
   role:               Role;
@@ -32,6 +33,7 @@ interface AppContextValue {
   selectUser:         (id: string) => void;
   updateGoal:         (goalId: string, level: BloomLevel, comment: string) => Promise<void>;
   reloadGoals:        (userId: string) => Promise<void>;
+  aiSuggestGoal:      (goalId: string, comment: string) => Promise<{ bloom_level: number; begruendung: string; optimierter_text: string | null; prompt_tokens: number; completion_tokens: number; total_tokens: number }>;
   addUser:            (body: Partial<User>) => Promise<User>;
   editUser:           (id: string, body: Partial<User>) => Promise<void>;
   removeUser:         (id: string) => Promise<void>;
@@ -49,9 +51,10 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 const COMPETENCY_FILE: Record<Specialty, string> = {
-  platform:      'kompetenzen-informatiker-efz',
-  app:           'kompetenzen-informatiker-efz',
-  'ict-fachmann':'kompetenzen-ict-fachmann-efz',
+  platform:           'kompetenzen-informatiker-efz',
+  app:                'kompetenzen-informatiker-efz',
+  'ict-fachmann':     'kompetenzen-ict-fachmann-efz',
+  betriebsinformatik: 'kompetenzen-betriebsinformatik-efz',
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -61,8 +64,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading,            setLoading]            = useState(true);
   const [error,              setError]              = useState<string | null>(null);
   const [role,               setRole]               = useState<Role>('berufsbildner');
-  const [areasInformatiker,  setAreasInformatiker]  = useState<Area[]>([]);
-  const [areasIct,           setAreasIct]           = useState<Area[]>([]);
+  const [areasInformatiker,        setAreasInformatiker]        = useState<Area[]>([]);
+  const [areasIct,                 setAreasIct]                 = useState<Area[]>([]);
+  const [areasBetriebsinformatik,  setAreasBetriebsinformatik]  = useState<Area[]>([]);
   const [ausbildungsplaetze, setAusbildungsplaetze] = useState<Ausbildungsplatz[]>([]);
   const [currentAPCode,      setCurrentAPCode]      = useState<string | null>(null);
   const [rotationGanttView,  setRotationGanttView]  = useState<'lernende' | 'ausbildungsplaetze'>('lernende');
@@ -71,14 +75,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       try {
-        const [compInfo, compIct, userList, apData] = await Promise.all([
+        const [compInfo, compIct, compBI, userList, apData] = await Promise.all([
           api.getCompetencies('kompetenzen-informatiker-efz'),
           api.getCompetencies('kompetenzen-ict-fachmann-efz'),
+          api.getCompetencies('kompetenzen-betriebsinformatik-efz'),
           api.getUsers(),
           api.getAusbildungsplaetze(),
         ]);
         setAreasInformatiker(compInfo.areas);
         setAreasIct(compIct.areas);
+        setAreasBetriebsinformatik(compBI.areas);
         setAusbildungsplaetze(apData.ausbildungsplaetze);
         if (apData.ausbildungsplaetze.length > 0) {
           setCurrentAPCode(apData.ausbildungsplaetze[0].code);
@@ -124,13 +130,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!currentUser) return;
-    const allAreas = currentUser.specialty === 'ict-fachmann' ? areasIct : areasInformatiker;
     if (currentUser.specialty === 'ict-fachmann') {
-      setAreas(allAreas);
+      setAreas(areasIct);
+    } else if (currentUser.specialty === 'betriebsinformatik') {
+      setAreas(areasBetriebsinformatik);
     } else {
-      setAreas(allAreas.filter(a => a.specialty === 'both' || a.specialty === currentUser.specialty));
+      setAreas(areasInformatiker.filter(a => a.specialty === 'both' || a.specialty === currentUser.specialty));
     }
-  }, [currentUserId, areasInformatiker, areasIct, currentUser]);
+  }, [currentUserId, areasInformatiker, areasIct, areasBetriebsinformatik, currentUser]);
 
   const currentAP = ausbildungsplaetze.find(ap => ap.code === currentAPCode) ?? null;
 
@@ -240,6 +247,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ));
   }, [currentUser]);
 
+  const aiSuggestGoal = useCallback(async (goalId: string, comment: string) => {
+    if (!currentUser) throw new Error('Kein Lernender ausgewählt');
+    return api.aiSuggestGoal(currentUser.id, goalId, comment);
+  }, [currentUser]);
+
   const addUser = useCallback(async (body: Partial<User>) => {
     const created = await api.createUser(body);
     setUsers(prev => [...prev, { ...created, startDate: created.start_date, goals: {}, rotations: [] }]);
@@ -261,7 +273,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!currentUserId) { setDocuments([]); return; }
-    api.getDocuments(currentUserId).then(setDocuments).catch(() => setDocuments([]));
+    let cancelled = false;
+    api.getDocuments(currentUserId)
+      .then(docs  => { if (!cancelled) setDocuments(docs); })
+      .catch(err  => { console.error('Dokumente laden fehlgeschlagen:', err); if (!cancelled) setDocuments([]); });
+    return () => { cancelled = true; };
   }, [currentUserId]);
 
   const uploadDocument = useCallback(async (userId: string, formData: FormData) => {
@@ -299,11 +315,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      users, currentUser, areas, areasInformatiker, areasIct, loading, error, role, setRole,
+      users, currentUser, areas, areasInformatiker, areasIct, areasBetriebsinformatik, loading, error, role, setRole,
       ausbildungsplaetze, currentAP, currentAPCode, selectAP, updateApHk, addAusbildungsplatz,
       activeAP,
       rotationGanttView, setRotationGanttView,
-      selectUser, updateGoal, reloadGoals, addUser, editUser, removeUser,
+      selectUser, updateGoal, reloadGoals, aiSuggestGoal, addUser, editUser, removeUser,
       addRotation, updateRotation, deleteRotation,
       documents, uploadDocument, updateDocument, deleteDocument, updateDocumentGoal, aiEvaluateDocument,
     }}>

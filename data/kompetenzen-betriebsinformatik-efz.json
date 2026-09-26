@@ -1,0 +1,267 @@
+{
+  "lehrberuf": "Betriebsinformatiker/in EFZ",
+  "berufsnummer": "88604",
+  "version": "Bildungsplan SBFI vom 28. Oktober 2021",
+  "areas": [
+    {
+      "id": "a",
+      "name": "Inbetriebnahme von ICT-Geräten",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "a1",
+          "name": "Benutzerendgeräte auswählen und in Betrieb nehmen",
+          "goals": [
+            { "id": "a1.1", "text": "Sie nehmen den Kundenauftrag auf und planen die Umsetzung unter Berücksichtigung von Organisation, Arbeitsmethodik, Ergonomie und Energieoptimierung.", "max": 4 },
+            { "id": "a1.2", "text": "Sie wählen geeignete Hard- und Software aus und präsentieren ihren Vorschlag dem Vorgesetzten. Danach beschaffen sie alles inkl. die erforderlichen Lizenzen.", "max": 4 },
+            { "id": "a1.3", "text": "Sie nehmen die Grundkonfiguration vor und berücksichtigen dabei Datensicherheits- und Datenschutzmassnahmen (inkl. Content-, Malware- und Virenfilterung).", "max": 3 },
+            { "id": "a1.4", "text": "Sie binden die ICT-Komponente gemäss Vorgaben und unter Kenntnis der aktuellen Technologien ins Netzwerk ein.", "max": 3 },
+            { "id": "a1.5", "text": "Sie richten Applikationen nach Kundenvorgabe manuell oder automatisiert ein. Dabei berücksichtigen sie die Umsysteme und lizenztechnische Aspekte.", "max": 3 },
+            { "id": "a1.6", "text": "Sie migrieren die Daten des Kunden korrekt und vollständig.", "max": 3 },
+            { "id": "a1.7", "text": "Sie nehmen alte ICT-Komponenten ausser Betrieb. Sie berücksichtigen dabei Datenschutz und Sicherheitsrichtlinien und die Betriebsabläufe und entsorgen fachgerecht.", "max": 6 }
+          ]
+        },
+        {
+          "id": "a2",
+          "name": "Mobile Benutzerendgeräte einrichten und über das Firmennetz synchronisieren",
+          "goals": [
+            { "id": "a2.1", "text": "Sie nehmen mobile Endgeräte in Betrieb und konfigurieren diese nach Kundenvorgabe und Unternehmensrichtlinien.", "max": 4 },
+            { "id": "a2.2", "text": "Sie richten die Synchronisation der Geräte mit dem Firmennetz und den zugehörigen Diensten ein und stellen die Datenkonsistenz sicher.", "max": 4 },
+            { "id": "a2.3", "text": "Sie sichern den Zugang zu den Geräten mit geeigneten Authentifizierungsverfahren und Mobile-Device-Management-Lösungen.", "max": 3 },
+            { "id": "a2.4", "text": "Sie aktivieren und konfigurieren Verschlüsselungs- und Datenschutzmassnahmen auf den mobilen Geräten.", "max": 3 },
+            { "id": "a2.5", "text": "Sie testen die Konnektivität und Funktionalität der eingerichteten Dienste und dokumentieren die Konfiguration.", "max": 3 }
+          ]
+        },
+        {
+          "id": "a3",
+          "name": "Peripheriegeräte anschliessen und konfigurieren",
+          "goals": [
+            { "id": "a3.1", "text": "Sie nehmen Peripheriegeräte in Betrieb und konfigurieren diese entsprechend den Kundenanforderungen und betrieblichen Vorgaben.", "max": 4 },
+            { "id": "a3.2", "text": "Sie integrieren die Peripheriegeräte in die bestehende ICT-Infrastruktur und stellen die Kompatibilität sicher.", "max": 4 },
+            { "id": "a3.3", "text": "Sie installieren und konfigurieren die erforderlichen Treiber und Software für die Peripheriegeräte.", "max": 3 },
+            { "id": "a3.4", "text": "Sie testen die Funktion der Peripheriegeräte und dokumentieren allfällige Probleme und deren Behebung.", "max": 3 },
+            { "id": "a3.5", "text": "Sie weisen Benutzerinnen und Benutzer in die Bedienung der neuen Peripheriegeräte ein.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "name": "Inbetriebnahme von Serverdiensten und Netzen",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "b1",
+          "name": "Serversysteme in Betrieb nehmen",
+          "goals": [
+            { "id": "b1.1", "text": "Sie planen die Installation und Konfiguration von Serversystemen unter Berücksichtigung der Anforderungen und führen diese durch.", "max": 4 },
+            { "id": "b1.2", "text": "Sie konfigurieren die Sicherheitseinstellungen der Serversysteme gemäss Unternehmensrichtlinien und Best Practices.", "max": 3 },
+            { "id": "b1.3", "text": "Sie testen die Funktionalität der Serversysteme, nehmen Anpassungen vor und dokumentieren die Konfiguration.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b2",
+          "name": "Netze und deren Topologie einrichten",
+          "goals": [
+            { "id": "b2.1", "text": "Sie planen eine Netzwerktopologie gemäss den Anforderungen und setzen diese unter Berücksichtigung von Skalierbarkeit und Redundanz um.", "max": 4 },
+            { "id": "b2.2", "text": "Sie konfigurieren Netzwerkkomponenten (Router, Switches, Firewalls) und stellen die Verbindungen und Sicherheitsrichtlinien sicher.", "max": 4 },
+            { "id": "b2.3", "text": "Sie überprüfen die Netzwerkkommunikation mit geeigneten Diagnosemitteln und beheben allfällige Fehler.", "max": 3 },
+            { "id": "b2.4", "text": "Sie dokumentieren die Netzwerktopologie und die eingesetzten Konfigurationen vollständig und nachvollziehbar.", "max": 3 }
+          ]
+        },
+        {
+          "id": "b3",
+          "name": "Datensicherungs-, Systemsicherungs- und Archivierungskonzepte erstellen und umsetzen",
+          "goals": [
+            { "id": "b3.1", "text": "Sie erstellen ein Datensicherungskonzept unter Berücksichtigung der Anforderungen an Recovery Time Objective und Recovery Point Objective und setzen es um.", "max": 4 },
+            { "id": "b3.2", "text": "Sie konfigurieren Datensicherungs- und Archivierungslösungen, automatisieren Sicherungsläufe und testen die Wiederherstellung.", "max": 4 },
+            { "id": "b3.3", "text": "Sie führen Wiederherstellungstests durch und überprüfen die Integrität sowie Vollständigkeit der gesicherten Daten.", "max": 3 },
+            { "id": "b3.4", "text": "Sie dokumentieren die eingesetzten Sicherungs- und Archivierungsverfahren und halten Verantwortlichkeiten fest.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "name": "Sicherstellen des ICT-Betriebs",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "c1",
+          "name": "Netze unterhalten und weiterentwickeln",
+          "goals": [
+            { "id": "c1.1", "text": "Sie überwachen die Netzwerkperformance mit geeigneten Monitoring-Werkzeugen und ergreifen bei Abweichungen geeignete Massnahmen.", "max": 3 },
+            { "id": "c1.2", "text": "Sie analysieren Netzwerkprobleme systematisch und beheben diese nachhaltig.", "max": 3 },
+            { "id": "c1.3", "text": "Sie planen Netzwerkerweiterungen oder -optimierungen und setzen diese unter Einhaltung der Betriebsprozesse um.", "max": 4 },
+            { "id": "c1.4", "text": "Sie aktualisieren Netzwerkkomponenten und Software und dokumentieren Änderungen im Change-Management-Prozess.", "max": 3 },
+            { "id": "c1.5", "text": "Sie stellen die Netzwerksicherheit sicher, überprüfen Sicherheitsrichtlinien regelmässig und setzen Massnahmen zur Prävention um.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c2",
+          "name": "Server unterhalten und administrieren",
+          "goals": [
+            { "id": "c2.1", "text": "Sie überwachen Serversysteme mit geeigneten Monitoring-Werkzeugen und stellen deren fehlerfreien Betrieb sicher.", "max": 3 },
+            { "id": "c2.2", "text": "Sie warten und aktualisieren Serversysteme und deren Software regelmässig nach einem definierten Patchmanagement-Prozess.", "max": 3 },
+            { "id": "c2.3", "text": "Sie analysieren Systemfehler, leiten geeignete Sofort- und Korrekturmassnahmen ein und dokumentieren diese.", "max": 3 },
+            { "id": "c2.4", "text": "Sie führen Benutzer- und Rechteverwaltung auf den Serversystemen nach dem Prinzip der minimalen Rechte durch.", "max": 3 },
+            { "id": "c2.5", "text": "Sie dokumentieren Systemänderungen, Vorfälle und Konfigurationen systematisch und aktuell.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c3",
+          "name": "Verzeichnisdienste und Freigaben planen und in Betrieb nehmen",
+          "goals": [
+            { "id": "c3.1", "text": "Sie planen eine Verzeichnisstruktur und Gruppenrichtlinien gemäss den Unternehmensanforderungen und setzen diese um.", "max": 4 },
+            { "id": "c3.2", "text": "Sie konfigurieren Verzeichnisdienste (z. B. Active Directory) und stellen die korrekte Replikation und Funktionalität sicher.", "max": 4 },
+            { "id": "c3.3", "text": "Sie richten Dateifreigaben mit den erforderlichen Berechtigungen nach dem Prinzip der minimalen Rechte ein.", "max": 3 },
+            { "id": "c3.4", "text": "Sie überprüfen, testen und dokumentieren die eingerichteten Verzeichnisdienste und Freigaben vollständig.", "max": 3 }
+          ]
+        },
+        {
+          "id": "c4",
+          "name": "Kommunikationsdienste und Dienste zur Unterstützung der Arbeit in einer Gruppe (Groupware) in Betrieb nehmen und konfigurieren",
+          "goals": [
+            { "id": "c4.1", "text": "Sie nehmen Kommunikationsdienste (z. B. E-Mail, Messaging, Videokonferenz) in Betrieb und konfigurieren diese gemäss den Anforderungen.", "max": 4 },
+            { "id": "c4.2", "text": "Sie richten Groupware-Lösungen (z. B. Kalender, Aufgabenverwaltung, gemeinsame Ablage) ein und passen diese an die Benutzerbedürfnisse an.", "max": 4 },
+            { "id": "c4.3", "text": "Sie testen die Funktionalität der eingerichteten Kommunikationsdienste und Groupware-Lösungen und beheben allfällige Probleme.", "max": 3 },
+            { "id": "c4.4", "text": "Sie dokumentieren die Konfiguration der Kommunikationsdienste und schulen Benutzerinnen und Benutzer in der Nutzung.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "name": "Unterstützen der Benutzerinnen und Benutzer",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "d1",
+          "name": "Benutzerinnen und Benutzer kompetent im Umgang mit Informatikmitteln instruieren und unterstützen",
+          "goals": [
+            { "id": "d1.1", "text": "Sie analysieren den Kenntnisstand und die Bedürfnisse der Benutzerinnen und Benutzer und leiten daraus geeignete Instruktionsmethoden ab.", "max": 4 },
+            { "id": "d1.2", "text": "Sie erstellen zielgruppengerechte Schulungsunterlagen und führen Instruktionen und Schulungen durch.", "max": 3 },
+            { "id": "d1.3", "text": "Sie unterstützen Benutzerinnen und Benutzer situationsgerecht bei der Lösung von Anwendungsproblemen und fördern deren Selbstständigkeit.", "max": 3 },
+            { "id": "d1.4", "text": "Sie dokumentieren häufig auftretende Probleme und erstellen Lösungshilfen (z. B. FAQs, Kurzanleitungen).", "max": 3 }
+          ]
+        },
+        {
+          "id": "d2",
+          "name": "Supportaufgaben mit Kundenkontakt übernehmen und Probleme vor Ort lösen",
+          "goals": [
+            { "id": "d2.1", "text": "Sie nehmen Supportanfragen entgegen, erfassen diese im Ticketsystem und priorisieren sie nach Dringlichkeit und Auswirkung.", "max": 3 },
+            { "id": "d2.2", "text": "Sie analysieren Probleme systematisch mit geeigneten Diagnoseverfahren und erarbeiten Lösungsansätze.", "max": 3 },
+            { "id": "d2.3", "text": "Sie lösen Probleme vor Ort oder per Remote-Zugriff, dokumentieren das Vorgehen und schliessen das Ticket ab.", "max": 3 },
+            { "id": "d2.4", "text": "Sie eskalieren nicht lösbare Probleme an den Second-Level-Support und kommunizieren transparent und lösungsorientiert mit den Benutzerinnen und Benutzern.", "max": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e",
+      "name": "Entwickeln von Applikationen unter Berücksichtigung von Qualitätsmerkmalen",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "e1",
+          "name": "Testkonzept erstellen, unterschiedliche Testvorgehen einsetzen und Applikationen systematisch testen",
+          "goals": [
+            { "id": "e1.1", "text": "Sie erklären verschiedene Testarten (Unit-, Integrations-, System-, Abnahmetest) und deren Anwendungsbereiche.", "max": 3 },
+            { "id": "e1.2", "text": "Sie erstellen ein Testkonzept mit Testzielen, Testumfang und Testmethoden und leiten daraus konkrete Testfälle ab.", "max": 4 },
+            { "id": "e1.3", "text": "Sie führen Unit-Tests durch, dokumentieren die Ergebnisse und beheben identifizierte Fehler.", "max": 3 },
+            { "id": "e1.4", "text": "Sie führen Integrationstests durch und überprüfen die korrekte Interaktion der Komponenten und Schnittstellen.", "max": 3 },
+            { "id": "e1.5", "text": "Sie führen Systemtests gemäss den spezifizierten Anforderungen durch und dokumentieren die Resultate.", "max": 3 },
+            { "id": "e1.6", "text": "Sie führen Abnahmetests mit dem Auftraggeber durch und holen die formelle Abnahme ein.", "max": 3 },
+            { "id": "e1.7", "text": "Sie erkennen, klassifizieren und dokumentieren Testfehler (Bugs) und leiten geeignete Korrekturen im Entwicklungsprozess ein.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e2",
+          "name": "Applikationen unter Anwendung geeigneter Vorgehensmodelle benutzergerecht entwickeln und dokumentieren",
+          "goals": [
+            { "id": "e2.1", "text": "Sie wählen ein geeignetes Vorgehensmodell für die Applikationsentwicklung aus, begründen ihre Wahl und passen es projektspezifisch an.", "max": 4 },
+            { "id": "e2.2", "text": "Sie analysieren Anforderungen, erstellen ein Pflichtenheft und überprüfen dessen Vollständigkeit und Konsistenz.", "max": 4 },
+            { "id": "e2.3", "text": "Sie entwerfen die Systemarchitektur unter Berücksichtigung von Qualitätsmerkmalen und dokumentieren diese.", "max": 4 },
+            { "id": "e2.4", "text": "Sie implementieren die Applikation gemäss den spezifizierten Anforderungen und halten Coding-Richtlinien ein.", "max": 3 },
+            { "id": "e2.5", "text": "Sie wenden Versionsverwaltungssysteme für die Codeentwicklung an und arbeiten mit Branching-Strategien.", "max": 3 },
+            { "id": "e2.6", "text": "Sie refaktorieren Code systematisch und verbessern dessen Qualität, Lesbarkeit und Wartbarkeit.", "max": 3 },
+            { "id": "e2.7", "text": "Sie dokumentieren die entwickelte Applikation benutzer- und entwicklergerecht und stellen die Aktualität sicher.", "max": 3 },
+            { "id": "e2.8", "text": "Sie führen Code-Reviews durch, geben konstruktives Feedback und integrieren erhaltene Rückmeldungen in die Entwicklung.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e3",
+          "name": "Benutzerschnittstellen für Applikationen gemäss den Kundenbedürfnissen entwerfen und implementieren",
+          "goals": [
+            { "id": "e3.1", "text": "Sie erheben Benutzeranforderungen, analysieren Nutzungskontexte und leiten daraus Gestaltungsrichtlinien für die Benutzerschnittstelle ab.", "max": 4 },
+            { "id": "e3.2", "text": "Sie erstellen Mockups und Prototypen, validieren diese mit dem Auftraggeber und iterieren basierend auf dem Feedback.", "max": 3 },
+            { "id": "e3.3", "text": "Sie implementieren die Benutzerschnittstelle gemäss den definierten Richtlinien und dem validierten Design.", "max": 3 },
+            { "id": "e3.4", "text": "Sie berücksichtigen Usability-Grundsätze, Barrierefreiheit und Responsive Design bei der Implementierung.", "max": 3 },
+            { "id": "e3.5", "text": "Sie testen die Benutzerschnittstelle mit Benutzerinnen und Benutzern und optimieren diese aufgrund der Rückmeldungen.", "max": 3 },
+            { "id": "e3.6", "text": "Sie dokumentieren die Benutzerschnittstelle inklusive Design-Entscheide und stellen die Nachvollziehbarkeit sicher.", "max": 3 }
+          ]
+        },
+        {
+          "id": "e4",
+          "name": "Datenmodell in einer Datenbank umsetzen",
+          "goals": [
+            { "id": "e4.1", "text": "Sie erstellen ein Entity-Relationship-Modell auf Basis der fachlichen Anforderungen und überführen dieses in ein normalisiertes Datenbankschema.", "max": 4 },
+            { "id": "e4.2", "text": "Sie überführen das konzeptuelle Datenmodell in ein relationales Datenbankmodell und berücksichtigen Normalformen.", "max": 3 },
+            { "id": "e4.3", "text": "Sie erstellen und pflegen die Datenbankstruktur (Tabellen, Indizes, Views) mit DDL-Befehlen.", "max": 3 },
+            { "id": "e4.4", "text": "Sie sichern die Datenintegrität durch geeignete Constraints, Fremdschlüssel und Validierungsregeln.", "max": 3 },
+            { "id": "e4.5", "text": "Sie analysieren und optimieren Datenbankstrukturen und Abfragen unter Performance- und Skalierbarkeitsgesichtspunkten.", "max": 4 }
+          ]
+        },
+        {
+          "id": "e5",
+          "name": "Aus Applikationen auf Daten mit geeigneten Sprachmitteln zugreifen",
+          "goals": [
+            { "id": "e5.1", "text": "Sie verwenden Datenbankabfragesprachen (SQL) für einfache und komplexe Abfragen, Joins und Aggregationen.", "max": 3 },
+            { "id": "e5.2", "text": "Sie implementieren Datenmanipulationsoperationen (CRUD) in der Applikation und behandeln Datenbankfehler geeignet.", "max": 3 },
+            { "id": "e5.3", "text": "Sie binden Datenbanken über geeignete Schnittstellen (z. B. JDBC, ORM-Frameworks) in Applikationen ein.", "max": 3 },
+            { "id": "e5.4", "text": "Sie analysieren und optimieren Datenbankzugriffe hinsichtlich Effizienz, Transaktionssicherheit und Schutz vor SQL-Injection.", "max": 4 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f",
+      "name": "Arbeiten in Projekten",
+      "specialty": "both",
+      "subComps": [
+        {
+          "id": "f1",
+          "name": "Arbeiten und Aufträge systematisch und effizient vorbereiten, strukturieren, durchführen und dokumentieren",
+          "goals": [
+            { "id": "f1.1", "text": "Sie analysieren einen Auftrag, klären offene Punkte und leiten die erforderlichen Arbeitsschritte ab.", "max": 3 },
+            { "id": "f1.2", "text": "Sie planen Arbeitsschritte, priorisieren Aufgaben nach Wichtigkeit und Dringlichkeit und erstellen einen Arbeitsplan.", "max": 3 },
+            { "id": "f1.3", "text": "Sie nutzen geeignete Hilfsmittel und Methoden (z. B. Checklisten, Kanban, Zeitplanung) zur strukturierten Bearbeitung von Aufträgen.", "max": 3 },
+            { "id": "f1.4", "text": "Sie führen Arbeiten gemäss Plan durch, reagieren flexibel auf Änderungen und informieren Betroffene über Abweichungen.", "max": 3 },
+            { "id": "f1.5", "text": "Sie kontrollieren Arbeitsergebnisse auf Vollständigkeit, Korrektheit und Qualität anhand der definierten Kriterien.", "max": 3 },
+            { "id": "f1.6", "text": "Sie dokumentieren ihre Arbeiten nachvollziehbar, strukturiert und adressatengerecht.", "max": 3 },
+            { "id": "f1.7", "text": "Sie reflektieren abgeschlossene Arbeiten hinsichtlich Vorgehen, Ergebnis und Zeitaufwand und leiten Verbesserungsmassnahmen ab.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f2",
+          "name": "In Projekten mitarbeiten",
+          "goals": [
+            { "id": "f2.1", "text": "Sie verstehen die eigene Rolle im Projektteam, übernehmen Verantwortung für ihre Aufgaben und tragen zum Projekterfolg bei.", "max": 4 },
+            { "id": "f2.2", "text": "Sie wenden eine geeignete Projektmanagementmethode (z. B. HERMES, Scrum) an und halten Projektstandards und -prozesse ein.", "max": 3 },
+            { "id": "f2.3", "text": "Sie schätzen Aufwände realistisch ein, melden Abweichungen frühzeitig und halten vereinbarte Termine und Meilensteine ein.", "max": 3 },
+            { "id": "f2.4", "text": "Sie identifizieren Projektrisiken, bewerten deren Auswirkungen und informieren das Projektteam frühzeitig.", "max": 3 },
+            { "id": "f2.5", "text": "Sie arbeiten konstruktiv im Team zusammen, bringen Ideen ein und tragen zu einer positiven Teamdynamik bei.", "max": 3 }
+          ]
+        },
+        {
+          "id": "f3",
+          "name": "In Projekten zielgerichtet und den jeweiligen Personen angepasst kommunizieren",
+          "goals": [
+            { "id": "f3.1", "text": "Sie kommunizieren klar, zielgruppengerecht und situationsangemessen im Projektteam und mit Auftraggebern sowie weiteren Stakeholdern.", "max": 3 },
+            { "id": "f3.2", "text": "Sie verfassen schriftliche Berichte, Protokolle und Statusmeldungen in verständlicher und strukturierter Form.", "max": 3 }
+          ]
+        }
+      ]
+    }
+  ]
+}

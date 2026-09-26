@@ -27,9 +27,14 @@ public class UsersController(AppDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserResponse>> Create(CreateUserRequest req)
     {
+        var email = string.IsNullOrWhiteSpace(req.Email) ? null : req.Email.Trim();
+        if (email is not null && await db.Users.AnyAsync(u => u.Email == email))
+            return Conflict(new { detail = "E-Mail-Adresse wird bereits verwendet." });
+
         var user = new User
         {
             Name      = req.Name.Trim(),
+            Email     = email,
             Specialty = req.Specialty,
             StartDate = req.StartDate,
         };
@@ -43,7 +48,13 @@ public class UsersController(AppDbContext db) : ControllerBase
     {
         var user = await db.Users.FindAsync(id);
         if (user is null) return NotFound();
+
+        var email = string.IsNullOrWhiteSpace(req.Email) ? null : req.Email.Trim();
+        if (email is not null && await db.Users.AnyAsync(u => u.Email == email && u.Id != id))
+            return Conflict(new { detail = "E-Mail-Adresse wird bereits verwendet." });
+
         user.Name      = req.Name.Trim();
+        user.Email     = email;
         user.Specialty = req.Specialty;
         user.StartDate = req.StartDate;
         await db.SaveChangesAsync();
@@ -61,5 +72,5 @@ public class UsersController(AppDbContext db) : ControllerBase
     }
 
     private static UserResponse ToResponse(User u) =>
-        new(u.Id, u.Name, u.Specialty, u.StartDate, u.CreatedAt);
+        new(u.Id, u.Name, u.Email, u.Specialty, u.StartDate, u.CreatedAt);
 }

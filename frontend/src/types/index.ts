@@ -1,6 +1,6 @@
 // ── Domain-Typen gemäss Datenmodell (HK-App Konzept v4) ──────────────────────
 
-export type Specialty = 'platform' | 'app' | 'ict-fachmann';
+export type Specialty = 'platform' | 'app' | 'ict-fachmann' | 'betriebsinformatik';
 
 export type Role = 'berufsbildner' | 'lernender';
 

@@ -1,3 +1,4 @@
+using HK.API.Services;
 using HK.Application.DTOs;
 using HK.Domain.Entities;
 using HK.Infrastructure.Persistence;
@@ -90,5 +91,27 @@ public class UserGoalsController(AppDbContext db) : ControllerBase
             entry.UpdatedAt,
             contributions
         );
+    }
+
+    [HttpPost("{goalId}/ai-suggest")]
+    public async Task<ActionResult<GoalAiSuggestResponse>> AiSuggest(
+        Guid userId, string goalId, GoalAiSuggestRequest req, [FromServices] AiEvaluationService aiService)
+    {
+        if (!aiService.IsConfigured)
+            return BadRequest(new { detail = "AI-Bewertung ist nicht konfiguriert. Endpoint und ApiKey in appsettings setzen." });
+
+        if (string.IsNullOrWhiteSpace(req.Comment))
+            return BadRequest(new { detail = "Kein Kompetenznachweis-Text vorhanden." });
+
+        var user = await db.Users.FindAsync(userId);
+        if (user is null) return NotFound();
+
+        var result = await aiService.SuggestGoalLevelAsync(user.Specialty, goalId, req.Comment);
+        if (result is null)
+            return StatusCode(503, new { detail = "AI-Analyse fehlgeschlagen. Bitte Leistungsziel und Konfiguration prüfen." });
+
+        return new GoalAiSuggestResponse(
+            result.BloomLevel, result.Begruendung, result.OptimierterText,
+            result.PromptTokens, result.CompletionTokens, result.TotalTokens);
     }
 }

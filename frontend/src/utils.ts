@@ -3,9 +3,10 @@ import type { Area, User, ProgressInfo, LehrjahrInfo } from './types';
 export const BLOOM = ['–', 'Wissen', 'Verstehen', 'Anwenden', 'Analysieren', 'Synthese', 'Beurteilen'];
 
 export const SPECIALTY_LABEL: Record<string, string> = {
-  platform:      'Plattformentwicklung',
-  app:           'Applikationsentwicklung',
-  'ict-fachmann': 'ICT-Fachmann/-frau EFZ',
+  platform:           'Plattformentwicklung',
+  app:                'Applikationsentwicklung',
+  'ict-fachmann':     'ICT-Fachmann/-frau EFZ',
+  betriebsinformatik: 'Betriebsinformatik EFZ',
 };
 
 export function getInitials(name: string): string {

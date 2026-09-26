@@ -64,7 +64,7 @@ function AreaRow({ area, coverage, onToggle }: AreaRowProps) {
 
 export default function APAbdeckungDetail() {
   const { bildungsplanKey } = useParams<{ bildungsplanKey: string }>();
-  const { currentAP, areasInformatiker, areasIct, updateApHk } = useApp();
+  const { currentAP, areasInformatiker, areasIct, areasBetriebsinformatik, updateApHk } = useApp();
   const [savingKey, setSavingKey] = useState<string | null>(null);
 
   if (!currentAP) return (
@@ -85,6 +85,12 @@ export default function APAbdeckungDetail() {
     fachrichtungFilter = null;
     pageTitle          = 'Bildungsplan ICT-Fachmann/frau EFZ';
     summaryRows        = [{ label: 'ICT-Fachmann/frau', hkIds: areasIct.flatMap(a => a.subComps.map(s => s.id)) }];
+  } else if (bildungsplanKey === 'betriebsinformatik') {
+    bildungsplan       = 'betriebsinformatik';
+    areas              = areasBetriebsinformatik;
+    fachrichtungFilter = null;
+    pageTitle          = 'Bildungsplan Betriebsinformatiker/in EFZ';
+    summaryRows        = [{ label: 'Betriebsinformatik', hkIds: areasBetriebsinformatik.flatMap(a => a.subComps.map(s => s.id)) }];
   } else {
     bildungsplan       = 'informatiker';
     fachrichtungFilter = bildungsplanKey === 'informatiker-platform' ? 'platform' : 'app';
@@ -111,7 +117,7 @@ export default function APAbdeckungDetail() {
     const newVal = nextCoverage((coverage[hkId] as CoverageValue) ?? null);
     setSavingKey(key);
     try {
-      await updateApHk(currentAP.code, bildungsplan, hkId, newVal ?? '');
+      await updateApHk(currentAP!.code, bildungsplan, hkId, newVal ?? '');
     } finally {
       setSavingKey(null);
     }

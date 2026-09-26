@@ -698,6 +698,14 @@ input, select, textarea { font: inherit; }
   transition: border-color .2s;
 }
 .goal-comment:focus { outline: none; border-color: var(--primary-light); }
+.goal-ai-row { margin-top: 6px; }
+.goal-ai-suggestion {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 0;
+}
 
 /* â”€â”€ Bloom Legend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bloom-legend {

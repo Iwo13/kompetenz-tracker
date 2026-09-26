@@ -28,7 +28,9 @@ export default function APLernView() {
     );
   }
 
-  const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann' : 'informatiker';
+  const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann'
+                     : currentUser.specialty === 'betriebsinformatik' ? 'betriebsinformatik'
+                     : 'informatiker';
   const apCov = (ap.hk_coverage?.[bildungsplan] ?? {}) as Record<string, string>;
 
   const areasWithAP = areas

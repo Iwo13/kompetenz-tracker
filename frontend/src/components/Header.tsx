@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { getInitials, getOverallProgress, getLehrjahrInfo, SPECIALTY_LABEL } from '../utils';
-import { generatePDF } from '../utils/generatePDF';
 import UserModal from './UserModal';
 import APModal from './APModal';
 import type { User } from '../types';
@@ -238,13 +237,6 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
             </>
           )}
         </div>
-
-        {!isAPView && (
-          <button className="header-icon-btn" title="PDF-Bericht erstellen"
-            onClick={() => generatePDF(currentUser, areas)} disabled={!currentUser}>
-            <img src="/IconPDF.png" style={{ height: '22px', display: 'block' }} alt="PDF" />
-          </button>
-        )}
       </div>
 
       {editUser  && <UserModal user={editUser} onClose={() => setEditUser(null)} />}

@@ -22,14 +22,39 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
     public bool IsConfigured =>
         !string.IsNullOrEmpty(config["AzureAi:Endpoint"]) &&
-        !string.IsNullOrEmpty(config["AzureAi:ApiKey"]);
+        !string.IsNullOrEmpty(config["AzureAi:ApiKey"]) &&
+        !string.IsNullOrEmpty(config["AzureAi:Model"]);
 
     public async Task<AiEvaluationResult?> EvaluateAsync(DomDocument doc, string specialty)
     {
         var docText = ExtractText(doc.FileData, doc.ContentType, doc.FileName);
         var goals   = LoadGoals(specialty);
+        if (goals.Count == 0)
+        {
+            logger.LogError(
+                "Keine Leistungsziele für Specialty '{Specialty}' geladen – AI-Bewertung abgebrochen. " +
+                "Prüfe ob die Kompetenz-Datei vorhanden ist und DataPaths:CompetenciesDir korrekt gesetzt ist.",
+                specialty);
+            return null;
+        }
         var prompt  = BuildPrompt(docText, goals);
         return await CallAiAsync(prompt);
+    }
+
+    public async Task<GoalSuggestionResult?> SuggestGoalLevelAsync(string specialty, string goalId, string comment)
+    {
+        var goal = LoadGoals(specialty).FirstOrDefault(g => g.Id == goalId);
+        if (goal is null)
+        {
+            logger.LogWarning("Leistungsziel '{GoalId}' nicht gefunden für Specialty '{Specialty}'", goalId, specialty);
+            return null;
+        }
+
+        var prompt = BuildGoalPrompt(goal.Text, goal.Max, comment);
+        var call   = await PostChatCompletionAsync(GoalSystemPrompt, prompt);
+        if (call is null) return null;
+
+        return ParseGoalSuggestion(call.Value.Content, call.Value.PromptTokens, call.Value.CompletionTokens, call.Value.TotalTokens);
     }
 
     // ── Textextraktion ───────────────────────────────────────────────────────────
@@ -90,9 +115,10 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
     private List<CompetencyGoal> LoadGoals(string specialty)
     {
-        var file = specialty == "ict-fachmann"
-            ? "kompetenzen-ict-fachmann-efz"
-            : "kompetenzen-informatiker-efz";
+        specialty = specialty.Trim().ToLowerInvariant();
+        var file = specialty == "ict-fachmann"       ? "kompetenzen-ict-fachmann-efz"
+                 : specialty == "betriebsinformatik" ? "kompetenzen-betriebsinformatik-efz"
+                 :                                     "kompetenzen-informatiker-efz";
         var dir  = config["DataPaths:CompetenciesDir"] ?? "../../data";
         var path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), dir, $"{file}.json"));
 
@@ -122,6 +148,9 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
             }
         }
 
+        logger.LogInformation(
+            "Leistungsziele geladen: {Count} Ziele für Specialty '{Specialty}' aus {File}",
+            goals.Count, specialty, file);
         return goals;
     }
 
@@ -142,7 +171,7 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
               "technologien": ["Python", "Django"],
               "umgebungen": ["Azure", "SQL Server"],
               "bewertungen": [
-                { "goal_id": "a1.1", "bloom_level": 3, "kommentar": "Begründung in 1–2 Sätzen" }
+                { "goal_id": "a1.1", "bloom_level": 3, "kommentar": "Begründung in 1–2 Sätzen. → Nächste Stufe: Stichwort 1, Stichwort 2" }
               ]
             }
             """;
@@ -159,13 +188,14 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
             ## Aufgabe
             Analysiere das Dokument und:
-            1. Identifiziere die 10 am deutlichsten nachgewiesenen Leistungsziele.
+            1. Identifiziere die 10 am deutlichsten nachgewiesenen Leistungsziele. Zusätzlich: Alle Leistungsziele, bei denen der belegte Bloom-Level den max-Wert des jeweiligen Ziels erreicht, müssen unabhängig von der 10er-Grenze immer im Ergebnis enthalten sein.
             2. Extrahiere als "technologien" nur Programmiersprachen und Frameworks, die der Lernende nachweislich selbst aktiv eingesetzt hat (z.B. Code geschrieben, konfiguriert, debuggt). Nicht aufnehmen: Technologien, die nur im Hintergrund laufen, nur erwähnt werden oder vom System automatisch genutzt werden.
             3. Extrahiere als "umgebungen" nur Systeme und Plattformen, mit denen der Lernende direkt gearbeitet hat (z.B. bewusst eingerichtet, deployed, administriert). Nicht aufnehmen: Systeme, die nur indirekt beteiligt sind oder die der Lernende nicht selbst bedient hat.
             Bewertungsmassstab:
             - Nur Leistungsziele bewerten, für die das Dokument konkrete eigene Leistung zeigt (Analyse, Entscheidung, Reflexion des Lernenden)
             - Tools, Frameworks oder KI-Unterstützung, die der Lernende eingesetzt hat, erhöhen den Bloom-Level NICHT automatisch
             - Bei unklarer Evidenz: niedrigeren Level wählen
+            - Jeder Kommentar enthält zwei Teile: (1) Begründung des vergebenen Bloom-Levels in 1–2 Sätzen, (2) nach einem Pfeil «→ Nächste Stufe:» 2–4 stichwortartige Hinweise, was der Lernende konkret tun könnte um beim nächsten Dokument die nächsthöhere Bloom-Stufe zu erreichen. Ist der max-Wert bereits erreicht, entfällt der Hinweis.
             Antworte AUSSCHLIESSLICH mit folgendem JSON-Objekt (kein Markdown, kein Fliesstext):
             {jsonExample}
             Wichtig: bloom_level darf den max-Wert des jeweiligen Leistungsziels nicht überschreiten.
@@ -174,16 +204,29 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
 
     // ── Azure AI Foundry Call ────────────────────────────────────────────────────
 
+    private const string DocumentSystemPrompt =
+        "Du bist ein kritischer Kompetenz-Bewerter für die Schweizer Berufsbildung (EFZ). Deine Aufgabe ist es, nur jene Kompetenzen zu bewerten, die der Lernende nachweislich SELBST erbracht hat. Wichtige Grundsätze: (1) Sei konservativ – weise einen Bloom-Level nur zu, wenn er im Dokument klar belegt ist. Im Zweifelsfall lieber eine Stufe tiefer. (2) Der Einsatz von Frameworks, Bibliotheken, KI-Tools oder Generatoren (z.B. Electron, React, GitHub Copilot, ChatGPT) ist KEIN eigenständiger Kompetenznachweis. Entscheidend ist, ob der Lernende das Warum und Wie selbst erklärt und reflektiert. (3) Verwende keine Personennamen. (4) Antworte ausschliesslich mit einem gültigen JSON-Objekt ohne weitere Erklärungen.";
+
     private async Task<AiEvaluationResult?> CallAiAsync(string userPrompt)
+    {
+        var call = await PostChatCompletionAsync(DocumentSystemPrompt, userPrompt);
+        if (call is null) return null;
+        return ParseAiResponse(call.Value.Content, call.Value.PromptTokens, call.Value.CompletionTokens, call.Value.TotalTokens);
+    }
+
+    private async Task<(string Content, int PromptTokens, int CompletionTokens, int TotalTokens)?> PostChatCompletionAsync(
+        string systemPrompt, string userPrompt)
     {
         var endpoint = config["AzureAi:Endpoint"]!;
         var apiKey   = config["AzureAi:ApiKey"]!;
+        var model    = config["AzureAi:Model"]!;
 
         var requestBody = new
         {
+            model,
             messages = new[]
             {
-                new { role = "system", content = "Du bist ein kritischer Kompetenz-Bewerter für die Schweizer Berufsbildung (EFZ). Deine Aufgabe ist es, nur jene Kompetenzen zu bewerten, die der Lernende nachweislich SELBST erbracht hat. Wichtige Grundsätze: (1) Sei konservativ – weise einen Bloom-Level nur zu, wenn er im Dokument klar belegt ist. Im Zweifelsfall lieber eine Stufe tiefer. (2) Der Einsatz von Frameworks, Bibliotheken, KI-Tools oder Generatoren (z.B. Electron, React, GitHub Copilot, ChatGPT) ist KEIN eigenständiger Kompetenznachweis. Entscheidend ist, ob der Lernende das Warum und Wie selbst erklärt und reflektiert. (3) Verwende keine Personennamen. (4) Antworte ausschliesslich mit einem gültigen JSON-Objekt ohne weitere Erklärungen." },
+                new { role = "system", content = systemPrompt },
                 new { role = "user", content = userPrompt }
             },
             response_format = new { type = "json_object" }
@@ -226,7 +269,63 @@ public class AiEvaluationService(IConfiguration config, ILogger<AiEvaluationServ
             totalTokens      = usage.TryGetProperty("total_tokens",      out var t) ? t.GetInt32() : 0;
         }
 
-        return ParseAiResponse(content, promptTokens, completionTokens, totalTokens);
+        return (content, promptTokens, completionTokens, totalTokens);
+    }
+
+    // ── Kompetenznachweis-Freitext (W1/W2): Prompt + Parsing ─────────────────────
+
+    private const string GoalSystemPrompt =
+        "Du bist ein kritischer Kompetenz-Bewerter für die Schweizer Berufsbildung (EFZ). Bewerte ausschliesslich anhand des vorliegenden Freitexts. Sei konservativ – weise eine Bloom-Stufe nur zu, wenn sie im Text klar belegt ist, im Zweifelsfall lieber eine Stufe tiefer. Verwende keine Personennamen. Antworte ausschliesslich mit einem gültigen JSON-Objekt ohne weitere Erklärungen.";
+
+    private static string BuildGoalPrompt(string goalText, int maxLevel, string comment)
+    {
+        const string jsonExample = """
+            {
+              "bloom_level": 3,
+              "begruendung": "Begründung in 1–2 Sätzen. → Nächste Stufe: Stichwort 1, Stichwort 2",
+              "optimierter_text": ""
+            }
+            """;
+
+        return $"""
+            ## Leistungsziel
+            {goalText} (maximale Stufe: K{maxLevel})
+
+            ## Bloom-Taxonomie
+            {BloomDefinition}
+
+            ## Kompetenznachweis (Freitext des Lernenden)
+            {comment}
+
+            ## Aufgabe
+            Bewerte den obigen Freitext-Kompetenznachweis für das genannte Leistungsziel:
+            1. Vergib eine Bloom-Stufe zwischen 1 und {maxLevel}, konservativ und nur wenn im Text klar belegt.
+            2. Begründe die Stufe in 1–2 Sätzen; ergänze bei Nichterreichen der maximalen Stufe nach einem Pfeil «→ Nächste Stufe:» 2–4 stichwortartige Hinweise, was für die nächsthöhere Stufe fehlt.
+            3. Formuliere in "optimierter_text" optional eine klarere, präzisere Version des Freitexts (gleicher Inhalt, bessere Formulierung) – nur falls eine Verbesserung sinnvoll ist, sonst leerer String.
+            Antworte AUSSCHLIESSLICH mit folgendem JSON-Objekt (kein Markdown, kein Fliesstext):
+            {jsonExample}
+            Wichtig: bloom_level darf {maxLevel} nicht überschreiten.
+            """;
+    }
+
+    private GoalSuggestionResult? ParseGoalSuggestion(string content, int promptTokens, int completionTokens, int totalTokens)
+    {
+        try
+        {
+            var root            = JsonDocument.Parse(content).RootElement;
+            var bloomLevel      = root.TryGetProperty("bloom_level", out var b) ? b.GetInt32() : 0;
+            var begruendung     = root.TryGetProperty("begruendung", out var g) ? g.GetString() ?? "" : "";
+            var optimierterText = root.TryGetProperty("optimierter_text", out var o) ? o.GetString() : null;
+            if (string.IsNullOrWhiteSpace(optimierterText)) optimierterText = null;
+
+            return new GoalSuggestionResult(bloomLevel, begruendung, optimierterText,
+                promptTokens, completionTokens, totalTokens);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "AI-Goal-Antwort konnte nicht geparst werden: {Content}", content);
+            return null;
+        }
     }
 
     private AiEvaluationResult? ParseAiResponse(string content, int promptTokens, int completionTokens, int totalTokens)
@@ -297,3 +396,12 @@ public record AiEvaluationResult(
 );
 
 public record AiGoalBewertung(string GoalId, int BloomLevel, string Kommentar);
+
+public record GoalSuggestionResult(
+    int BloomLevel,
+    string Begruendung,
+    string? OptimierterText,
+    int PromptTokens,
+    int CompletionTokens,
+    int TotalTokens
+);

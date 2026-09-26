@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
   getApColor, getToday, moToLabel, dateToMo, mo,
@@ -23,11 +24,12 @@ interface BarDrag {
   lv0: number; lv1: number;
 }
 
-const SPEC_LV: Record<string, string> = { app:'AE', platform:'PE', 'ict-fachmann':'FI' };
+const SPEC_LV: Record<string, string> = { app:'AE', platform:'PE', 'ict-fachmann':'FI', betriebsinformatik:'BI' };
 const LV_STYLE: Record<string, { bg: string; fg: string }> = {
   AE:{ bg:'#dbeafe', fg:'#1d4ed8' },
   PE:{ bg:'#dcfce7', fg:'#15803d' },
   FI:{ bg:'#fef3c7', fg:'#b45309' },
+  BI:{ bg:'#fce7f3', fg:'#9d174d' },
 };
 
 // Farben für Lernenden-Balken in der AP-Sicht
@@ -123,7 +125,8 @@ function rotConflict(rot: GRot, cf: Record<string, Set<number>>): boolean {
 // ── Hauptkomponente ───────────────────────────────────────────────────────────
 export default function RotationsplanungView() {
   const { users, ausbildungsplaetze, addRotation, updateRotation, deleteRotation,
-          rotationGanttView: view, setRotationGanttView: setView } = useApp();
+          selectAP, selectUser, rotationGanttView: view, setRotationGanttView: setView } = useApp();
+  const navigate = useNavigate();
   const [zoom,          setZoom]          = useState<'sem'|'mon'>('sem');
   const [dragOverRow,   setDragOverRow]   = useState<string | null>(null);
   const [dragOverAPRow, setDragOverAPRow] = useState<string | null>(null);
@@ -430,7 +433,10 @@ export default function RotationsplanungView() {
                   ) : (
                     <div key={i} className="gantt-name-row"
                       style={{ position:'absolute', top:positions[i], left:0, right:0, height:GANTT_ROW_H }}>
-                      <span className="gantt-rname">{item.row.name}</span>
+                      <span className="gantt-rname" style={{ cursor:'pointer' }}
+                        title={`${item.row.name} – Übersicht öffnen`}
+                        onClick={() => { selectUser(item.row.userId); navigate('/overview'); }}>
+                        {item.row.name}</span>
                       {(() => {
                         const st = LV_STYLE[item.row.lv] ?? { bg:'#f1f5f9', fg:'#475569' };
                         return <span className="gantt-lv" style={{ background:st.bg, color:st.fg }}>{item.row.lv}</span>;
@@ -523,7 +529,9 @@ export default function RotationsplanungView() {
                   return (
                     <div key={apRow.ap.code} className="gantt-name-row"
                       style={{ position:'absolute', top:i*GANTT_ROW_H, left:0, right:0, height:GANTT_ROW_H }}>
-                      <span className="gantt-rname" style={{ fontSize:'0.75rem' }}>
+                      <span className="gantt-rname" style={{ fontSize:'0.75rem', cursor:'pointer' }}
+                        title={`${apRow.ap.name} – Abdeckungsübersicht öffnen`}
+                        onClick={() => { selectAP(apRow.ap.code); navigate('/ap-abdeckung'); }}>
                         <strong>{apRow.ap.code}</strong> {apRow.ap.name}
                       </span>
                       {apRow.fokus !== '–' && (

@@ -15,7 +15,7 @@ function calcCoverage(
 }
 
 export default function APAbdeckungOverview() {
-  const { currentAP, areasInformatiker, areasIct } = useApp();
+  const { currentAP, areasInformatiker, areasIct, areasBetriebsinformatik } = useApp();
   const navigate = useNavigate();
 
   if (!currentAP) return (
@@ -52,6 +52,13 @@ export default function APAbdeckungOverview() {
       bildungsplan: 'ict-fachmann',
       hkIds:        getHks(areasIct, null),
       path:         '/ap-abdeckung/ict-fachmann',
+    },
+    {
+      key:          'betriebsinformatik',
+      label:        'Betriebsinformatiker/-in',
+      bildungsplan: 'betriebsinformatik',
+      hkIds:        getHks(areasBetriebsinformatik, null),
+      path:         '/ap-abdeckung/betriebsinformatik',
     },
   ];
 

@@ -7,7 +7,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    let detail = body;
+    try { detail = JSON.parse(body)?.detail ?? JSON.parse(body)?.title ?? body; } catch { /* noop */ }
+    throw new Error(`HTTP ${res.status}${detail ? ': ' + detail : ''}`);
+  }
   const text = await res.text();
   return (text ? JSON.parse(text) : undefined) as T;
 }
@@ -53,6 +58,18 @@ export const api = {
     request<GoalEntry>(`/users/${userId}/goals/${goalId}`, {
       method: 'PUT',
       body: JSON.stringify(body),
+    }),
+  aiSuggestGoal: (userId: string, goalId: string, comment: string) =>
+    request<{
+      bloom_level: number;
+      begruendung: string;
+      optimierter_text: string | null;
+      prompt_tokens: number;
+      completion_tokens: number;
+      total_tokens: number;
+    }>(`/users/${userId}/goals/${goalId}/ai-suggest`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
     }),
 
   // Rotationen

@@ -58,6 +58,23 @@ using (var scope = app.Services.CreateScope())
 
     // Neue Tabellen nachrüsten falls DB bereits existiert (EnsureCreated ignoriert das)
     db.Database.ExecuteSqlRaw("""
+        -- CHECK-Constraint auf Specialty aktualisieren damit neue Lehrberufe erlaubt sind
+        IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Users_Specialty')
+        BEGIN
+            ALTER TABLE Users DROP CONSTRAINT CK_Users_Specialty;
+        END
+        IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_Users_Specialty')
+        BEGIN
+            ALTER TABLE Users ADD CONSTRAINT CK_Users_Specialty
+                CHECK (Specialty IN ('app', 'platform', 'ict-fachmann', 'betriebsinformatik'));
+        END
+
+        -- Specialty-Spalte auf nvarchar(25) erweitern falls noch kleiner (MAX_LENGTH in sys.columns = Bytes, nvarchar*2)
+        IF (SELECT MAX_LENGTH FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Specialty') < 50
+        BEGIN
+            ALTER TABLE Users ALTER COLUMN Specialty NVARCHAR(25) NOT NULL;
+        END
+
         IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Documents')
         BEGIN
             CREATE TABLE Documents (
@@ -112,6 +129,22 @@ using (var scope = app.Services.CreateScope())
                 CONSTRAINT FK_DocGoalLinks_Documents FOREIGN KEY (DocumentId) REFERENCES Documents(Id) ON DELETE CASCADE,
                 CONSTRAINT UQ_Doc_Goal UNIQUE (DocumentId, GoalId)
             );
+        END
+        """);
+
+    // Email-Spalte + Index in eigenen Batches: SQL Server bindet Spaltennamen für
+    // CREATE INDEX bereits beim Parsen des Batches, bevor eine vorangehende ALTER TABLE
+    // im selben Batch tatsächlich ausgeführt wird ("Invalid column name").
+    db.Database.ExecuteSqlRaw("""
+        IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'Email')
+        BEGIN
+            ALTER TABLE Users ADD Email NVARCHAR(200) NULL;
+        END
+        """);
+    db.Database.ExecuteSqlRaw("""
+        IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('Users') AND name = 'UQ_Users_Email')
+        BEGIN
+            CREATE UNIQUE INDEX UQ_Users_Email ON Users(Email) WHERE Email IS NOT NULL;
         END
         """);
 }

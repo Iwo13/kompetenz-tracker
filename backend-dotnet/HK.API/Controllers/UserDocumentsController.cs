@@ -13,12 +13,28 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<IEnumerable<DocumentResponse>> GetAll(Guid userId)
-        => await db.Documents
+    {
+        // FileData (Binärinhalt) wird bewusst nicht geladen — nur Metadaten für die Listenansicht
+        var rows = await db.Documents
             .Where(d => d.UserId == userId)
-            .Include(d => d.GoalLinks)
             .OrderByDescending(d => d.UploadedAt)
-            .Select(d => ToResponse(d))
+            .Select(d => new {
+                d.Id, d.UserId, d.ApCode, d.Title, d.Description,
+                d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart, d.FeedbackBerufsbildner,
+                d.Technologies, d.Environments,
+                d.FileName, d.ContentType, d.FileSize, d.UploadedAt, d.DocumentDate,
+                GoalLinks = d.GoalLinks.Select(l => new { l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel }),
+            })
             .ToListAsync();
+
+        return rows.Select(d => new DocumentResponse(
+            d.Id, d.UserId, d.ApCode, d.Title, d.Description,
+            d.Kurzbeschreibung, d.Umsetzung, d.Luecken, d.Bewertungsart, d.FeedbackBerufsbildner,
+            SplitTags(d.Technologies), SplitTags(d.Environments),
+            d.FileName, d.ContentType, d.FileSize, d.UploadedAt, d.DocumentDate,
+            d.GoalLinks.Select(l => new DocumentGoalLinkDto(l.Id, l.GoalId, l.Einschaetzung, l.BloomLevel))
+        ));
+    }
 
     [HttpPost]
     [RequestSizeLimit(50 * 1024 * 1024)]
@@ -170,7 +186,7 @@ public class UserDocumentsController(AppDbContext db) : ControllerBase
 
         var result = await aiService.EvaluateAsync(doc, user.Specialty);
         if (result is null)
-            return StatusCode(503, new { error = "AI-Analyse fehlgeschlagen. Bitte Logs prüfen." });
+            return StatusCode(503, new { error = $"AI-Analyse fehlgeschlagen (Specialty: {user.Specialty}). Keine Leistungsziele geladen oder KI-Verbindungsfehler. Bitte Backend-Logs prüfen." });
 
         // Nur leere Textfelder befüllen – manuelle Einträge bleiben erhalten
         if (string.IsNullOrWhiteSpace(doc.Kurzbeschreibung))

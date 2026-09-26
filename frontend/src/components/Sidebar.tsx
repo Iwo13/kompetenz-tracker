@@ -21,7 +21,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct, ausbildungsplaetze, documents } = useApp();
+  const { currentUser, areas, role, currentAP, areasInformatiker, areasIct, areasBetriebsinformatik, ausbildungsplaetze, documents } = useApp();
   const navigate  = useNavigate();
   const location  = useLocation();
   const isOverview      = location.pathname === '/overview' || location.pathname === '/';
@@ -35,6 +35,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   function go(path: string) { navigate(path); onClose(); }
 
   const ictHks = (areasIct ?? []).flatMap((a: Area) => a.subComps.map(sc => sc.id));
+  const biHks  = (areasBetriebsinformatik ?? []).flatMap((a: Area) => a.subComps.map(sc => sc.id));
 
   function getHksForFachrichtung(fachrichtung: string) {
     return (areasInformatiker ?? [])
@@ -131,12 +132,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </button>
               );
             })()}
+            {(() => {
+              const { covered, total } = calcApCoverage(currentAP, 'betriebsinformatik', biHks);
+              const pct  = total ? Math.round(covered / total * 100) : 0;
+              const path = '/ap-abdeckung/betriebsinformatik';
+              return (
+                <button className={`sidebar-item${location.pathname === path ? ' active' : ''}`}
+                  onClick={() => go(path)}>
+                  <span className="item-name">Betriebsinformatik</span>
+                  <span className={`item-badge${pct === 100 ? ' done' : ''}`}>{pct}%</span>
+                </button>
+              );
+            })()}
           </div>
         )}
 
         {/* Ausbildungsplätze des aktuellen Lernenden */}
         {!isAPView && currentUser && currentUser.rotations?.length > 0 && (() => {
-          const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann' : 'informatiker';
+          const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann'
+                             : currentUser.specialty === 'betriebsinformatik' ? 'betriebsinformatik'
+                             : 'informatiker';
           const uniqueApCodes = [...new Set(currentUser.rotations.map(r => r.ap_code))];
           const learnerAPs = uniqueApCodes
             .map(code => ausbildungsplaetze.find(ap => ap.code === code))
@@ -178,7 +193,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/>
                 </svg>
               </span>
-              <span className="item-name">Dokumente</span>
+              <span className="item-name" style={{ fontWeight: documents.length > 0 ? 700 : undefined }}>Dokumente</span>
               {documents.length > 0 && (
                 <span className="item-badge">{documents.length}</span>
               )}

@@ -20,3 +20,16 @@ public record UpsertGoalRequest(
     int Level,
     string? Comment
 );
+
+public record GoalAiSuggestRequest(
+    string Comment
+);
+
+public record GoalAiSuggestResponse(
+    int BloomLevel,
+    string Begruendung,
+    string? OptimierterText,
+    int PromptTokens,
+    int CompletionTokens,
+    int TotalTokens
+);

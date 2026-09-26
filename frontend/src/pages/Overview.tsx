@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { getLehrjahrInfo, getAreaProgress, getOverallProgress, getAPLernProgress } from '../utils';
+import { generatePDF } from '../utils/generatePDF';
 import DonutChart from '../components/DonutChart';
 import type { Ausbildungsplatz } from '../types';
 
@@ -39,6 +40,10 @@ export default function Overview() {
   const { currentUser, areas, ausbildungsplaetze, documents } = useApp();
   const navigate = useNavigate();
 
+  function goToTag(tag: string) {
+    navigate(`/dokumente?tag=${encodeURIComponent(tag)}`);
+  }
+
   if (!currentUser) {
     return (
       <div className="no-user-state">
@@ -51,7 +56,9 @@ export default function Overview() {
   const { yearPcts } = getLehrjahrInfo(currentUser);
   const overall = getOverallProgress(areas, currentUser.goals);
 
-  const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann' : 'informatiker';
+  const bildungsplan = currentUser.specialty === 'ict-fachmann' ? 'ict-fachmann'
+                     : currentUser.specialty === 'betriebsinformatik' ? 'betriebsinformatik'
+                     : 'informatiker';
   const uniqueApCodes = [...new Set(currentUser.rotations.map(r => r.ap_code))];
   const learnerAPs = uniqueApCodes
     .map(code => ausbildungsplaetze.find(ap => ap.code === code))
@@ -93,7 +100,13 @@ export default function Overview() {
 
       {/* Lehrzeit-Fortschritt */}
       <div className="section-card">
-        <h3>Lehrzeit-Fortschritt ({Math.round(ljTotal)}% absolviert)</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h3>Lehrzeit-Fortschritt ({Math.round(ljTotal)}% absolviert)</h3>
+          <button className="header-icon-btn" title="PDF-Bericht erstellen"
+            onClick={() => generatePDF(currentUser, areas, documents)}>
+            <img src="/IconPDF.png" style={{ height: '22px', display: 'block' }} alt="PDF" />
+          </button>
+        </div>
         <div className="lehrzeit-bars">
           {yearPcts.map((pct, i) => {
             const cls = pct === 100 ? 'lj-done' : pct > 0 ? 'lj-current' : '';
@@ -204,18 +217,18 @@ export default function Overview() {
           const envs  = Object.entries(envCount).sort((a, b) => b[1] - a[1]);
           if (techs.length === 0 && envs.length === 0) return null;
           return (
-            <div style={{ flex: '0 0 260px', minWidth: 220 }}>
+            <div style={{ flex: '1 1 400px', minWidth: 320 }}>
               <div className="pie-title">Technologien &amp; Systeme</div>
               {techs.length > 0 && (
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Technologie</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {techs.map(([tag, count]) => (
-                      <a key={tag} href={`/dokumente?tag=${encodeURIComponent(tag)}`}
-                        style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                      <button key={tag} onClick={() => goToTag(tag)}
+                        style={{ background: '#dbeafe', color: '#1e40af', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer', border: 'none' }}
                         title={`Dokumente mit «${tag}» anzeigen`}>
                         {tag}{count > 1 && <span style={{ opacity: 0.6, marginLeft: 4 }}>×{count}</span>}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -225,11 +238,11 @@ export default function Overview() {
                   <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>System / Umgebung</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {envs.map(([tag, count]) => (
-                      <a key={tag} href={`/dokumente?tag=${encodeURIComponent(tag)}`}
-                        style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer' }}
+                      <button key={tag} onClick={() => goToTag(tag)}
+                        style={{ background: '#dcfce7', color: '#166534', borderRadius: 12, padding: '3px 10px', fontSize: 12, fontWeight: 500, textDecoration: 'none', cursor: 'pointer', border: 'none' }}
                         title={`Dokumente mit «${tag}» anzeigen`}>
                         {tag}{count > 1 && <span style={{ opacity: 0.6, marginLeft: 4 }}>×{count}</span>}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 </div>
